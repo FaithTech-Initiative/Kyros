@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 16;
+    final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 8;
 
     return Scaffold(
       appBar: PreferredSize(
