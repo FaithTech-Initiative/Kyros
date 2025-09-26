@@ -25,7 +25,7 @@ samples, guidance on mobile development, and a full API reference.
 - **Study Tools Integration** — Provide links to external Bible study resources (e.g., commentaries, dictionaries) directly within the app.
 - **Export Notes** — Allow users to export their notes in various formats (e.g., text, PDF) for personal use and sharing.
 
-  ## Platforms
+## Platforms
 
 -   iOS\
 -   Android\
