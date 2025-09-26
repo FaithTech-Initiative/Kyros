@@ -1,7 +1,12 @@
 
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:image_picker/image_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
@@ -19,22 +24,41 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController _titleController;
-  late TextEditingController _contentController;
+  late quill.QuillController _contentController;
   final _auth = FirebaseAuth.instance;
+  final _storage = FirebaseStorage.instance;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title);
-    _contentController = TextEditingController(text: widget.note?.content);
+    _contentController = quill.QuillController.basic();
+
+    // Load existing note content if available
+    if (widget.note != null && widget.note!.content.isNotEmpty) {
+      try {
+        final contentJson = jsonDecode(widget.note!.content);
+        _contentController = quill.QuillController(
+          document: quill.Document.fromJson(contentJson),
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      } catch (e) {
+        // Handle plain text content for backward compatibility
+        _contentController = quill.QuillController(
+          document: quill.Document()..insert(0, widget.note!.content),
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      }
+    }
   }
 
+  // Save note to Firestore
   void _saveNote() {
     final title = _titleController.text;
-    final content = _contentController.text;
+    final content = jsonEncode(_contentController.document.toDelta().toJson());
     final user = _auth.currentUser;
 
-    if (title.isNotEmpty && content.isNotEmpty) {
+    if (title.isNotEmpty) {
       if (widget.note != null) {
         FirebaseFirestore.instance.collection('notes').doc(widget.note!.id).update({
           'title': title,
@@ -55,6 +79,7 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
+  // Open Bible lookup screen
   void _openBibleLookup() async {
     final result = await Navigator.push(
       context,
@@ -62,14 +87,17 @@ class _NoteScreenState extends State<NoteScreen> {
     );
 
     if (result != null && result is String) {
-      setState(() {
-        _contentController.text += '\n\n$result';
-      });
+      final index = _contentController.selection.baseOffset;
+      final length = _contentController.selection.extentOffset - index;
+      _contentController.replaceText(index, length, '\n\n$result', null);
     }
   }
 
+  // Export note as PDF
   void _exportNote() async {
     final pdf = pw.Document();
+    final content = _contentController.document.toPlainText();
+
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) => pw.Column(
@@ -77,7 +105,7 @@ class _NoteScreenState extends State<NoteScreen> {
           children: [
             pw.Text(_titleController.text, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
             pw.SizedBox(height: 16),
-            pw.Text(_contentController.text),
+            pw.Text(content),
           ],
         ),
       ),
@@ -86,6 +114,22 @@ class _NoteScreenState extends State<NoteScreen> {
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
     );
+  }
+
+  // Pick and upload an image
+  Future<String?> _pickAndUploadImage(quill.QuillController controller) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final ref = _storage.ref().child('note_images/${DateTime.now().toIso8601String()}');
+      final uploadTask = ref.putFile(file);
+      final snapshot = await uploadTask.whenComplete(() => null);
+      final url = await snapshot.ref.getDownloadURL();
+      controller.insertImageBlock(imageUrl: url);
+    }
+    return null;
   }
 
   @override
@@ -121,14 +165,14 @@ class _NoteScreenState extends State<NoteScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            quill.QuillToolbar.simple(
+              controller: _contentController,
+              onImageInsert: (image, controller) => _pickAndUploadImage(controller),
+            ),
             Expanded(
-              child: TextField(
+              child: quill.QuillEditor.basic(
                 controller: _contentController,
-                decoration: const InputDecoration(
-                  hintText: 'Note',
-                ),
-                maxLines: null,
-                expands: true,
+                
               ),
             ),
           ],

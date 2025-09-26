@@ -16,7 +16,7 @@ ChurchPad is a Flutter-based mobile and web application designed to be a compreh
 
 | Feature | Status | Notes |
 | :--- | :--- | :--- |
-| **Note Taking** | **Partially Done** | Simple text notes are functional. Rich text (audio, image, drawing) is planned. |
+| **Note Taking** | **Done** | Rich text editor with image embedding is implemented. |
 | **User Authentication** | **Done** | Email/password and Google Sign-In are implemented. |
 | **Note Organization** | **Done** | Users can view notes in a list or grid, mark favorites, and search by title. |
 | **Bible Reference Lookup**| **Done** | The UI and API integration are complete. Requires user API key. |

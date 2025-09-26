@@ -1,8 +1,10 @@
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +21,19 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const ChurchPadApp());
+}
+
+// Helper function to convert Quill Delta to plain text
+String _getPlainText(String content) {
+  if (content.isEmpty) return '';
+  try {
+    final json = jsonDecode(content);
+    final doc = quill.Document.fromJson(json);
+    return doc.toPlainText().replaceAll('\n', ' ').trim();
+  } catch (e) {
+    // For backward compatibility with old plain text notes
+    return content.replaceAll('\n', ' ').trim();
+  }
 }
 
 class ChurchPadApp extends StatelessWidget {
@@ -375,7 +390,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
           ],
         ),
       ),
-    );  
+    );
   }
 }
 
@@ -629,7 +644,7 @@ class _NoteGridView extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1,
+        childAspectRatio: 0.8,
       ),
       itemBuilder: (context, index) {
         final note = notes[index];
@@ -661,7 +676,11 @@ class _NoteGridView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), maxLines: 3, overflow: TextOverflow.ellipsis),
+                  Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: Text(_getPlainText(note.content), style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 3, overflow: TextOverflow.ellipsis),
+                  ),
                 ],
               ),
             ),
@@ -682,7 +701,7 @@ class _NoteListView extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: ListTile(
           title: Text(note.title),
-          subtitle: Text(note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
+          subtitle: Text(_getPlainText(note.content), maxLines: 2, overflow: TextOverflow.ellipsis),
           leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
           trailing: IconButton(
             icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
