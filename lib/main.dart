@@ -283,6 +283,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
 
   Future<void> _startUpload() async {
     if (_pickedFile == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a file first.')),
       );
@@ -299,21 +300,27 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
       });
 
       _uploadTask!.snapshotEvents.listen((TaskSnapshot snapshot) {
-        setState(() {
-          _progress = snapshot.bytesTransferred / snapshot.totalBytes;
-        });
+        if (mounted) {
+          setState(() {
+            _progress = snapshot.bytesTransferred / snapshot.totalBytes;
+          });
+        }
       });
 
       await _uploadTask!;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Upload complete!')),
       );
-      setState(() {
-        _uploadTask = null;
-        _pickedFile = null;
-        _progress = 0;
-      });
+      if (mounted) {
+        setState(() {
+          _uploadTask = null;
+          _pickedFile = null;
+          _progress = 0;
+        });
+      }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error uploading file: $e')),
       );

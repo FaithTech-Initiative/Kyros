@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_ai/firebase_ai.dart';
+import 'package:firebase_ai/firebase_ai.dart' as f_ai;
 import 'package:url_launcher/url_launcher.dart';
 import 'highlighted_verses_screen.dart';
 
@@ -109,10 +109,11 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     );
 
     try {
-      final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-pro-latest');
+      final model = f_ai.FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-pro-latest');
       final prompt = 'Summarize the following Bible verse in a few bullet points: $_verseText';
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await model.generateContent([f_ai.Content.text(prompt)]);
 
+      if (!mounted) return;
       Navigator.of(context).pop(); // Close the loading indicator
 
       showDialog(
@@ -129,6 +130,7 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       Navigator.of(context).pop(); // Close the loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error generating insights: $e')),
@@ -157,6 +159,7 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
         },
       );
 
+      if (!mounted) return;
       Navigator.of(context).pop(); // Close the loading indicator
 
       if (response.statusCode == 200) {
@@ -177,11 +180,13 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${response.reasonPhrase}')),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       Navigator.of(context).pop(); // Close the loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
@@ -200,6 +205,7 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not launch study tools')),
       );
@@ -283,7 +289,7 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
             Expanded(
               child: SingleChildScrollView(
                 child: Container(
-                  color: _isHighlighted ? Colors.yellow.withOpacity(0.3) : null,
+                  color: _isHighlighted ? Colors.yellow.withAlpha(77) : null,
                   padding: const EdgeInsets.all(8.0),
                   child: Text(_verseText),
                 ),
