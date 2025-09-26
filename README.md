@@ -1,4 +1,4 @@
-## myapp(Churchpad)
+# myapp(Churchpad)
 
 Cross-platform app for organizing and safeguarding sermon notes.
 
@@ -20,7 +20,7 @@ samples, guidance on mobile development, and a full API reference.
 - **Note Taking** — Simple and rich modern note-taking interface to capture sermon points, reflections, and personal thoughts.
 - **Bible Reference Lookup** — Instantly search and link Bible verses within notes using an in-app reference tool.
 - **Verse Highlighting** — Highlight key verses for emphasis and quick review.
-# AI-Powered Insights
+### AI-Powered Insights
  — Generate summarized bullet points from scripture using AI as a tool, deepening comprehension of scripture.
 - **Cross-Reference Suggestions**
  — Receive suggestions for related Bible passages as you type notes, powered by AI as a tool, connecting themes and concepts.
