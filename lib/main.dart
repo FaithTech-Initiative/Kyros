@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
+import 'bible_lookup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,6 +90,13 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const NoteScreen()),
+    );
+  }
+
+  void _openBibleLookup() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const BibleLookupScreen()),
     );
   }
 
@@ -190,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildArcMenuButtons(double baseBottom) {
     final List<_ArcMenuItem> items = [
+       _ArcMenuItem(icon: Icons.menu_book, label: 'Bible', color: Colors.brown, onPressed: _openBibleLookup),
       _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
       _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
       _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),

@@ -1,19 +1,37 @@
-# ChurchPad App Blueprint
+# ChurchPad Blueprint
 
 ## Overview
 
-A note-taking application for church members, allowing them to take notes during services, Bible studies, and other events. The app is built with Flutter and uses Firebase for backend services.
+ChurchPad is a Flutter-based mobile and web application designed to be a comprehensive digital companion for sermon note-taking and personal Bible study. It blends modern note-taking capabilities with powerful, AI-driven study tools to deepen the user's engagement with scripture.
 
-## Features
+## Design and Style Guide
 
-- **Note-taking:** Create, edit, and view notes.
-- **Firestore Integration:** Notes are saved and retrieved from a Firestore database.
-- **Bible Verse Lookup:** Search for and add Bible verses to notes using an external API.
-- **Favorites:** Mark notes as favorites.
-- **Search:** Search for notes by title.
-- **Grid/List View:** Toggle between grid and list views for notes.
-- **User Authentication:** Users can sign up and log in with their email and password. Notes are associated with the user who created them.
+*   **Typography:** Google Fonts (Lato)
+*   **Primary Color:** `#2563EB` (A vibrant blue)
+*   **UI Components:** Material 3 with a focus on clean, card-based layouts, and modern input fields.
+*   **Iconography:** Material Design icons.
+*   **Layout:** Responsive grid and list views for notes.
 
-## Current Plan
+## Feature Status
 
-- The application is in a good state. I will now wait for further instructions from the user.
+| Feature | Status | Notes |
+| :--- | :--- | :--- |
+| **Note Taking** | **Partially Done** | Simple text notes are functional. Rich text (audio, image, drawing) is planned. |
+| **User Authentication** | **Done** | Email/password and Google Sign-In are implemented. |
+| **Note Organization** | **Done** | Users can view notes in a list or grid, mark favorites, and search by title. |
+| **Bible Reference Lookup**| **Done** | The UI and API integration are complete. Requires user API key. |
+| **Verse Highlighting** | **Done** | Users can highlight verses, and they are saved to Firestore. |
+| **AI-Powered Insights** | **Done** | Generates bulleted summaries of scripture. Requires user to enable Gemini API. |
+| **Cross-Reference Suggestions** | **Done** | Provides related verses from the ESV API. |
+| **Study Tools Integration**| **Done** | Links to Blue Letter Bible for deeper study. |
+| **Export Notes** | **Not Started** | |
+
+
+## Current Task: Export Notes
+
+*   **Objective:** Allow users to export their notes to common formats like PDF or TXT.
+*   **Next Steps:**
+    1.  Research and choose a suitable package for generating PDF or TXT files.
+    2.  Add an "Export" button to the note details screen.
+    3.  Implement the logic to format and save the note content to a file.
+
