@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           IndexedStack(
-            index: _currentIndex,
+            index: _currentIndex,   
             children: [
               _HomePageContent(
                 isGrid: _isGrid,
