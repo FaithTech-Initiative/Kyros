@@ -22,15 +22,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '_'
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '_'
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '_'
@@ -62,4 +56,22 @@ class DefaultFirebaseOptions {
     storageBucket: 'my-churchpad.firebasestorage.app',
     measurementId: 'G-W7D9EZRZ92',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBh6fe9g-nzXTM9q7zJRfBjejTGIcBarKA',
+    appId: '1:749827558187:ios:99f930f29533abb96b136e',
+    messagingSenderId: '749827558187',
+    projectId: 'my-churchpad',
+    storageBucket: 'my-churchpad.firebasestorage.app',
+    iosBundleId: 'com.example.myapp',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCsFnPJVDNCGWM0B7iEh0CtXLj98hp00Yw',
+    appId: '1:749827558187:android:d3ee36c483e271206b136e',
+    messagingSenderId: '749827558187',
+    projectId: 'my-churchpad',
+    storageBucket: 'my-churchpad.firebasestorage.app',
+  );
+
 }

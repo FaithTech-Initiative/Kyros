@@ -1,4 +1,5 @@
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,8 @@ import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
 import 'bible_lookup_screen.dart';
@@ -100,6 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openFileUpload() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FileUploadScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 8;
@@ -151,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           IndexedStack(
-            index: _currentIndex,   
+            index: _currentIndex,
             children: [
               _HomePageContent(
                 isGrid: _isGrid,
@@ -198,11 +208,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildArcMenuButtons(double baseBottom) {
     final List<_ArcMenuItem> items = [
-       _ArcMenuItem(icon: Icons.menu_book, label: 'Bible', color: Colors.brown, onPressed: _openBibleLookup),
+      _ArcMenuItem(icon: Icons.menu_book, label: 'Bible', color: Colors.brown, onPressed: _openBibleLookup),
       _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
       _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
       _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),
       _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
+      _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
     ];
     const double radius = 120;
     const double startAngle = 180;
@@ -230,6 +241,141 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     });
+  }
+}
+
+class FileUploadScreen extends StatefulWidget {
+  const FileUploadScreen({super.key});
+
+  @override
+  State<FileUploadScreen> createState() => _FileUploadScreenState();
+}
+
+class _FileUploadScreenState extends State<FileUploadScreen> {
+  UploadTask? _uploadTask;
+  XFile? _pickedFile;
+  double _progress = 0;
+
+  Future<void> _pickFile() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _pickedFile = pickedFile;
+      });
+    }
+  }
+
+  Future<void> _startUpload() async {
+    if (_pickedFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a file first.')),
+      );
+      return;
+    }
+    final file = File(_pickedFile!.path);
+    final fileName = _pickedFile!.name;
+    final destination = 'uploads/$fileName';
+
+    try {
+      final ref = FirebaseStorage.instance.ref(destination);
+      setState(() {
+        _uploadTask = ref.putFile(file);
+      });
+
+      _uploadTask!.snapshotEvents.listen((TaskSnapshot snapshot) {
+        setState(() {
+          _progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        });
+      });
+
+      await _uploadTask!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upload complete!')),
+      );
+      setState(() {
+        _uploadTask = null;
+        _pickedFile = null;
+        _progress = 0;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading file: $e')),
+      );
+    }
+  }
+
+  void _pauseUpload() {
+    _uploadTask?.pause();
+  }
+
+  void _resumeUpload() {
+    _uploadTask?.resume();
+  }
+
+  void _cancelUpload() {
+    _uploadTask?.cancel();
+    setState(() {
+      _uploadTask = null;
+      _pickedFile = null;
+      _progress = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('File Upload'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: _pickFile,
+              child: const Text('Pick a File'),
+            ),
+            if (_pickedFile != null)
+              Text('Selected file: ${_pickedFile!.name}'),
+            const SizedBox(height: 20),
+            if (_uploadTask != null)
+              Column(
+                children: [
+                  LinearProgressIndicator(value: _progress),
+                  const SizedBox(height: 8),
+                  Text('${(_progress * 100).toStringAsFixed(2)}%'),
+                ],
+              ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _startUpload,
+                  child: const Text('Start Upload'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _pauseUpload,
+                  child: const Text('Pause'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _resumeUpload,
+                  child: const Text('Resume'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _cancelUpload,
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
