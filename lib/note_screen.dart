@@ -1,25 +1,48 @@
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
 import 'bible_lookup_screen.dart';
 
 class NoteScreen extends StatefulWidget {
-  const NoteScreen({super.key});
+  final Note? note;
+
+  const NoteScreen({super.key, this.note});
 
   @override
   _NoteScreenState createState() => _NoteScreenState();
 }
 
 class _NoteScreenState extends State<NoteScreen> {
-  final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.note?.title);
+    _contentController = TextEditingController(text: widget.note?.content);
+  }
 
   void _saveNote() {
-    if (_titleController.text.isNotEmpty && _contentController.text.isNotEmpty) {
-      Navigator.pop(
-        context,
-        _Note(_titleController.text, _contentController.text),
-      );
+    final title = _titleController.text;
+    final content = _contentController.text;
+
+    if (title.isNotEmpty && content.isNotEmpty) {
+      if (widget.note != null) {
+        FirebaseFirestore.instance.collection('notes').doc(widget.note!.id).update({
+          'title': title,
+          'content': content,
+        });
+      } else {
+        FirebaseFirestore.instance.collection('notes').add({
+          'title': title,
+          'content': content,
+          'isFavorite': false,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
+      Navigator.pop(context);
     }
   }
 
@@ -40,7 +63,7 @@ class _NoteScreenState extends State<NoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Note'),
+        title: Text(widget.note == null ? 'New Note' : 'Edit Note'),
         actions: [
           IconButton(
             icon: const Icon(Icons.book),

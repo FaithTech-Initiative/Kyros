@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
 import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -68,46 +69,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   bool _sortAsc = true;
 
-  final List<_Note> _notes = [
-    _Note('Sunday Service Notes', 'These are the notes from the sunday service.', isFavorite: true),
-    _Note('Bible Study: John 3', 'A deep dive into John chapter 3.', isFavorite: false),
-    _Note('Prayer Points', 'Points to pray for this week.', isFavorite: true),
-    _Note('Youth Meeting', 'Notes from the youth meeting.', isFavorite: false),
-  ];
-
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
-  List<_Note> get _filteredNotes {
-    List<_Note> filtered = List.of(_notes);
-    if (_selectedFilter == 1) {
-      filtered = filtered.where((note) => note.isFavorite).toList();
-    }
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered
-          .where((note) => note.title.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-    filtered.sort((a, b) => _sortAsc
-        ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
-        : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
-    return filtered;
-  }
-
-  void _addNote() async {
-    final newNote = await Navigator.push(
+  void _addNote() {
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const NoteScreen()),
     );
-
-    if (newNote != null) {
-      setState(() {
-        _notes.add(newNote);
-      });
-    }
   }
 
   @override
@@ -163,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _HomePageContent(
                 isGrid: _isGrid,
                 selectedFilter: _selectedFilter,
-                filteredNotes: _filteredNotes,
+                searchQuery: _searchQuery,
                 onToggleGrid: () => setState(() => _isGrid = !_isGrid),
                 onSelectFilter: (int index) => setState(() => _selectedFilter = index),
                 sortAsc: _sortAsc,
@@ -316,11 +288,23 @@ class _FullScreenProfileCard extends StatelessWidget {
   }
 }
 
-class _Note {
+class Note {
+  final String id;
   final String title;
   final String content;
   final bool isFavorite;
-  _Note(this.title, this.content, {this.isFavorite = false});
+
+  Note({required this.id, required this.title, required this.content, this.isFavorite = false});
+
+  factory Note.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Note(
+      id: doc.id,
+      title: data['title'] ?? '',
+      content: data['content'] ?? '',
+      isFavorite: data['isFavorite'] ?? false,
+    );
+  }
 }
 
 class _ArcMenuItem {
@@ -334,7 +318,7 @@ class _ArcMenuItem {
 class _HomePageContent extends StatelessWidget {
   final bool isGrid;
   final int selectedFilter;
-  final List<_Note> filteredNotes;
+  final String searchQuery;
   final VoidCallback onToggleGrid;
   final Function(int) onSelectFilter;
   final bool sortAsc;
@@ -343,7 +327,7 @@ class _HomePageContent extends StatelessWidget {
   const _HomePageContent({
     required this.isGrid,
     required this.selectedFilter,
-    required this.filteredNotes,
+    required this.searchQuery,
     required this.onToggleGrid,
     required this.onSelectFilter,
     required this.sortAsc,
@@ -352,63 +336,91 @@ class _HomePageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 8),
-          Row(
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('notes').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(child: Text('Something went wrong'));
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final notes = snapshot.data!.docs.map((doc) => Note.fromFirestore(doc)).toList();
+
+        List<Note> filteredNotes = List.of(notes);
+        if (selectedFilter == 1) {
+          filteredNotes = filteredNotes.where((note) => note.isFavorite).toList();
+        }
+        if (searchQuery.isNotEmpty) {
+          filteredNotes = filteredNotes
+              .where((note) => note.title.toLowerCase().contains(searchQuery.toLowerCase()))
+              .toList();
+        }
+        filteredNotes.sort((a, b) => sortAsc
+            ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
+            : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FilterChip(label: const Text('All'), selected: selectedFilter == 0, onSelected: (_) => onSelectFilter(0)),
-              const SizedBox(width: 8),
-              FilterChip(label: const Text('Favorites'), selected: selectedFilter == 1, onSelected: (_) => onSelectFilter(1)),
-              const SizedBox(width: 8),
-              FilterChip(label: const Text('Tags'), selected: selectedFilter == 2, onSelected: (_) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tags coming soon')));
-              }),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              InkWell(
-                onTap: onToggleSort,
-                child: Row(
-                  children: [Text(sortAsc ? 'Title A–Z' : 'Title Z–A'), const Icon(Icons.swap_vert)],
-                ),
-              ),
-              IconButton(
-                icon: Icon(isGrid ? Icons.view_list : Icons.grid_view),
-                onPressed: onToggleGrid,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          if (filteredNotes.isEmpty)
-            Center(
-              child: Column(
+              const SizedBox(height: 8),
+              Row(
                 children: [
-                  Image.asset('assets/illustration.png', height: 180, fit: BoxFit.contain),
-                  const SizedBox(height: 24),
-                  const Text('Start creating your first note here.'),
+                  FilterChip(label: const Text('All'), selected: selectedFilter == 0, onSelected: (_) => onSelectFilter(0)),
+                  const SizedBox(width: 8),
+                  FilterChip(label: const Text('Favorites'), selected: selectedFilter == 1, onSelected: (_) => onSelectFilter(1)),
+                  const SizedBox(width: 8),
+                  FilterChip(label: const Text('Tags'), selected: selectedFilter == 2, onSelected: (_) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tags coming soon')));
+                  }),
                 ],
               ),
-            )
-          else if (isGrid)
-            _NoteGridView(notes: filteredNotes)
-          else
-            _NoteListView(notes: filteredNotes),
-          const SizedBox(height: 120),
-        ],
-      ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: onToggleSort,
+                    child: Row(
+                      children: [Text(sortAsc ? 'Title A–Z' : 'Title Z–A'), const Icon(Icons.swap_vert)],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(isGrid ? Icons.view_list : Icons.grid_view),
+                    onPressed: onToggleGrid,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              if (filteredNotes.isEmpty)
+                Center(
+                  child: Column(
+                    children: [
+                      Image.asset('assets/illustration.png', height: 180, fit: BoxFit.contain),
+                      const SizedBox(height: 24),
+                      const Text('Start creating your first note here.'),
+                    ],
+                  ),
+                )
+              else if (isGrid)
+                _NoteGridView(notes: filteredNotes)
+              else
+                _NoteListView(notes: filteredNotes),
+              const SizedBox(height: 120),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
 class _NoteGridView extends StatelessWidget {
-  final List<_Note> notes;
+  final List<Note> notes;
   const _NoteGridView({required this.notes});
   @override
   Widget build(BuildContext context) {
@@ -420,24 +432,41 @@ class _NoteGridView extends StatelessWidget {
         crossAxisCount: 2,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 1.2,
+        childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
         final note = notes[index];
-        return Card(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
-                const SizedBox(height: 12),
-                Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), maxLines: 3, overflow: TextOverflow.ellipsis),
-                const Spacer(),
-                if (note.isFavorite) const Align(alignment: Alignment.bottomRight, child: Icon(Icons.star, color: Colors.amber, size: 20)),
-              ],
+        return GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NoteScreen(note: note)),
+          ),
+          child: Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
+                      IconButton(
+                        icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
+                        onPressed: () {
+                          FirebaseFirestore.instance.collection('notes').doc(note.id).update({
+                            'isFavorite': !note.isFavorite,
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), maxLines: 3, overflow: TextOverflow.ellipsis),
+                ],
+              ),
             ),
           ),
         );
@@ -447,7 +476,7 @@ class _NoteGridView extends StatelessWidget {
 }
 
 class _NoteListView extends StatelessWidget {
-  final List<_Note> notes;
+  final List<Note> notes;
   const _NoteListView({required this.notes});
   @override
   Widget build(BuildContext context) {
@@ -458,7 +487,18 @@ class _NoteListView extends StatelessWidget {
           title: Text(note.title),
           subtitle: Text(note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
           leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
-          trailing: note.isFavorite ? const Icon(Icons.star, color: Colors.amber) : null,
+          trailing: IconButton(
+            icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
+            onPressed: () {
+              FirebaseFirestore.instance.collection('notes').doc(note.id).update({
+                'isFavorite': !note.isFavorite,
+              });
+            },
+          ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NoteScreen(note: note)),
+          ),
         ),
       )).toList(),
     );
