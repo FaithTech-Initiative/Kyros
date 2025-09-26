@@ -1,8 +1,16 @@
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
+import 'note_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const ChurchPadApp());
 }
 
@@ -61,14 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _sortAsc = true;
 
   final List<_Note> _notes = [
-    _Note('Sunday Service Notes', isFavorite: true),
-    _Note('Bible Study: John 3', isFavorite: false),
-    _Note('Prayer Points', isFavorite: true),
-    _Note('Youth Meeting', isFavorite: false),
-    _Note('Choir Practice', isFavorite: false),
-    _Note('Outreach Plan', isFavorite: false),
-    _Note('Thanksgiving List', isFavorite: false),
-    _Note('Sermon: Faith & Works', isFavorite: true),
+    _Note('Sunday Service Notes', 'These are the notes from the sunday service.', isFavorite: true),
+    _Note('Bible Study: John 3', 'A deep dive into John chapter 3.', isFavorite: false),
+    _Note('Prayer Points', 'Points to pray for this week.', isFavorite: true),
+    _Note('Youth Meeting', 'Notes from the youth meeting.', isFavorite: false),
   ];
 
   @override
@@ -91,6 +95,19 @@ class _HomeScreenState extends State<HomeScreen> {
         ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
         : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
     return filtered;
+  }
+
+  void _addNote() async {
+    final newNote = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NoteScreen()),
+    );
+
+    if (newNote != null) {
+      setState(() {
+        _notes.add(newNote);
+      });
+    }
   }
 
   @override
@@ -187,10 +204,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildArcMenuButtons(double baseBottom) {
     final List<_ArcMenuItem> items = [
-      _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple),
-      _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green),
-      _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange),
-      _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue),
+      _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
     ];
     const double radius = 120;
     const double startAngle = 180;
@@ -214,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           icon: Icon(items[i].icon, size: 20),
           label: Text(items[i].label),
-          onPressed: () {},
+          onPressed: items[i].onPressed,
         ),
       );
     });
@@ -301,15 +318,17 @@ class _FullScreenProfileCard extends StatelessWidget {
 
 class _Note {
   final String title;
+  final String content;
   final bool isFavorite;
-  _Note(this.title, {this.isFavorite = false});
+  _Note(this.title, this.content, {this.isFavorite = false});
 }
 
 class _ArcMenuItem {
   final IconData icon;
   final String label;
   final Color color;
-  _ArcMenuItem({required this.icon, required this.label, required this.color});
+  final VoidCallback onPressed;
+  _ArcMenuItem({required this.icon, required this.label, required this.color, required this.onPressed});
 }
 
 class _HomePageContent extends StatelessWidget {
@@ -437,6 +456,7 @@ class _NoteListView extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: ListTile(
           title: Text(note.title),
+          subtitle: Text(note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
           leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
           trailing: note.isFavorite ? const Icon(Icons.star, color: Colors.amber) : null,
         ),

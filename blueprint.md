@@ -1,58 +1,27 @@
-# Project Blueprint
+
+# Churchpad: Sermon Notes Organizer
 
 ## Overview
 
-This document outlines the design, features, and development plan for the Flutter application.
+Churchpad is a cross-platform application designed to help users organize and safeguard their sermon notes. It provides a simple and modern interface for taking notes, linking Bible verses, and gaining deeper insights into scripture.
 
-## Initial Setup
+## Style, Design, and Features
 
-*   **Objective:** Remove the default Flutter demo application.
-*   **Action:** Replaced the initial boilerplate code with a basic "Hello, World!" application.
-*   **Files Modified:** `lib/main.dart`
+### Current Version
 
-## UI Enhancements: App Bar
+*   **UI:** A modern, visually balanced layout with clean spacing and polished styles.
+*   **Theme:** A consistent theme with a defined color scheme, typography, and component styles.
+*   **Home Screen:** A home screen that displays a list of notes with options for filtering and sorting.
+*   **Navigation:** A bottom navigation bar for switching between different sections of the app.
+*   **Floating Action Button:** A FAB with an arc menu for adding new notes.
+*   **Note-Taking:** A dedicated screen for adding and editing notes.
 
-*   **Objective:** Add a search bar and profile avatar to the app bar.
-*   **Actions:**
-    *   Replaced the simple title with a `Row` widget.
-    *   Added an `Expanded` `TextField` with a search icon and rounded borders.
-    *   Added a `CircleAvatar` to represent a user profile.
-*   **Files Modified:** `lib/main.dart`
+### Current Plan: Bible Reference Lookup
 
-## Full App Refactor & Material 3 Upgrade
+Our next goal is to implement a Bible reference lookup tool. This will allow users to easily search for and link Bible verses within their notes.
 
-*   **Objective:** Modernize the app, fix UI bugs, and improve visual design.
-*   **Actions:**
-    *   **Material 3 Upgrade:**
-        *   Enabled `useMaterial3` in `ThemeData`.
-        *   Switched to `ColorScheme.fromSeed` for a modern, seed-generated color palette.
-    *   **Typography:**
-        *   Added the `google_fonts` package.
-        *   Integrated the 'Lato' font using `GoogleFonts.latoTextTheme` for a cleaner look.
-    *   **Asset Management:**
-        *   Created the `assets/` directory for images.
-        *   Added `profile.jpg` and `illustration.png` placeholders.
-        *   Registered the asset path in `pubspec.yaml`.
-    *   **Bug Fixes & UI Polish:**
-        *   Corrected the `_FilterChip` selection logic to ensure the correct filter is highlighted.
-        *   Minor code cleanup and formatting.
-*   **Files Modified:** `lib/main.dart`, `pubspec.yaml`
-*   **Files Added:** `assets/profile.jpg`, `assets/illustration.png`
+#### Steps:
 
-## Material 3 Component Migration
-
-*   **Objective:** Replace deprecated widgets with their Material 3 counterparts.
-*   **Actions:**
-    *   Replaced `BottomNavigationBar` with `NavigationBar`.
-    *   Replaced the custom `_FilterChip` with the Material 3 `FilterChip`.
-    *   Updated the `FloatingActionButton` to the latest Material 3 style.
-    *   Refined the UI of the `_FullScreenProfileCard` for a more modern look.
-*   **Files Modified:** `lib/main.dart`
-
-## Theme Refinements (Current State)
-
-*   **Objective:** Align the app's theme with Material 3 best practices.
-*   **Actions:**
-    *   Removed the redundant `scaffoldBackgroundColor` property from `ThemeData`.
-    *   Removed the `background` property from `ColorScheme.fromSeed` to allow the theme to automatically determine the most appropriate background color.
-*   **Files Modified:** `lib/main.dart`
+1.  **Add a Bible API:** We will integrate a Bible API to fetch scripture content.
+2.  **Create a Search UI:** We will design a user-friendly search interface for finding verses.
+3.  **Link to Notes:** We will implement the functionality to link the searched verses to the user's notes.
