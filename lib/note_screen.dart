@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
 import 'main.dart';
 import 'bible_lookup_screen.dart';
 
@@ -65,6 +68,26 @@ class _NoteScreenState extends State<NoteScreen> {
     }
   }
 
+  void _exportNote() async {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(_titleController.text, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 16),
+            pw.Text(_contentController.text),
+          ],
+        ),
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,6 +98,11 @@ class _NoteScreenState extends State<NoteScreen> {
             icon: const Icon(Icons.book),
             onPressed: _openBibleLookup,
             tooltip: 'Lookup Bible Verse',
+          ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: _exportNote,
+            tooltip: 'Export Note',
           ),
           IconButton(
             icon: const Icon(Icons.save),

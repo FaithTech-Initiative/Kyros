@@ -24,14 +24,10 @@ ChurchPad is a Flutter-based mobile and web application designed to be a compreh
 | **AI-Powered Insights** | **Done** | Generates bulleted summaries of scripture. Requires user to enable Gemini API. |
 | **Cross-Reference Suggestions** | **Done** | Provides related verses from the ESV API. |
 | **Study Tools Integration**| **Done** | Links to Blue Letter Bible for deeper study. |
-| **Export Notes** | **Not Started** | |
+| **Export Notes** | **Done** | |
 
 
-## Current Task: Export Notes
+## Current Task: Next feature
 
-*   **Objective:** Allow users to export their notes to common formats like PDF or TXT.
-*   **Next Steps:**
-    1.  Research and choose a suitable package for generating PDF or TXT files.
-    2.  Add an "Export" button to the note details screen.
-    3.  Implement the logic to format and save the note content to a file.
+*   **Objective:** Let the user decide on the next feature to implement.
 

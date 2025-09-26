@@ -1,1 +1,26 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"my-churchpad","appId":"1:749827558187:android:d3ee36c483e271206b136e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"my-churchpad","configurations":{"android":"1:749827558187:android:d3ee36c483e271206b136e","ios":"1:749827558187:ios:99f930f29533abb96b136e","web":"1:749827558187:web:70b2488509918feb6b136e"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "my-churchpad",
+          "appId": "1:749827558187:android:d3ee36c483e271206b136e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "my-churchpad",
+          "configurations": {
+            "android": "1:749827558187:android:d3ee36c483e271206b136e",
+            "ios": "1:749827558187:ios:99f930f29533abb96b136e",
+            "web": "1:749827558187:web:70b2488509918feb6b136e"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "singleProjectMode": true
+  }
+}
