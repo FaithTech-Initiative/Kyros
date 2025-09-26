@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+import 'auth_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +49,15 @@ class ChurchPadApp extends StatelessWidget {
           bodyColor: const Color(0xFF334155),
         ),
       ),
-      home: const HomeScreen(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (ctx, userSnapshot) {
+          if (userSnapshot.hasData) {
+            return const HomeScreen();
+          }
+          return const AuthScreen();
+        },
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -85,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 8;
+    final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: PreferredSize(
@@ -116,11 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () => showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) => const _FullScreenProfileCard(),
+                  builder: (context) => _FullScreenProfileCard(user: user),
                 ),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 20,
-                  backgroundImage: AssetImage('assets/profile.jpg'),
+                  backgroundImage: user?.photoURL != null
+                      ? NetworkImage(user!.photoURL!)
+                      : const AssetImage('assets/profile.jpg') as ImageProvider,
                 ),
               ),
             ],
@@ -140,6 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onSelectFilter: (int index) => setState(() => _selectedFilter = index),
                 sortAsc: _sortAsc,
                 onToggleSort: () => setState(() => _sortAsc = !_sortAsc),
+                user: user,
               ),
               const Center(child: Text('Shared (coming soon)')),
               const Center(child: Text('Menu (coming soon)')),
@@ -211,7 +225,8 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _FullScreenProfileCard extends StatelessWidget {
-  const _FullScreenProfileCard();
+  final User? user;
+  const _FullScreenProfileCard({this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -229,50 +244,65 @@ class _FullScreenProfileCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const CircleAvatar(
+            CircleAvatar(
               radius: 48,
-              backgroundImage: AssetImage('assets/profile.jpg'),
+              backgroundImage: user?.photoURL != null
+                  ? NetworkImage(user!.photoURL!)
+                  : const AssetImage('assets/profile.jpg') as ImageProvider,
             ),
             const SizedBox(height: 16),
-            const Text('Hi, Philip!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
-            const SizedBox(height: 8),
-            const Text('philzybreeze19@gmail.com', style: TextStyle(fontSize: 16)),
+            if (user != null)
+              Column(
+                children: [
+                  Text('Hi, ${user!.displayName ?? 'User'}!', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+                  const SizedBox(height: 8),
+                  Text(user!.email!, style: const TextStyle(fontSize: 16)),
+                ],
+              )
+            else
+              const Text('Hi, Guest!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
             const SizedBox(height: 32),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+            if (user == null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    icon: const Icon(Icons.login),
+                    label: const Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => const AuthScreen()),
+                      );
+                    },
                   ),
-                  icon: const Icon(Icons.volunteer_activism),
-                  label: const Text('Donate Now', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onPressed: () {},
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFEF4444),
-                    side: const BorderSide(color: Color(0xFFEF4444)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+            if (user != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFEF4444),
+                      side: const BorderSide(color: Color(0xFFEF4444)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: () => FirebaseAuth.instance.signOut(),
                   ),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onPressed: () {},
                 ),
               ),
-            ),
             const Spacer(),
             const Padding(
               padding: EdgeInsets.only(bottom: 18),
@@ -293,8 +323,9 @@ class Note {
   final String title;
   final String content;
   final bool isFavorite;
+  final String userId;
 
-  Note({required this.id, required this.title, required this.content, this.isFavorite = false});
+  Note({required this.id, required this.title, required this.content, this.isFavorite = false, required this.userId});
 
   factory Note.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
@@ -303,6 +334,7 @@ class Note {
       title: data['title'] ?? '',
       content: data['content'] ?? '',
       isFavorite: data['isFavorite'] ?? false,
+      userId: data['userId'] ?? '',
     );
   }
 }
@@ -323,6 +355,7 @@ class _HomePageContent extends StatelessWidget {
   final Function(int) onSelectFilter;
   final bool sortAsc;
   final VoidCallback onToggleSort;
+  final User? user;
 
   const _HomePageContent({
     required this.isGrid,
@@ -332,12 +365,21 @@ class _HomePageContent extends StatelessWidget {
     required this.onSelectFilter,
     required this.sortAsc,
     required this.onToggleSort,
+    this.user,
   });
 
   @override
   Widget build(BuildContext context) {
+    Query notesQuery = FirebaseFirestore.instance.collection('notes');
+    if (user != null) {
+      notesQuery = notesQuery.where('userId', isEqualTo: user!.uid);
+    } else {
+      // No user, no notes
+      notesQuery = notesQuery.where('userId', isEqualTo: 'nouser');
+    }
+
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('notes').snapshots(),
+      stream: notesQuery.snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(child: Text('Something went wrong'));

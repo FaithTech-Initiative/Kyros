@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'main.dart';
 import 'bible_lookup_screen.dart';
 
@@ -16,6 +17,7 @@ class NoteScreen extends StatefulWidget {
 class _NoteScreenState extends State<NoteScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
+  final _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -27,6 +29,7 @@ class _NoteScreenState extends State<NoteScreen> {
   void _saveNote() {
     final title = _titleController.text;
     final content = _contentController.text;
+    final user = _auth.currentUser;
 
     if (title.isNotEmpty && content.isNotEmpty) {
       if (widget.note != null) {
@@ -35,12 +38,15 @@ class _NoteScreenState extends State<NoteScreen> {
           'content': content,
         });
       } else {
-        FirebaseFirestore.instance.collection('notes').add({
-          'title': title,
-          'content': content,
-          'isFavorite': false,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
+        if (user != null) {
+          FirebaseFirestore.instance.collection('notes').add({
+            'title': title,
+            'content': content,
+            'isFavorite': false,
+            'timestamp': FieldValue.serverTimestamp(),
+            'userId': user.uid,
+          });
+        }
       }
       Navigator.pop(context);
     }

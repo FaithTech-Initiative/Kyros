@@ -12,6 +12,7 @@ A note-taking application for church members, allowing them to take notes during
 - **Favorites:** Mark notes as favorites.
 - **Search:** Search for notes by title.
 - **Grid/List View:** Toggle between grid and list views for notes.
+- **User Authentication:** Users can sign up and log in with their email and password. Notes are associated with the user who created them.
 
 ## Current Plan
 
