@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/bible_lookup_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -46,6 +47,10 @@ class AuthScreenState extends State<AuthScreen> {
         ),
       );
     }
+  }
+
+  void _continueAsGuest() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const BibleLookupScreen()));
   }
 
   @override
@@ -105,7 +110,11 @@ class AuthScreenState extends State<AuthScreen> {
                           _isLogin = !_isLogin;
                         });
                       },
-                    )
+                    ),
+                    TextButton(
+                      onPressed: _continueAsGuest,
+                      child: const Text('Continue as Guest'),
+                    ),
                   ],
                 ),
               ),
