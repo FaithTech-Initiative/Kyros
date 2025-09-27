@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   radius: 20,
                   backgroundImage: user?.photoURL != null
                       ? NetworkImage(user!.photoURL!)
-                      : const AssetImage('assets/profile.jpg') as ImageProvider,
+                      : const AssetImage('assets/illustration.png') as ImageProvider,
                 ),
               ),
             ],
@@ -201,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          if (_currentIndex == 0) ..._buildArcMenuButtons(fabBottom),
+          ..._buildArcMenuButtons(fabBottom),
           if (_currentIndex == 0)
             Positioned(
               right: 16,
@@ -231,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  List<Widget> _buildArcMenuButtons(double baseBottom) {
+  List<Widget> _buildArcMenuButtons(double fabBottom) {
     final List<_ArcMenuItem> items = [
       _ArcMenuItem(icon: Icons.menu_book, label: 'Bible', color: Colors.brown, onPressed: _openBibleLookup),
       _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
@@ -242,22 +242,19 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     const double radius = 100.0;
-    final double fabX = 16.0 + 28.0; // Right padding of FAB + half its width
-    final double fabY = baseBottom + 28.0; // Bottom padding of FAB + half its height
-    final double startAngle = pi; // 180 degrees
-    final double endAngle = pi / 2; // 90 degrees
-    final double sweepAngle = startAngle - endAngle; // The total angle of the arc
-    final double angleStep = sweepAngle / (items.length - 1); // Angle between each button
+    const double startAngle = pi;
+    const double endAngle = pi / 2;
+    final double sweepAngle = startAngle - endAngle;
+    final double angleStep = sweepAngle / (items.length - 1);
 
     return List.generate(items.length, (i) {
-      final angle = startAngle - (i * angleStep);
-
-      final double x = fabX + radius * cos(angle);
-      final double y = fabY + radius * sin(angle);
+      final double angle = startAngle - (i * angleStep);
+      final double x = cos(angle) * radius;
+      final double y = sin(angle) * radius;
 
       return Positioned(
-        right: x - 28.0, // Adjust for the button's own radius
-        bottom: y - 28.0, // Adjust for the button's own radius
+        right: 16 - x,
+        bottom: fabBottom + y,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _showArcMenu ? 1.0 : 0.0,
@@ -266,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Tooltip(
               message: items[i].label,
               child: FloatingActionButton(
-                heroTag: 'fab_arc_$i', // Important for multiple FABs
+                heroTag: 'fab_arc_$i',
                 backgroundColor: items[i].color,
                 onPressed: () {
                   setState(() => _showArcMenu = false);
@@ -281,7 +278,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 }
-
 class FileUploadScreen extends StatefulWidget {
   const FileUploadScreen({super.key});
 
@@ -448,7 +444,7 @@ class _FullScreenProfileCard extends StatelessWidget {
               radius: 48,
               backgroundImage: user?.photoURL != null
                   ? NetworkImage(user!.photoURL!)
-                  : const AssetImage('assets/profile.jpg') as ImageProvider,
+                  : const AssetImage('assets/illustration.png') as ImageProvider,
             ),
             const SizedBox(height: 16),
             if (user != null)
