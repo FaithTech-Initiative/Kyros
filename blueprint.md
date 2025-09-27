@@ -25,9 +25,18 @@ ChurchPad is a Flutter-based mobile and web application designed to be a compreh
 | **Cross-Reference Suggestions** | **Done** | Provides related verses from the ESV API. |
 | **Study Tools Integration**| **Done** | Links to Blue Letter Bible for deeper study. |
 | **Export Notes** | **Done** | |
+| **Offline Sync** | **In Progress** | |
+| **Notebooks/Folders** | **Not Started** | |
+| **Sermon Audio Recording/Attachment** | **Not Started** | |
+| **Enhanced Search** | **Not Started** | |
+| **Daily Reading Plans** | **Not Started** | |
+| **Community Features** | **Not Started** | |
 
+## Current Task: Implement Offline Sync
 
-## Current Task: Next feature
-
-*   **Objective:** Let the user decide on the next feature to implement.
-
+*   **Objective:** Implement offline capabilities for accessing and editing notes.
+*   **Steps:**
+    1.  Add the `drift` and `path_provider` packages.
+    2.  Create a local database and tables for notes.
+    3.  Implement a repository to handle data syncing between the local database and Firestore.
+    4.  Update the UI to read from and write to the local database first, then sync with Firestore.
