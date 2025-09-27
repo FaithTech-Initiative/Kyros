@@ -16,7 +16,7 @@ class HighlightedVersesScreen extends StatelessWidget {
       ),
       body: user == null
           ? const Center(
-              child: Text('You must be logged in to see your highlights.'),
+              child: Text('Please log in to see your highlighted verses.'),
             )
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -25,43 +25,26 @@ class HighlightedVersesScreen extends StatelessWidget {
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Something went wrong'));
-                }
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
-                final highlights = snapshot.data!.docs;
-
-                if (highlights.isEmpty) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(
                     child: Text('You have no highlighted verses yet.'),
                   );
                 }
-
+                final docs = snapshot.data!.docs;
                 return ListView.builder(
-                  itemCount: highlights.length,
+                  itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    final highlight = highlights[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      child: ListTile(
-                        title: Text(highlight['reference']),
-                        subtitle: Text(highlight['text']),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            FirebaseFirestore.instance
-                                .collection('highlights')
-                                .doc(highlight.id)
-                                .delete();
-                          },
-                        ),
+                    final doc = docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
+                    return ListTile(
+                      title: Text(data['reference'] ?? 'No Reference'),
+                      subtitle: Text(data['text'] ?? 'No Text'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => doc.reference.delete(),
                       ),
                     );
                   },

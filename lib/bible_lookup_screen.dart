@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_ai/firebase_ai.dart' as f_ai;
 import 'package:url_launcher/url_launcher.dart';
 import 'highlighted_verses_screen.dart';
 
@@ -24,6 +23,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
 
   // TODO: Replace with your ESV API key
   final String _apiKey = 'YOUR_ESV_API_KEY';
+  // TODO: Replace with your Google AI API key
+  final String _googleAiApiKey = 'YOUR_GOOGLE_AI_API_KEY';
 
   Future<void> _lookupVerse() async {
     if (_searchController.text.isEmpty) {
@@ -109,26 +110,50 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     );
 
     try {
-      final model = f_ai.FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-pro-latest');
-      final prompt = 'Summarize the following Bible verse in a few bullet points: $_verseText';
-      final response = await model.generateContent([f_ai.Content.text(prompt)]);
+      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_googleAiApiKey');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'contents': [
+            {
+              'parts': [
+                {
+                  'text': 'Summarize the following Bible verse in a few bullet points: $_verseText'
+                }
+              ]
+            }
+          ]
+        }),
+      );
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Close the loading indicator
 
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('AI-Powered Insights'),
-          content: Text(response.text ?? 'No response from model.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        ),
-      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final summary = data['candidates'][0]['content']['parts'][0]['text'];
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('AI-Powered Insights'),
+            content: Text(summary),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        final error = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error generating insights: ${error['error']['message']}')),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       Navigator.of(context).pop(); // Close the loading indicator
