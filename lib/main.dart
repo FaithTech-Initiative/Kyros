@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 8;
+    final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 16;
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -192,10 +192,19 @@ class _HomeScreenState extends State<HomeScreen> {
               const Center(child: Text('Menu (coming soon)')),
             ],
           ),
-          if (_currentIndex == 0 && _showArcMenu) ..._buildArcMenuButtons(fabBottom),
+          if (_showArcMenu)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => setState(() => _showArcMenu = false),
+                child: Container(
+                  color: Colors.black.withOpacity(0.4),
+                ),
+              ),
+            ),
+          if (_currentIndex == 0) ..._buildArcMenuButtons(fabBottom),
           if (_currentIndex == 0)
             Positioned(
-              right: 24,
+              right: 16,
               bottom: fabBottom,
               child: FloatingActionButton(
                 onPressed: () => setState(() => _showArcMenu = !_showArcMenu),
@@ -230,29 +239,40 @@ class _HomeScreenState extends State<HomeScreen> {
       _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
       _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
     ];
-    const double radius = 120;
-    const double startAngle = 180;
-    const double sweep = 90;
-    final double step = sweep / (items.length - 1);
+
+    const double radius = 120.0;
+    const double startAngle = pi;
+    const double endAngle = pi / 2;
+    final double angleStep = (startAngle - endAngle) / (items.length - 1);
 
     return List.generate(items.length, (i) {
-      final angle = (startAngle - step * i) * (pi / 180);
+      final angle = startAngle - (i * angleStep);
+      final fabX = 16.0 + 28.0; // right padding + half fab width
+      final fabY = baseBottom + 28.0; // bottom padding + half fab width
+
+      // Calculate the position for each button
+      final double x = fabX + (radius * cos(angle));
+      final double y = fabY + (radius * sin(angle));
+
       return Positioned(
-        right: 24 - radius * cos(angle),
-        bottom: baseBottom + radius * sin(angle),
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: items[i].color,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+        right: x - 28.0, // Adjust for button's own radius
+        bottom: y - 28.0, // Adjust for button's own radius
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: _showArcMenu ? 1.0 : 0.0,
+          child: Transform.scale(
+            scale: _showArcMenu ? 1.0 : 0.5,
+            child: FloatingActionButton.extended(
+              heroTag: 'fab_arc_$i',
+              backgroundColor: items[i].color,
+              onPressed: () {
+                setState(() => _showArcMenu = false);
+                items[i].onPressed();
+              },
+              label: Text(items[i].label, style: const TextStyle(color: Colors.white)),
+              icon: Icon(items[i].icon, color: Colors.white),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            elevation: 6,
           ),
-          icon: Icon(items[i].icon, size: 20),
-          label: Text(items[i].label),
-          onPressed: items[i].onPressed,
         ),
       );
     });
