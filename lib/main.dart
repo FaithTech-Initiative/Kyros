@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
     ];
 
-    const double radius = 100.0;
+    const double radius = 120.0;
     const double startAngle = pi;
     const double endAngle = pi / 2;
     final double sweepAngle = startAngle - endAngle;
