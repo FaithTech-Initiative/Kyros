@@ -207,6 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
               right: 16,
               bottom: fabBottom,
               child: FloatingActionButton(
+                heroTag: 'main_fab',
                 onPressed: () => setState(() => _showArcMenu = !_showArcMenu),
                 child: Icon(_showArcMenu ? Icons.close : Icons.add),
               ),
@@ -240,37 +241,39 @@ class _HomeScreenState extends State<HomeScreen> {
       _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
     ];
 
-    const double radius = 120.0;
-    const double startAngle = pi;
-    const double endAngle = pi / 2;
-    final double angleStep = (startAngle - endAngle) / (items.length - 1);
+    const double radius = 100.0;
+    final double fabX = 16.0 + 28.0; // Right padding of FAB + half its width
+    final double fabY = baseBottom + 28.0; // Bottom padding of FAB + half its height
+    final double startAngle = pi; // 180 degrees
+    final double endAngle = pi / 2; // 90 degrees
+    final double sweepAngle = startAngle - endAngle; // The total angle of the arc
+    final double angleStep = sweepAngle / (items.length - 1); // Angle between each button
 
     return List.generate(items.length, (i) {
       final angle = startAngle - (i * angleStep);
-      final fabX = 16.0 + 28.0; // right padding + half fab width
-      final fabY = baseBottom + 28.0; // bottom padding + half fab width
 
-      // Calculate the position for each button
-      final double x = fabX + (radius * cos(angle));
-      final double y = fabY + (radius * sin(angle));
+      final double x = fabX + radius * cos(angle);
+      final double y = fabY + radius * sin(angle);
 
       return Positioned(
-        right: x - 28.0, // Adjust for button's own radius
-        bottom: y - 28.0, // Adjust for button's own radius
+        right: x - 28.0, // Adjust for the button's own radius
+        bottom: y - 28.0, // Adjust for the button's own radius
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _showArcMenu ? 1.0 : 0.0,
           child: Transform.scale(
-            scale: _showArcMenu ? 1.0 : 0.5,
-            child: FloatingActionButton.extended(
-              heroTag: 'fab_arc_$i',
-              backgroundColor: items[i].color,
-              onPressed: () {
-                setState(() => _showArcMenu = false);
-                items[i].onPressed();
-              },
-              label: Text(items[i].label, style: const TextStyle(color: Colors.white)),
-              icon: Icon(items[i].icon, color: Colors.white),
+            scale: _showArcMenu ? 1.0 : 0.0,
+            child: Tooltip(
+              message: items[i].label,
+              child: FloatingActionButton(
+                heroTag: 'fab_arc_$i', // Important for multiple FABs
+                backgroundColor: items[i].color,
+                onPressed: () {
+                  setState(() => _showArcMenu = false);
+                  items[i].onPressed();
+                },
+                child: Icon(items[i].icon, color: Colors.white),
+              ),
             ),
           ),
         ),
