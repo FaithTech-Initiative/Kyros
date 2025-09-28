@@ -113,14 +113,16 @@ class NoteScreenState extends State<NoteScreen> {
               ),
               const SizedBox(height: 16),
               QuillSimpleToolbar(
-                config: const QuillSimpleToolbarConfigurations(),
-                controller: _controller,
+                config: QuillSimpleToolbarConfigurations(
+                  controller: _controller,
+                ),
               ),
               Expanded(
                 child: QuillEditor.basic(
-                  config: const QuillEditorConfigurations(),
-                  controller: _controller,
-                  readOnly: false,
+                  config: QuillEditorConfigurations(
+                    controller: _controller,
+                    readOnly: false,
+                  ),
                 ),
               ),
             ],
