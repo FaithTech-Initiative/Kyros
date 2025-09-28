@@ -1,17 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
+import 'package:myapp/splash_screen.dart';
 import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
 import 'bible_lookup_screen.dart';
@@ -67,22 +64,15 @@ class ChurchPadApp extends StatelessWidget {
           bodyColor: const Color(0xFF334155),
         ),
       ),
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (ctx, userSnapshot) {
-          if (userSnapshot.hasData) {
-            return const HomeScreen();
-          }
-          return const AuthScreen();
-        },
-      ),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String userId;
+  const HomeScreen({super.key, required this.userId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -103,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _noteRepository = NoteRepository(AppDatabase());
+    _noteRepository = NoteRepository(AppDatabase(), widget.userId);
     _notesFuture = _noteRepository.getNotes();
   }
 
@@ -122,18 +112,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void _addNote() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const NoteScreen()),
+      MaterialPageRoute(builder: (context) => NoteScreen(userId: widget.userId)),
     );
     if (result == true) {
       _refreshNotes();
     }
-  }
-
-  void _openFileUpload() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FileUploadScreen()),
-    );
   }
 
   @override
@@ -209,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onToggleSort: () => setState(() => _sortAsc = !_sortAsc),
                     noteRepository: _noteRepository,
                     onNoteUpdated: _refreshNotes,
+                    userId: widget.userId,
                   );
                 },
               ),
@@ -259,189 +243,49 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildArcMenuButtons(double fabBottom) {
     final List<_ArcMenuItem> items = [
-      _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
-      _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
-      _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),
       _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
-      _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
+      _ArcMenuItem(icon: Icons.list, label: 'List', color: Colors.red, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
     ];
 
-    const double radius = 130.0;
-    const double startAngle = pi;
-    const double endAngle = pi / 3;
-    const double sweepAngle = startAngle - endAngle;
-    final double angleStep = sweepAngle / (items.length - 1);
+    const double radius = 100.0;
+    const double startAngle = -pi / 2;
+    const double sweepAngle = -pi;
 
     return List.generate(items.length, (i) {
-      final double angle = startAngle - (i * angleStep);
+      final double angle = startAngle + (i / (items.length - 1)) * sweepAngle;
       final double x = cos(angle) * radius;
       final double y = sin(angle) * radius;
 
       return Positioned(
         right: 16 - x,
-        bottom: fabBottom + y,
+        bottom: fabBottom - y,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _showArcMenu ? 1.0 : 0.0,
           child: Transform.scale(
             scale: _showArcMenu ? 1.0 : 0.0,
-            child: Tooltip(
-              message: items[i].label,
-              child: FloatingActionButton(
-                heroTag: 'fab_arc_$i',
-                backgroundColor: items[i].color,
-                onPressed: () {
-                  setState(() => _showArcMenu = false);
-                  items[i].onPressed();
-                },
-                child: Icon(items[i].icon, color: Colors.white),
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton(
+                  heroTag: 'fab_arc_$i',
+                  backgroundColor: items[i].color,
+                  onPressed: () {
+                    setState(() => _showArcMenu = false);
+                    items[i].onPressed();
+                  },
+                  child: Icon(items[i].icon, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Text(items[i].label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
         ),
       );
     });
-  }
-}
-class FileUploadScreen extends StatefulWidget {
-  const FileUploadScreen({super.key});
-
-  @override
-  State<FileUploadScreen> createState() => _FileUploadScreenState();
-}
-
-class _FileUploadScreenState extends State<FileUploadScreen> {
-  UploadTask? _uploadTask;
-  XFile? _pickedFile;
-  double _progress = 0;
-
-  Future<void> _pickFile() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _pickedFile = pickedFile;
-      });
-    }
-  }
-
-  Future<void> _startUpload() async {
-    if (_pickedFile == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a file first.')),
-      );
-      return;
-    }
-    final file = File(_pickedFile!.path);
-    final fileName = _pickedFile!.name;
-    final destination = 'uploads/$fileName';
-
-    try {
-      final ref = FirebaseStorage.instance.ref(destination);
-      setState(() {
-        _uploadTask = ref.putFile(file);
-      });
-
-      _uploadTask!.snapshotEvents.listen((TaskSnapshot snapshot) {
-        if (mounted) {
-          setState(() {
-            _progress = snapshot.bytesTransferred / snapshot.totalBytes;
-          });
-        }
-      });
-
-      await _uploadTask!;
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Upload complete!')),
-      );
-      if (mounted) {
-        setState(() {
-          _uploadTask = null;
-          _pickedFile = null;
-          _progress = 0;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading file: $e')),
-      );
-    }
-  }
-
-  void _pauseUpload() {
-    _uploadTask?.pause();
-  }
-
-  void _resumeUpload() {
-    _uploadTask?.resume();
-  }
-
-  void _cancelUpload() {
-    _uploadTask?.cancel();
-    setState(() {
-      _uploadTask = null;
-      _pickedFile = null;
-      _progress = 0;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('File Upload'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _pickFile,
-              child: const Text('Pick a File'),
-            ),
-            if (_pickedFile != null)
-              Text('Selected file: ${_pickedFile!.name}'),
-            const SizedBox(height: 20),
-            if (_uploadTask != null)
-              Column(
-                children: [
-                  LinearProgressIndicator(value: _progress),
-                  const SizedBox(height: 8),
-                  Text('${(_progress * 100).toStringAsFixed(2)}%'),
-                ],
-              ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _startUpload,
-                  child: const Text('Start Upload'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _pauseUpload,
-                  child: const Text('Pause'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _resumeUpload,
-                  child: const Text('Resume'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _cancelUpload,
-                  child: const Text('Cancel'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -558,6 +402,7 @@ class _HomePageContent extends StatelessWidget {
   final VoidCallback onToggleSort;
   final NoteRepository noteRepository;
   final VoidCallback onNoteUpdated;
+  final String userId;
 
   const _HomePageContent({
     required this.notes,
@@ -570,6 +415,7 @@ class _HomePageContent extends StatelessWidget {
     required this.onToggleSort,
     required this.noteRepository,
     required this.onNoteUpdated,
+    required this.userId,
   });
 
   @override
@@ -632,9 +478,9 @@ class _HomePageContent extends StatelessWidget {
               ),
             )
           else if (isGrid)
-            _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated)
+            _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId)
           else
-            _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated),
+            _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId),
           const SizedBox(height: 120),
         ],
       ),
@@ -646,8 +492,9 @@ class _NoteGridView extends StatelessWidget {
   final List<Note> notes;
   final NoteRepository noteRepository;
   final VoidCallback onNoteUpdated;
+  final String userId;
 
-  const _NoteGridView({required this.notes, required this.noteRepository, required this.onNoteUpdated});
+  const _NoteGridView({required this.notes, required this.noteRepository, required this.onNoteUpdated, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -667,7 +514,7 @@ class _NoteGridView extends StatelessWidget {
           onTap: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note)),
+              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: userId)),
             );
             if (result == true) {
               onNoteUpdated();
@@ -715,8 +562,9 @@ class _NoteListView extends StatelessWidget {
   final List<Note> notes;
   final NoteRepository noteRepository;
   final VoidCallback onNoteUpdated;
+  final String userId;
 
-  const _NoteListView({required this.notes, required this.noteRepository, required this.onNoteUpdated});
+  const _NoteListView({required this.notes, required this.noteRepository, required this.onNoteUpdated, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -738,7 +586,7 @@ class _NoteListView extends StatelessWidget {
           onTap: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note)),
+              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: userId)),
             );
             if (result == true) {
               onNoteUpdated();
