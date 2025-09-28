@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
@@ -41,7 +40,7 @@ class NoteScreenState extends State<NoteScreen> {
         await _noteRepository.updateNote(updatedNote);
       } else {
         final newNote = Note(
-          id: DateTime.now().millisecondsSinceEpoch,
+          id: 0,
           title: title,
           content: content,
           createdAt: now,

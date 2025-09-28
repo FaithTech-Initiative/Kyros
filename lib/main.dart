@@ -199,6 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onToggleSort: () => setState(() => _sortAsc = !_sortAsc),
                     noteRepository: _noteRepository,
                     onNoteUpdated: _refreshNotes,
+                    userId: widget.userId,
                   );
                 },
               ),
@@ -406,6 +407,7 @@ class _HomePageContent extends StatelessWidget {
   final VoidCallback onToggleSort;
   final NoteRepository noteRepository;
   final VoidCallback onNoteUpdated;
+  final String userId;
 
   const _HomePageContent({
     required this.notes,
@@ -418,6 +420,7 @@ class _HomePageContent extends StatelessWidget {
     required this.onToggleSort,
     required this.noteRepository,
     required this.onNoteUpdated,
+    required this.userId,
   });
 
   @override
@@ -480,9 +483,9 @@ class _HomePageContent extends StatelessWidget {
               ),
             )
           else if (isGrid)
-            _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated)
+            _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId)
           else
-            _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated),
+            _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId),
           const SizedBox(height: 120),
         ],
       ),
@@ -494,8 +497,9 @@ class _NoteGridView extends StatelessWidget {
   final List<Note> notes;
   final NoteRepository noteRepository;
   final VoidCallback onNoteUpdated;
+  final String userId;
 
-  const _NoteGridView({required this.notes, required this.noteRepository, required this.onNoteUpdated});
+  const _NoteGridView({required this.notes, required this.noteRepository, required this.onNoteUpdated, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -515,7 +519,7 @@ class _NoteGridView extends StatelessWidget {
           onTap: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: note.userId)),
+              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: userId)),
             );
             if (result == true) {
               onNoteUpdated();
@@ -563,8 +567,9 @@ class _NoteListView extends StatelessWidget {
   final List<Note> notes;
   final NoteRepository noteRepository;
   final VoidCallback onNoteUpdated;
+  final String userId;
 
-  const _NoteListView({required this.notes, required this.noteRepository, required this.onNoteUpdated});
+  const _NoteListView({required this.notes, required this.noteRepository, required this.onNoteUpdated, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -586,7 +591,7 @@ class _NoteListView extends StatelessWidget {
           onTap: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: note.userId)),
+              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: userId)),
             );
             if (result == true) {
               onNoteUpdated();
