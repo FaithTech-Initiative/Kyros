@@ -130,10 +130,8 @@ class NoteScreenState extends State<NoteScreen> {
               ),
               Expanded(
                 child: QuillEditor.basic(
-                  configurations: QuillEditorConfigurations(
-                    controller: _controller,
-                    readOnly: false,
-                  ),
+                  controller: _controller,
+                  readOnly: false,
                 ),
               ),
             ],
