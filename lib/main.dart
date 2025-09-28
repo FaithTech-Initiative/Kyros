@@ -96,9 +96,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late final NoteRepository _noteRepository;
   late Future<List<Note>> _notesFuture;
   
-  List<Note> _allNotes = [];
-  List<Note> _displayedNotes = [];
-
   // State for filtering and sorting
   String _searchQuery = '';
   int _selectedFilter = 0;
@@ -113,53 +110,19 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
-    _loadNotes();
+    _notesFuture = _noteRepository.getNotes();
     developer.log('Current user: ${FirebaseAuth.instance.currentUser?.uid}', name: 'myapp.home');
     _searchController.addListener(() {
       setState(() {
          _searchQuery = _searchController.text;
-         _runFilterAndSort();
       });
     });
   }
   
-  void _loadNotes() {
-    _notesFuture = _noteRepository.getNotes();
-    _notesFuture.then((notes) {
-      setState(() {
-        _allNotes = notes;
-        _runFilterAndSort();
-      });
-    });
-  }
-
-  void _runFilterAndSort() {
-    List<Note> filtered = List.of(_allNotes);
-
-    // Apply filter
-    if (_selectedFilter == 1) {
-      filtered = filtered.where((note) => note.isFavorite).toList();
-    }
-
-    // Apply search
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered
-          .where((note) => note.title.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-    
-    // Apply sort
-    filtered.sort((a, b) => _sortAsc
-        ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
-        : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
-
-    setState(() {
-      _displayedNotes = filtered;
-    });
-  }
-
   void _refreshNotes() {
-    _loadNotes();
+    setState(() {
+      _notesFuture = _noteRepository.getNotes();
+    });
   }
 
   @override
@@ -243,20 +206,40 @@ class _HomeScreenState extends State<HomeScreen> {
                     developer.log('Error loading notes: ${snapshot.error}', name: 'myapp.home', level: 900);
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
-                   developer.log('Notes loaded successfully. Count: ${_allNotes.length}', name: 'myapp.home');
+
+                  final allNotes = snapshot.data ?? [];
+                  developer.log('Notes loaded successfully. Count: ${allNotes.length}', name: 'myapp.home');
+
+                  List<Note> filtered = List.of(allNotes);
+
+                  // Apply filter
+                  if (_selectedFilter == 1) {
+                    filtered = filtered.where((note) => note.isFavorite).toList();
+                  }
+
+                  // Apply search
+                  if (_searchQuery.isNotEmpty) {
+                    filtered = filtered
+                        .where((note) => note.title.toLowerCase().contains(_searchQuery.toLowerCase()))
+                        .toList();
+                  }
+                  
+                  // Apply sort
+                  filtered.sort((a, b) => _sortAsc
+                      ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
+                      : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+
                   return _HomePageContent(
-                    notes: _displayedNotes,
+                    notes: filtered,
                     isGrid: _isGrid,
                     selectedFilter: _selectedFilter,
                     sortAsc: _sortAsc,
                     onToggleGrid: () => setState(() => _isGrid = !_isGrid),
                     onSelectFilter: (int index) {
                       setState(() => _selectedFilter = index);
-                      _runFilterAndSort();
                     },
                     onToggleSort: () {
                       setState(() => _sortAsc = !_sortAsc);
-                      _runFilterAndSort();
                     },
                     noteRepository: _noteRepository,
                     onNoteUpdated: _refreshNotes,
