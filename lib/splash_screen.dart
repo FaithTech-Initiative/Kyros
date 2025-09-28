@@ -39,7 +39,7 @@ class SplashScreen extends StatelessWidget {
               ),
               const Spacer(),
               Image.asset(
-                'assets/brand_expression.png',
+                'assets/illustration.png',
                 height: 300,
               ),
               const Spacer(),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
+import 'package:drift/drift.dart';
 import 'bible_lookup_screen.dart';
 
 class NoteScreen extends StatefulWidget {
@@ -14,38 +16,52 @@ class NoteScreen extends StatefulWidget {
 }
 
 class NoteScreenState extends State<NoteScreen> {
+  late quill.QuillController _controller;
   late TextEditingController _titleController;
-  late TextEditingController _contentController;
   late final NoteRepository _noteRepository;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.note?.title);
-    _contentController = TextEditingController(text: widget.note?.content);
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
+    _titleController = TextEditingController(text: widget.note?.title);
+
+    quill.Document document;
+    if (widget.note != null && widget.note!.content.isNotEmpty) {
+      try {
+        document = quill.Document.fromJson(widget.note!.content as List);
+      } catch (e) {
+        document = quill.Document()..insert(0, widget.note!.content);
+      }
+    } else {
+      document = quill.Document();
+    }
+    _controller = quill.QuillController(document: document, selection: const TextSelection.collapsed(offset: 0));
   }
 
   void _saveNote() async {
     final title = _titleController.text;
-    final content = _contentController.text;
+    final content = _controller.document.toDelta().toJson();
 
     if (title.isNotEmpty) {
       final now = DateTime.now();
       if (widget.note != null) {
-        final updatedNote = widget.note!.copyWith(
-          title: title,
-          content: content,
+        final updatedNote = NotesCompanion(
+          id: Value(widget.note!.id),
+          title: Value(title),
+          content: Value(content as String),
+          createdAt: Value(widget.note!.createdAt),
+          isFavorite: Value(widget.note!.isFavorite),
+          userId: Value(widget.userId),
         );
         await _noteRepository.updateNote(updatedNote);
       } else {
-        final newNote = Note(
-          id: 0,
-          title: title,
-          content: content,
-          createdAt: now,
-          isFavorite: false,
-          userId: widget.userId,
+        final newNote = NotesCompanion(
+          title: Value(title),
+          content: Value(content as String),
+          createdAt: Value(now),
+          isFavorite: const Value(false),
+          userId: Value(widget.userId),
         );
         await _noteRepository.addNote(newNote);
       }
@@ -61,8 +77,8 @@ class NoteScreenState extends State<NoteScreen> {
     );
 
     if (result != null && result is String) {
-      final currentText = _contentController.text;
-      _contentController.text = '$currentText\n\n$result';
+      final index = _controller.selection.baseOffset;
+      _controller.document.insert(index, '\n\n$result');
     }
   }
 
@@ -94,15 +110,25 @@ class NoteScreenState extends State<NoteScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: TextField(
-                controller: _contentController,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText: 'Content',
+            quill.QuillToolbar.simple(
+              configurations: quill.QuillSimpleToolbarConfigurations(
+                controller: _controller,
+                sharedConfigurations: const quill.QuillSharedConfigurations(
+                  locale: Locale('en'),
                 ),
               ),
             ),
+            Expanded(
+              child: quill.QuillEditor.basic(
+                configurations: quill.QuillEditorConfigurations(
+                  controller: _controller,
+                  readOnly: false,
+                  sharedConfigurations: const quill.QuillSharedConfigurations(
+                    locale: Locale('en'),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),

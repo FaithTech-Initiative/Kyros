@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:myapp/splash_screen.dart';
@@ -20,20 +17,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const ChurchPadApp());
-}
-
-// This is the background function that will be run in a separate isolate.
-String _getPlainText(String content) {
-  if (content.isEmpty) {
-    return '';
-  }
-  try {
-    final json = jsonDecode(content);
-    final doc = quill.Document.fromJson(json);
-    return doc.toPlainText().replaceAll('\n', ' ').trim();
-  } catch (e) {
-    return content.replaceAll('\n', ' ').trim();
-  }
 }
 
 class ChurchPadApp extends StatelessWidget {
@@ -272,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     const double radius = 100.0;
-    const double startAngle = -pi;
+    const double startAngle = -pi + pi / 4;
     const double sweepAngle = pi / 2;
 
     return List.generate(items.length, (i) {
@@ -282,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       return Positioned(
         right: 16 - x,
-        bottom: fabBottom - y,
+        bottom: fabBottom - y - 20,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _showArcMenu ? 1.0 : 0.0,
@@ -558,7 +541,7 @@ class _NoteGridView extends StatelessWidget {
                         icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
                         onPressed: () async {
                           final updatedNote = note.copyWith(isFavorite: !note.isFavorite);
-                          await noteRepository.updateNote(updatedNote);
+                          await noteRepository.updateNote(updatedNote as dynamic);
                           onNoteUpdated();
                         },
                       ),
@@ -568,7 +551,7 @@ class _NoteGridView extends StatelessWidget {
                   Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), maxLines: 2, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 8),
                   Expanded(
-                    child: AsyncPlainTextPreview(content: note.content, style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 3, overflow: TextOverflow.ellipsis),
+                    child: Text(note.plainTextContent, style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 3, overflow: TextOverflow.ellipsis),
                   ),
                 ],
               ),
@@ -591,6 +574,8 @@ class _NoteListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      shrinkWrap: true,        
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: notes.length,
       itemBuilder: (context, index) {
         final note = notes[index];
@@ -598,13 +583,13 @@ class _NoteListView extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: ListTile(
             title: Text(note.title),
-            subtitle: AsyncPlainTextPreview(content: note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
+            subtitle: Text(note.plainTextContent, maxLines: 2, overflow: TextOverflow.ellipsis),
             leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
             trailing: IconButton(
               icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
               onPressed: () async {
                 final updatedNote = note.copyWith(isFavorite: !note.isFavorite);
-                await noteRepository.updateNote(updatedNote);
+                await noteRepository.updateNote(updatedNote as dynamic);
                 onNoteUpdated();
               },
             ),
@@ -618,55 +603,6 @@ class _NoteListView extends StatelessWidget {
               }
             },
           ),
-        );
-      },
-    );
-  }
-}
-
-class AsyncPlainTextPreview extends StatefulWidget {
-  final String content;
-  final TextStyle? style;
-  final int maxLines;
-  final TextOverflow overflow;
-
-  const AsyncPlainTextPreview({
-    super.key,
-    required this.content,
-    this.style,
-    required this.maxLines,
-    required this.overflow,
-  });
-
-  @override
-  State<AsyncPlainTextPreview> createState() => _AsyncPlainTextPreviewState();
-}
-
-class _AsyncPlainTextPreviewState extends State<AsyncPlainTextPreview> {
-  late Future<String> _plainTextFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _plainTextFuture = compute(_getPlainText, widget.content);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: _plainTextFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Text('Error', style: widget.style);
-        }
-        return Text(
-          snapshot.data ?? '',
-          style: widget.style,
-          maxLines: widget.maxLines,
-          overflow: widget.overflow,
         );
       },
     );

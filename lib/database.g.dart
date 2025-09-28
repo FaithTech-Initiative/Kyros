@@ -28,6 +28,14 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
       'content', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _plainTextContentMeta =
+      const VerificationMeta('plainTextContent');
+  @override
+  late final GeneratedColumn<String> plainTextContent = GeneratedColumn<String>(
+      'plain_text_content', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -51,7 +59,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, title, content, createdAt, isFavorite, userId];
+      [id, title, content, plainTextContent, createdAt, isFavorite, userId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -76,6 +84,12 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     } else if (isInserting) {
       context.missing(_contentMeta);
+    }
+    if (data.containsKey('plain_text_content')) {
+      context.handle(
+          _plainTextContentMeta,
+          plainTextContent.isAcceptableOrUnknown(
+              data['plain_text_content']!, _plainTextContentMeta));
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -110,6 +124,8 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      plainTextContent: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}plain_text_content'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       isFavorite: attachedDatabase.typeMapping
@@ -129,6 +145,7 @@ class Note extends DataClass implements Insertable<Note> {
   final int id;
   final String title;
   final String content;
+  final String plainTextContent;
   final DateTime createdAt;
   final bool isFavorite;
   final String userId;
@@ -136,6 +153,7 @@ class Note extends DataClass implements Insertable<Note> {
       {required this.id,
       required this.title,
       required this.content,
+      required this.plainTextContent,
       required this.createdAt,
       required this.isFavorite,
       required this.userId});
@@ -145,6 +163,7 @@ class Note extends DataClass implements Insertable<Note> {
     map['id'] = Variable<int>(id);
     map['title'] = Variable<String>(title);
     map['content'] = Variable<String>(content);
+    map['plain_text_content'] = Variable<String>(plainTextContent);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['is_favorite'] = Variable<bool>(isFavorite);
     map['user_id'] = Variable<String>(userId);
@@ -156,6 +175,7 @@ class Note extends DataClass implements Insertable<Note> {
       id: Value(id),
       title: Value(title),
       content: Value(content),
+      plainTextContent: Value(plainTextContent),
       createdAt: Value(createdAt),
       isFavorite: Value(isFavorite),
       userId: Value(userId),
@@ -169,6 +189,7 @@ class Note extends DataClass implements Insertable<Note> {
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       content: serializer.fromJson<String>(json['content']),
+      plainTextContent: serializer.fromJson<String>(json['plainTextContent']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       userId: serializer.fromJson<String>(json['userId']),
@@ -181,6 +202,7 @@ class Note extends DataClass implements Insertable<Note> {
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'content': serializer.toJson<String>(content),
+      'plainTextContent': serializer.toJson<String>(plainTextContent),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'userId': serializer.toJson<String>(userId),
@@ -191,6 +213,7 @@ class Note extends DataClass implements Insertable<Note> {
           {int? id,
           String? title,
           String? content,
+          String? plainTextContent,
           DateTime? createdAt,
           bool? isFavorite,
           String? userId}) =>
@@ -198,6 +221,7 @@ class Note extends DataClass implements Insertable<Note> {
         id: id ?? this.id,
         title: title ?? this.title,
         content: content ?? this.content,
+        plainTextContent: plainTextContent ?? this.plainTextContent,
         createdAt: createdAt ?? this.createdAt,
         isFavorite: isFavorite ?? this.isFavorite,
         userId: userId ?? this.userId,
@@ -207,6 +231,9 @@ class Note extends DataClass implements Insertable<Note> {
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       content: data.content.present ? data.content.value : this.content,
+      plainTextContent: data.plainTextContent.present
+          ? data.plainTextContent.value
+          : this.plainTextContent,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       isFavorite:
           data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
@@ -220,6 +247,7 @@ class Note extends DataClass implements Insertable<Note> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
+          ..write('plainTextContent: $plainTextContent, ')
           ..write('createdAt: $createdAt, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('userId: $userId')
@@ -228,8 +256,8 @@ class Note extends DataClass implements Insertable<Note> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, content, createdAt, isFavorite, userId);
+  int get hashCode => Object.hash(
+      id, title, content, plainTextContent, createdAt, isFavorite, userId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -237,6 +265,7 @@ class Note extends DataClass implements Insertable<Note> {
           other.id == this.id &&
           other.title == this.title &&
           other.content == this.content &&
+          other.plainTextContent == this.plainTextContent &&
           other.createdAt == this.createdAt &&
           other.isFavorite == this.isFavorite &&
           other.userId == this.userId);
@@ -246,6 +275,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
   final Value<int> id;
   final Value<String> title;
   final Value<String> content;
+  final Value<String> plainTextContent;
   final Value<DateTime> createdAt;
   final Value<bool> isFavorite;
   final Value<String> userId;
@@ -253,6 +283,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.content = const Value.absent(),
+    this.plainTextContent = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.userId = const Value.absent(),
@@ -261,6 +292,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.id = const Value.absent(),
     required String title,
     required String content,
+    this.plainTextContent = const Value.absent(),
     required DateTime createdAt,
     this.isFavorite = const Value.absent(),
     required String userId,
@@ -272,6 +304,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
     Expression<int>? id,
     Expression<String>? title,
     Expression<String>? content,
+    Expression<String>? plainTextContent,
     Expression<DateTime>? createdAt,
     Expression<bool>? isFavorite,
     Expression<String>? userId,
@@ -280,6 +313,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (content != null) 'content': content,
+      if (plainTextContent != null) 'plain_text_content': plainTextContent,
       if (createdAt != null) 'created_at': createdAt,
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (userId != null) 'user_id': userId,
@@ -290,6 +324,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       {Value<int>? id,
       Value<String>? title,
       Value<String>? content,
+      Value<String>? plainTextContent,
       Value<DateTime>? createdAt,
       Value<bool>? isFavorite,
       Value<String>? userId}) {
@@ -297,6 +332,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
+      plainTextContent: plainTextContent ?? this.plainTextContent,
       createdAt: createdAt ?? this.createdAt,
       isFavorite: isFavorite ?? this.isFavorite,
       userId: userId ?? this.userId,
@@ -314,6 +350,9 @@ class NotesCompanion extends UpdateCompanion<Note> {
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (plainTextContent.present) {
+      map['plain_text_content'] = Variable<String>(plainTextContent.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -333,6 +372,7 @@ class NotesCompanion extends UpdateCompanion<Note> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
+          ..write('plainTextContent: $plainTextContent, ')
           ..write('createdAt: $createdAt, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('userId: $userId')
@@ -356,6 +396,7 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   Value<int> id,
   required String title,
   required String content,
+  Value<String> plainTextContent,
   required DateTime createdAt,
   Value<bool> isFavorite,
   required String userId,
@@ -364,6 +405,7 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<int> id,
   Value<String> title,
   Value<String> content,
+  Value<String> plainTextContent,
   Value<DateTime> createdAt,
   Value<bool> isFavorite,
   Value<String> userId,
@@ -385,6 +427,10 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<String> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get plainTextContent => $composableBuilder(
+      column: $table.plainTextContent,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -414,6 +460,10 @@ class $$NotesTableOrderingComposer
   ColumnOrderings<String> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get plainTextContent => $composableBuilder(
+      column: $table.plainTextContent,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 
@@ -441,6 +491,9 @@ class $$NotesTableAnnotationComposer
 
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get plainTextContent => $composableBuilder(
+      column: $table.plainTextContent, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -478,6 +531,7 @@ class $$NotesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<String> title = const Value.absent(),
             Value<String> content = const Value.absent(),
+            Value<String> plainTextContent = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<bool> isFavorite = const Value.absent(),
             Value<String> userId = const Value.absent(),
@@ -486,6 +540,7 @@ class $$NotesTableTableManager extends RootTableManager<
             id: id,
             title: title,
             content: content,
+            plainTextContent: plainTextContent,
             createdAt: createdAt,
             isFavorite: isFavorite,
             userId: userId,
@@ -494,6 +549,7 @@ class $$NotesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             required String title,
             required String content,
+            Value<String> plainTextContent = const Value.absent(),
             required DateTime createdAt,
             Value<bool> isFavorite = const Value.absent(),
             required String userId,
@@ -502,6 +558,7 @@ class $$NotesTableTableManager extends RootTableManager<
             id: id,
             title: title,
             content: content,
+            plainTextContent: plainTextContent,
             createdAt: createdAt,
             isFavorite: isFavorite,
             userId: userId,
