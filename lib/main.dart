@@ -1,16 +1,18 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:developer' as developer;
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:myapp/auth_screen.dart';
+import 'package:myapp/bible_lookup_screen.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:myapp/splash_screen.dart';
-import 'note_screen.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'firebase_options.dart';
-import 'auth_screen.dart';
-import 'bible_lookup_screen.dart';
-import 'dart:developer' as developer;
+import 'note_screen.dart';
 
 void main() async {
   developer.log('Starting app...', name: 'myapp.main');
@@ -85,28 +87,75 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  
+  // State variables for UI and data
+  late final NoteRepository _noteRepository;
+  late Future<List<Note>> _notesFuture;
+  
+  List<Note> _allNotes = [];
+  List<Note> _displayedNotes = [];
+
+  // State for filtering and sorting
   String _searchQuery = '';
   int _selectedFilter = 0;
+  bool _sortAsc = true;
+
+  // State for UI elements
   bool _isGrid = false;
   bool _showArcMenu = false;
   int _currentIndex = 0;
-  bool _sortAsc = true;
-
-  late final NoteRepository _noteRepository;
-  late Future<List<Note>> _notesFuture;
 
   @override
   void initState() {
     super.initState();
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
-    _notesFuture = _noteRepository.getNotes();
+    _loadNotes();
     developer.log('Current user: ${FirebaseAuth.instance.currentUser?.uid}', name: 'myapp.home');
+    _searchController.addListener(() {
+      setState(() {
+         _searchQuery = _searchController.text;
+         _runFilterAndSort();
+      });
+    });
+  }
+  
+  void _loadNotes() {
+    _notesFuture = _noteRepository.getNotes();
+    _notesFuture.then((notes) {
+      setState(() {
+        _allNotes = notes;
+        _runFilterAndSort();
+      });
+    });
+  }
+
+  void _runFilterAndSort() {
+    List<Note> filtered = List.of(_allNotes);
+
+    // Apply filter
+    if (_selectedFilter == 1) {
+      filtered = filtered.where((note) => note.isFavorite).toList();
+    }
+
+    // Apply search
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered
+          .where((note) => note.title.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
+    }
+    
+    // Apply sort
+    filtered.sort((a, b) => _sortAsc
+        ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
+        : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+
+    setState(() {
+      _displayedNotes = filtered;
+    });
   }
 
   void _refreshNotes() {
-    setState(() {
-      _notesFuture = _noteRepository.getNotes();
-    });
+    _loadNotes();
   }
 
   @override
@@ -148,7 +197,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 48,
                         child: TextField(
                           controller: _searchController,
-                          onChanged: (value) => setState(() => _searchQuery = value),
                           decoration: const InputDecoration(
                             hintText: 'Search your notes',
                             prefixIcon: Icon(Icons.search, color: Color(0xFF64748B)),
@@ -191,17 +239,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     developer.log('Error loading notes: ${snapshot.error}', name: 'myapp.home', level: 900);
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
-                  final notes = snapshot.data ?? [];
-                  developer.log('Notes loaded successfully. Count: ${notes.length}', name: 'myapp.home');
+                   developer.log('Notes loaded successfully. Count: ${_allNotes.length}', name: 'myapp.home');
                   return _HomePageContent(
-                    notes: notes,
+                    notes: _displayedNotes,
                     isGrid: _isGrid,
                     selectedFilter: _selectedFilter,
-                    searchQuery: _searchQuery,
-                    onToggleGrid: () => setState(() => _isGrid = !_isGrid),
-                    onSelectFilter: (int index) => setState(() => _selectedFilter = index),
                     sortAsc: _sortAsc,
-                    onToggleSort: () => setState(() => _sortAsc = !_sortAsc),
+                    onToggleGrid: () => setState(() => _isGrid = !_isGrid),
+                    onSelectFilter: (int index) {
+                      setState(() => _selectedFilter = index);
+                      _runFilterAndSort();
+                    },
+                    onToggleSort: () {
+                      setState(() => _sortAsc = !_sortAsc);
+                      _runFilterAndSort();
+                    },
                     noteRepository: _noteRepository,
                     onNoteUpdated: _refreshNotes,
                     userId: widget.userId,
@@ -407,7 +459,6 @@ class _HomePageContent extends StatelessWidget {
   final List<Note> notes;
   final bool isGrid;
   final int selectedFilter;
-  final String searchQuery;
   final VoidCallback onToggleGrid;
   final Function(int) onSelectFilter;
   final bool sortAsc;
@@ -420,7 +471,6 @@ class _HomePageContent extends StatelessWidget {
     required this.notes,
     required this.isGrid,
     required this.selectedFilter,
-    required this.searchQuery,
     required this.onToggleGrid,
     required this.onSelectFilter,
     required this.sortAsc,
@@ -432,19 +482,6 @@ class _HomePageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Note> filteredNotes = List.of(notes);
-    if (selectedFilter == 1) {
-      filteredNotes = filteredNotes.where((note) => note.isFavorite).toList();
-    }
-    if (searchQuery.isNotEmpty) {
-      filteredNotes = filteredNotes
-          .where((note) => note.title.toLowerCase().contains(searchQuery.toLowerCase()))
-          .toList();
-    }
-    filteredNotes.sort((a, b) => sortAsc
-        ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
-        : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -480,7 +517,7 @@ class _HomePageContent extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: filteredNotes.isEmpty
+            child: notes.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -492,8 +529,8 @@ class _HomePageContent extends StatelessWidget {
                     ),
                   )
                 : isGrid
-                    ? _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId)
-                    : _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId),
+                    ? _NoteGridView(notes: notes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId)
+                    : _NoteListView(notes: notes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId),
           ),
           const SizedBox(height: 120),
         ],

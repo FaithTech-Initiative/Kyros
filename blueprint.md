@@ -10,6 +10,8 @@ This document outlines the plan and progress for creating a note-taking applicat
 
 - **Debugging:** Added logging to `main.dart` to investigate `MallocStackLogging` warnings.
 
+- **Performance optimization:** Refactored the `HomeScreen` to move filtering and sorting logic out of the `build` method, improving UI performance and responsiveness.
+
 ## Implemented Features
 
 - **Note-taking functionality:** Users can create, edit, and save notes.
