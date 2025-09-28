@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 part 'database.g.dart';
 
+@DataClassName('Note')
 class Notes extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
