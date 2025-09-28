@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/flutter_quill_toolbar.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -19,6 +20,7 @@ class NoteScreenState extends State<NoteScreen> {
   late QuillController _controller;
   late TextEditingController _titleController;
   late final NoteRepository _noteRepository;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -112,9 +114,15 @@ class NoteScreenState extends State<NoteScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: QuillEditor.basic(
+                child: QuillEditor(
                   controller: _controller,
+                  scrollController: ScrollController(),
+                  focusNode: _focusNode,
+                  autoFocus: false,
                   readOnly: false,
+                  scrollable: true,
+                  padding: EdgeInsets.zero,
+                  expands: false,
                 ),
               ),
             ],
@@ -122,41 +130,40 @@ class NoteScreenState extends State<NoteScreen> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        color: Colors.transparent,
-        elevation: 0,
-        child: QuillToolbar.basic(
-          controller: _controller,
-          multiRowsDisplay: false,
-          showAlignmentButtons: true,
-          showBackgroundColorButton: true,
-          showCenterAlignment: true,
-          showClearFormat: true,
-          showCodeBlock: true,
-          showColorButton: true,
-          showDirection: true,
-          showDividers: true,
-          showFontFamily: true,
-          showFontSize: true,
-          showHeaderStyle: true,
-          showIndent: true,
-          showInlineCode: true,
-          showJustifyAlignment: true,
-          showLeftAlignment: true,
-          showLink: true,
-          showListBullets: true,
-          showListCheck: true,
-          showListNumbers: true,
-          showQuote: true,
-          showRightAlignment: true,
-          showSearchButton: true,
-          showSmallButton: true,
-          showStrikeThrough: true,
-          showSubscript: true,
-          showSuperscript: true,
-          showUndo: true,
-          showRedo: true,
-        ),
-      ),
+          color: Colors.transparent,
+          elevation: 0,
+          child: QuillToolbar.basic(
+            controller: _controller,
+            multiRowsDisplay: false,
+            showAlignmentButtons: true,
+            showBackgroundColorButton: true,
+            showCenterAlignment: true,
+            showClearFormat: true,
+            showCodeBlock: true,
+            showColorButton: true,
+            showDirection: true,
+            showDividers: true,
+            showFontFamily: true,
+            showFontSize: true,
+            showHeaderStyle: true,
+            showIndent: true,
+            showInlineCode: true,
+            showJustifyAlignment: true,
+            showLeftAlignment: true,
+            showLink: true,
+            showListBullets: true,
+            showListCheck: true,
+            showListNumbers: true,
+            showQuote: true,
+            showRightAlignment: true,
+            showSearchButton: true,
+            showSmallButton: true,
+            showStrikeThrough: true,
+            showSubscript: true,
+            showSuperscript: true,
+            showUndo: true,
+            showRedo: true,
+          )),
     );
   }
 }
