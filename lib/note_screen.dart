@@ -112,32 +112,28 @@ class NoteScreenState extends State<NoteScreen> {
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
-              QuillToolbar(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      QuillToolbarHistoryButton(controller: _controller, isUndo: true),
-                      QuillToolbarHistoryButton(controller: _controller, isUndo: false),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.bold),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.italic),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.underline),
-                      QuillToolbarClearFormatButton(controller: _controller),
-                      const VerticalDivider(indent: 4, endIndent: 4, color: Colors.grey),
-                      QuillToolbarSelectHeaderStyleButton(controller: _controller),
-                      const VerticalDivider(indent: 4, endIndent: 4, color: Colors.grey),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.listBullet),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.listNumbered),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.blockQuote),
-                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.codeBlock),
-                    ],
-                  ),
+              QuillToolbar.simple(
+                configurations: QuillSimpleToolbarConfigurations(
+                  controller: _controller,
+                  showUndo: true,
+                  showRedo: true,
+                  showBoldButton: true,
+                  showItalicButton: true,
+                  showUnderlineButton: true,
+                  showClearFormat: true,
+                  showHeaderStyle: true,
+                  showListBullets: true,
+                  showListNumbers: true,
+                  showQuote: true,
+                  showCodeBlock: true,
                 ),
               ),
               Expanded(
                 child: QuillEditor.basic(
-                  controller: _controller,
-                  readOnly: false,
+                  configurations: QuillEditorConfigurations(
+                    controller: _controller,
+                    readOnly: false,
+                  ),
                 ),
               ),
             ],
