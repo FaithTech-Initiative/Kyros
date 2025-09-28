@@ -9,6 +9,7 @@
     pkgs.jdk21
     pkgs.unzip
     pkgs.android-studio
+    pkgs.cmake
   ];
   # Sets environment variables in the workspace
   env = {};
