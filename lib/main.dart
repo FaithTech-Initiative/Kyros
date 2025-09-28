@@ -75,6 +75,21 @@ class ChurchPadApp extends StatelessWidget {
         textTheme: textTheme.apply(
           bodyColor: const Color(0xFF334155),
         ),
+        navigationBarTheme: NavigationBarThemeData(
+          indicatorColor: const Color(0xFF2563EB),
+          labelTextStyle: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) {
+              return const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold);
+            }
+            return const TextStyle(color: Color(0xFF64748B));
+          }),
+          iconTheme: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.selected)) {
+              return const IconThemeData(color: Colors.white);
+            }
+            return const IconThemeData(color: Color(0xFF64748B));
+          }),
+        ),
       ),
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
@@ -134,50 +149,53 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final bool showAppBar = _currentIndex != 1;
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            MediaQuery.of(context).padding.top + 12,
-            16,
-            0,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                    decoration: const InputDecoration(
-                      hintText: 'Search your notes',
-                      prefixIcon: Icon(Icons.search, color: Color(0xFF64748B)),
+      appBar: showAppBar
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(80),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  MediaQuery.of(context).padding.top + 12,
+                  16,
+                  0,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) => setState(() => _searchQuery = value),
+                          decoration: const InputDecoration(
+                            hintText: 'Search your notes',
+                            prefixIcon: Icon(Icons.search, color: Color(0xFF64748B)),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () => showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => _FullScreenProfileCard(user: user),
+                      ),
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundImage: user?.photoURL != null
+                            ? NetworkImage(user!.photoURL!)
+                            : const AssetImage('assets/illustration.png') as ImageProvider,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              GestureDetector(
-                onTap: () => showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => _FullScreenProfileCard(user: user),
-                ),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: user?.photoURL != null
-                      ? NetworkImage(user!.photoURL!)
-                      : const AssetImage('assets/illustration.png') as ImageProvider,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : null,
       body: Stack(
         children: [
           IndexedStack(
@@ -222,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          ..._buildArcMenuButtons(24.0),
+          ..._buildArcMenuButtons(MediaQuery.of(context).padding.bottom + 80),
           if (_currentIndex == 0)
             Positioned(
               right: 16,
@@ -261,8 +279,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     const double radius = 100.0;
-    const double startAngle = -pi / 2;
-    const double sweepAngle = -pi;
+    const double startAngle = -pi;
+    const double sweepAngle = pi / 2;
 
     return List.generate(items.length, (i) {
       final double angle = startAngle + (i / (items.length - 1)) * sweepAngle;
@@ -579,32 +597,36 @@ class _NoteListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: notes.map((note) => Card(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: ListTile(
-          title: Text(note.title),
-          subtitle: Text(_getPlainText(note.content), maxLines: 2, overflow: TextOverflow.ellipsis),
-          leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
-          trailing: IconButton(
-            icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
-            onPressed: () async {
-              final updatedNote = note.copyWith(isFavorite: !note.isFavorite);
-              await noteRepository.updateNote(updatedNote);
-              onNoteUpdated();
+    return ListView.builder(
+      itemCount: notes.length,
+      itemBuilder: (context, index) {
+        final note = notes[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListTile(
+            title: Text(note.title),
+            subtitle: Text(_getPlainText(note.content), maxLines: 2, overflow: TextOverflow.ellipsis),
+            leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
+            trailing: IconButton(
+              icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
+              onPressed: () async {
+                final updatedNote = note.copyWith(isFavorite: !note.isFavorite);
+                await noteRepository.updateNote(updatedNote);
+                onNoteUpdated();
+              },
+            ),
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: userId)),
+              );
+              if (result == true) {
+                onNoteUpdated();
+              }
             },
           ),
-          onTap: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: userId)),
-            );
-            if (result == true) {
-              onNoteUpdated();
-            }
-          },
-        ),
-      )).toList(),
+        );
+      },
     );
   }
 }

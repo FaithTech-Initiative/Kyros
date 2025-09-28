@@ -6,6 +6,14 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
 
 ## Style, Design, and Features
 
+### Version 1.3
+
+*   **Performance & UI Bug Fixes:**
+    *   **ANR Resolution:** Replaced the note list's `Column` with a `ListView.builder` to ensure only visible notes are rendered, completely resolving the "App Not Responding" issue.
+    *   **FAB Arc Menu:** Corrected the angle calculations for the Floating Action Button's arc menu to prevent it from appearing underneath the bottom navigation bar.
+    *   **Active Navbar Highlight:** Updated the theme to highlight the active navigation bar icon and label with a distinct color and bold font weight.
+    *   **Conditional AppBar:** The main AppBar is now hidden when the "Bible" screen is active, providing a more focused reading experience.
+
 ### Version 1.2
 
 *   **UI Refinements:**
