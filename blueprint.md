@@ -6,6 +6,12 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
 
 ## Style, Design, and Features
 
+### Version 1.5
+
+*   **FAB Menu Enhancement:**
+    *   Re-instated the "List" option to the Floating Action Button menu.
+    *   Corrected the arc layout calculations to ensure all four menu items ("Text", "Image", "List", and "Audio") are now evenly spaced and correctly positioned.
+
 ### Version 1.4
 
 *   **Definitive ANR Fix:**
