@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +8,6 @@ import 'package:myapp/note_repository.dart';
 import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
 import 'bible_lookup_screen.dart';
@@ -70,7 +67,7 @@ class ChurchPadApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (ctx, userSnapshot) {
           if (userSnapshot.hasData) {
-            return const HomeScreen();
+            return HomeScreen(userId: userSnapshot.data!.uid);
           }
           return const AuthScreen();
         },
@@ -81,7 +78,8 @@ class ChurchPadApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String userId;
+  const HomeScreen({super.key, required this.userId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -102,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _noteRepository = NoteRepository(AppDatabase());
+    _noteRepository = NoteRepository(AppDatabase(), widget.userId);
     _notesFuture = _noteRepository.getNotes();
   }
 
@@ -121,18 +119,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void _addNote() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const NoteScreen()),
+      MaterialPageRoute(builder: (context) => NoteScreen(userId: widget.userId)),
     );
     if (result == true) {
       _refreshNotes();
     }
-  }
-
-  void _openFileUpload() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FileUploadScreen()),
-    );
   }
 
   @override
@@ -262,7 +253,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
       _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),
       _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
-      _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
     ];
 
     const double radius = 130.0;
@@ -300,147 +290,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     });
-  }
-}
-class FileUploadScreen extends StatefulWidget {
-  const FileUploadScreen({super.key});
-
-  @override
-  State<FileUploadScreen> createState() => _FileUploadScreenState();
-}
-
-class _FileUploadScreenState extends State<FileUploadScreen> {
-  UploadTask? _uploadTask;
-  XFile? _pickedFile;
-  double _progress = 0;
-
-  Future<void> _pickFile() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _pickedFile = pickedFile;
-      });
-    }
-  }
-
-  Future<void> _startUpload() async {
-    if (_pickedFile == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a file first.')),
-      );
-      return;
-    }
-    final file = File(_pickedFile!.path);
-    final fileName = _pickedFile!.name;
-    final destination = 'uploads/$fileName';
-
-    try {
-      final ref = FirebaseStorage.instance.ref(destination);
-      setState(() {
-        _uploadTask = ref.putFile(file);
-      });
-
-      _uploadTask!.snapshotEvents.listen((TaskSnapshot snapshot) {
-        if (mounted) {
-          setState(() {
-            _progress = snapshot.bytesTransferred / snapshot.totalBytes;
-          });
-        }
-      });
-
-      await _uploadTask!;
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Upload complete!')),
-      );
-      if (mounted) {
-        setState(() {
-          _uploadTask = null;
-          _pickedFile = null;
-          _progress = 0;
-        });
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading file: $e')),
-      );
-    }
-  }
-
-  void _pauseUpload() {
-    _uploadTask?.pause();
-  }
-
-  void _resumeUpload() {
-    _uploadTask?.resume();
-  }
-
-  void _cancelUpload() {
-    _uploadTask?.cancel();
-    setState(() {
-      _uploadTask = null;
-      _pickedFile = null;
-      _progress = 0;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('File Upload'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _pickFile,
-              child: const Text('Pick a File'),
-            ),
-            if (_pickedFile != null)
-              Text('Selected file: ${_pickedFile!.name}'),
-            const SizedBox(height: 20),
-            if (_uploadTask != null)
-              Column(
-                children: [
-                  LinearProgressIndicator(value: _progress),
-                  const SizedBox(height: 8),
-                  Text('${(_progress * 100).toStringAsFixed(2)}%'),
-                ],
-              ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _startUpload,
-                  child: const Text('Start Upload'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _pauseUpload,
-                  child: const Text('Pause'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _resumeUpload,
-                  child: const Text('Resume'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _cancelUpload,
-                  child: const Text('Cancel'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -666,7 +515,7 @@ class _NoteGridView extends StatelessWidget {
           onTap: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note)),
+              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: note.userId)),
             );
             if (result == true) {
               onNoteUpdated();
@@ -737,7 +586,7 @@ class _NoteListView extends StatelessWidget {
           onTap: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => NoteScreen(note: note)),
+              MaterialPageRoute(builder: (context) => NoteScreen(note: note, userId: note.userId)),
             );
             if (result == true) {
               onNoteUpdated();

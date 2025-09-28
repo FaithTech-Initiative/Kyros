@@ -3,12 +3,15 @@ import 'package:myapp/database.dart';
 
 class NoteRepository {
   final AppDatabase _database;
-  final CollectionReference _notesCollection = FirebaseFirestore.instance.collection('notes');
+  final String userId;
+  late final CollectionReference _notesCollection;
 
-  NoteRepository(this._database);
+  NoteRepository(this._database, this.userId) {
+    _notesCollection = FirebaseFirestore.instance.collection('users').doc(userId).collection('notes');
+  }
 
   Future<List<Note>> getNotes() async {
-    final localNotes = await _database.select(_database.notes).get();
+    final localNotes = await (_database.select(_database.notes)..where((t) => t.userId.equals(userId))).get();
     if (localNotes.isNotEmpty) {
       return localNotes;
     }
@@ -25,6 +28,7 @@ class NoteRepository {
         content: data['content'],
         createdAt: (data['createdAt'] as Timestamp).toDate(),
         isFavorite: data['isFavorite'],
+        userId: userId,
       );
     }).toList();
 
@@ -42,6 +46,7 @@ class NoteRepository {
       'content': note.content,
       'createdAt': note.createdAt,
       'isFavorite': note.isFavorite,
+      'userId': userId,
     });
   }
 

@@ -30,4 +30,11 @@ The application follows a clean and modern design aesthetic, with a focus on usa
 
 ### Current Plan
 
-*   There are no new features planned at this time.
+*   **User-Specific Notes:**
+    *   Modify the database schema to include a `userId` field for each note to ensure that all notes are tied to the user who created them.
+    *   Update the `NoteRepository` to filter notes based on the currently logged-in user, so only their notes are displayed.
+*   **User-Specific File Storage:**
+    *   In the `FileUploadScreen`, change the upload path in Firebase Storage to be user-specific (i.e., `uploads/<user_id>/<filename>`).
+*   **Display Uploaded Files:**
+    *   Enhance the `FileUploadScreen` to fetch and display a list of the files that the signed-in user has uploaded.
+    *   Each item in the list will show the filename and a delete button.

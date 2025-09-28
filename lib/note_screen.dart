@@ -6,8 +6,9 @@ import 'bible_lookup_screen.dart';
 
 class NoteScreen extends StatefulWidget {
   final Note? note;
+  final String userId;
 
-  const NoteScreen({super.key, this.note});
+  const NoteScreen({super.key, this.note, required this.userId});
 
   @override
   NoteScreenState createState() => NoteScreenState();
@@ -23,7 +24,7 @@ class NoteScreenState extends State<NoteScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title);
     _contentController = TextEditingController(text: widget.note?.content);
-    _noteRepository = NoteRepository(AppDatabase());
+    _noteRepository = NoteRepository(AppDatabase(), widget.userId);
   }
 
   void _saveNote() async {
@@ -45,6 +46,7 @@ class NoteScreenState extends State<NoteScreen> {
           content: content,
           createdAt: now,
           isFavorite: false,
+          userId: widget.userId,
         );
         await _noteRepository.addNote(newNote);
       }
