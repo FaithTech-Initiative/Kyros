@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<_ArcMenuItem> items = [
       _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
       _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
-      _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.list, label: 'List', color: Colors.red, onPressed: () {}),
       _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
     ];
 
