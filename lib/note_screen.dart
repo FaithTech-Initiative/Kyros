@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
-
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -114,8 +112,9 @@ class NoteScreenState extends State<NoteScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: quill.QuillEditor.basic(
+                child: QuillEditor.basic(
                   controller: _controller,
+                  readOnly: false,
                 ),
               ),
             ],
@@ -123,40 +122,41 @@ class NoteScreenState extends State<NoteScreen> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-          color: Colors.transparent,
-          elevation: 0,
-          child: quill.QuillToolbar.basic(
-            controller: _controller,
-            multiRowsDisplay: false,
-            showAlignmentButtons: true,
-            showBackgroundColorButton: true,
-            showCenterAlignment: true,
-            showClearFormat: true,
-            showCodeBlock: true,
-            showColorButton: true,
-            showDirection: true,
-            showDividers: true,
-            showFontFamily: true,
-            showFontSize: true,
-            showHeaderStyle: true,
-            showIndent: true,
-            showInlineCode: true,
-            showJustifyAlignment: true,
-            showLeftAlignment: true,
-            showLink: true,
-            showListBullets: true,
-            showListCheck: true,
-            showListNumbers: true,
-            showQuote: true,
-            showRightAlignment: true,
-            showSearchButton: true,
-            showSmallButton: true,
-            showStrikeThrough: true,
-            showSubscript: true,
-            showSuperscript: true,
-            showUndo: true,
-            showRedo: true,
-          )),
+        color: Colors.transparent,
+        elevation: 0,
+        child: QuillToolbar.basic(
+          controller: _controller,
+          multiRowsDisplay: false,
+          showAlignmentButtons: true,
+          showBackgroundColorButton: true,
+          showCenterAlignment: true,
+          showClearFormat: true,
+          showCodeBlock: true,
+          showColorButton: true,
+          showDirection: true,
+          showDividers: true,
+          showFontFamily: true,
+          showFontSize: true,
+          showHeaderStyle: true,
+          showIndent: true,
+          showInlineCode: true,
+          showJustifyAlignment: true,
+          showLeftAlignment: true,
+          showLink: true,
+          showListBullets: true,
+          showListCheck: true,
+          showListNumbers: true,
+          showQuote: true,
+          showRightAlignment: true,
+          showSearchButton: true,
+          showSmallButton: true,
+          showStrikeThrough: true,
+          showSubscript: true,
+          showSuperscript: true,
+          showUndo: true,
+          showRedo: true,
+        ),
+      ),
     );
   }
 }
