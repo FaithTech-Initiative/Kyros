@@ -3,9 +3,8 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  file_selector_linux
-  printing
-  sqlite3_flutter_libs
+  irondash_engine_context
+  super_native_extensions
   url_launcher_linux
 )
 

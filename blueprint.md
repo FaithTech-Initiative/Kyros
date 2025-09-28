@@ -6,13 +6,8 @@ This document outlines the plan and progress for creating a note-taking applicat
 
 ## Current State
 
-- **Fixing build errors:** Resolved issues related to `flutter_quill` and constructor inconsistencies.
-
-- **Debugging:** Added logging to `main.dart` to investigate `MallocStackLogging` warnings.
-
-- **Performance optimization:** Refactored the `HomeScreen` to move filtering and sorting logic out of the `build` method, improving UI performance and responsiveness.
-
-- **Firebase App Check:** Integrated Firebase App Check and configured the debug provider to address authentication and network errors, enhancing the app's security during development.
+- **Fixed "Invalid image data" error:** Replaced the network image for the Google logo on the authentication screen with a local asset. This resolves the `Invalid image data` exception and makes the screen more robust, especially in offline or poor network conditions.
+- **Resolved dependency conflicts:** Addressed a `flutter pub get` failure by downgrading the `flutter_quill` package to a compatible version, ensuring that all project dependencies are correctly resolved.
 
 ## Implemented Features
 
@@ -22,6 +17,6 @@ This document outlines the plan and progress for creating a note-taking applicat
 
 ## Next Steps
 
-- **Analyze logs:** Review the logs to identify the cause of the `MallocStackLogging` warnings.
+- **Investigate network errors:** The persistent network errors need to be addressed to ensure that the application can reliably connect to Firebase services.
 - **Enhance UI:** Improve the user interface for a better user experience.
 - **Add more features:** Consider adding features like categories, search, and reminders.
