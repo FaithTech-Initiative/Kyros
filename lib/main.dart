@@ -91,17 +91,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
-  
-  // State variables for UI and data
+
   late final NoteRepository _noteRepository;
-  late Future<List<Note>> _notesFuture;
-  
-  // State for filtering and sorting
+  List<Note> _allNotes = [];
+  List<Note> _displayedNotes = [];
+  bool _isLoading = true;
+
   String _searchQuery = '';
   int _selectedFilter = 0;
   bool _sortAsc = true;
 
-  // State for UI elements
   bool _isGrid = false;
   bool _showArcMenu = false;
   int _currentIndex = 0;
@@ -110,18 +109,57 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
-    _notesFuture = _noteRepository.getNotes();
-    developer.log('Current user: ${FirebaseAuth.instance.currentUser?.uid}', name: 'myapp.home');
     _searchController.addListener(() {
-      setState(() {
-         _searchQuery = _searchController.text;
-      });
+      if (_searchQuery != _searchController.text) {
+        setState(() {
+          _searchQuery = _searchController.text;
+          _runFilterAndSort();
+        });
+      }
     });
+    _refreshNotes();
   }
-  
-  void _refreshNotes() {
+
+  Future<void> _refreshNotes() async {
     setState(() {
-      _notesFuture = _noteRepository.getNotes();
+      _isLoading = true;
+    });
+    try {
+      final notes = await _noteRepository.getNotes();
+      setState(() {
+        _allNotes = notes;
+        _runFilterAndSort();
+      });
+    } catch (e, s) {
+      developer.log('Error fetching notes', name: 'myapp.home', error: e, stackTrace: s);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _runFilterAndSort() {
+    List<Note> filtered = List.of(_allNotes);
+
+    if (_selectedFilter == 1) {
+      filtered = filtered.where((note) => note.isFavorite).toList();
+    }
+
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered
+          .where((note) =>
+              note.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              note.plainTextContent.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
+    }
+
+    filtered.sort((a, b) => _sortAsc
+        ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
+        : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+
+    setState(() {
+      _displayedNotes = filtered;
     });
   }
 
@@ -195,58 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IndexedStack(
             index: _currentIndex,
             children: [
-              FutureBuilder<List<Note>>(
-                future: _notesFuture,
-                builder: (context, snapshot) {
-                  developer.log('Building notes list. Connection state: ${snapshot.connectionState}', name: 'myapp.home');
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    developer.log('Error loading notes: ${snapshot.error}', name: 'myapp.home', level: 900);
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  final allNotes = snapshot.data ?? [];
-                  developer.log('Notes loaded successfully. Count: ${allNotes.length}', name: 'myapp.home');
-
-                  List<Note> filtered = List.of(allNotes);
-
-                  // Apply filter
-                  if (_selectedFilter == 1) {
-                    filtered = filtered.where((note) => note.isFavorite).toList();
-                  }
-
-                  // Apply search
-                  if (_searchQuery.isNotEmpty) {
-                    filtered = filtered
-                        .where((note) => note.title.toLowerCase().contains(_searchQuery.toLowerCase()))
-                        .toList();
-                  }
-                  
-                  // Apply sort
-                  filtered.sort((a, b) => _sortAsc
-                      ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
-                      : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
-
-                  return _HomePageContent(
-                    notes: filtered,
-                    isGrid: _isGrid,
-                    selectedFilter: _selectedFilter,
-                    sortAsc: _sortAsc,
-                    onToggleGrid: () => setState(() => _isGrid = !_isGrid),
-                    onSelectFilter: (int index) {
-                      setState(() => _selectedFilter = index);
-                    },
-                    onToggleSort: () {
-                      setState(() => _sortAsc = !_sortAsc);
-                    },
-                    noteRepository: _noteRepository,
-                    onNoteUpdated: _refreshNotes,
-                    userId: widget.userId,
-                  );
-                },
-              ),
+              _buildHomeContent(),
               const BibleLookupScreen(),
               const Center(child: Text('Shared (coming soon)')),
               const Center(child: Text('Menu (coming soon)')),
@@ -289,6 +276,31 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(icon: Icon(Icons.menu), label: 'Menu'),
         ],
       ),
+    );
+  }
+  
+  Widget _buildHomeContent() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return _HomePageContent(
+      notes: _displayedNotes,
+      isGrid: _isGrid,
+      selectedFilter: _selectedFilter,
+      sortAsc: _sortAsc,
+      onToggleGrid: () => setState(() => _isGrid = !_isGrid),
+      onSelectFilter: (int index) {
+        setState(() => _selectedFilter = index);
+        _runFilterAndSort();
+      },
+      onToggleSort: () {
+        setState(() => _sortAsc = !_sortAsc);
+        _runFilterAndSort();
+      },
+      noteRepository: _noteRepository,
+      onNoteUpdated: _refreshNotes,
+      userId: widget.userId,
     );
   }
 
