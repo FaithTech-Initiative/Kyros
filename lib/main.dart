@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     const double radius = 130.0;
     const double startAngle = -pi / 2;
-    const double endAngle = pi / 2;
+    const double endAngle = 0;
     const double sweepAngle = endAngle - startAngle;
     final double angleStep = sweepAngle / (items.length - 1);
 
@@ -268,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final double y = sin(angle) * radius;
 
       return Positioned(
-        right: 16 - x,
+        right: 16 + x,
         bottom: fabBottom - y,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
