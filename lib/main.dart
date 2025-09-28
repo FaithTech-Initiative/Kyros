@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
+import 'package:myapp/splash_screen.dart';
 import 'note_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -63,15 +64,7 @@ class ChurchPadApp extends StatelessWidget {
           bodyColor: const Color(0xFF334155),
         ),
       ),
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (ctx, userSnapshot) {
-          if (userSnapshot.hasData) {
-            return HomeScreen(userId: userSnapshot.data!.uid);
-          }
-          return const AuthScreen();
-        },
-      ),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -256,36 +249,38 @@ class _HomeScreenState extends State<HomeScreen> {
       _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
     ];
 
-    const double radius = 130.0;
+    const double radius = 100.0;
     const double startAngle = -pi / 2;
-    const double endAngle = 0;
-    const double sweepAngle = endAngle - startAngle;
-    final double angleStep = sweepAngle / (items.length - 1);
+    const double sweepAngle = -pi;
 
     return List.generate(items.length, (i) {
-      final double angle = startAngle + (i * angleStep);
+      final double angle = startAngle + (i / (items.length - 1)) * sweepAngle;
       final double x = cos(angle) * radius;
       final double y = sin(angle) * radius;
 
       return Positioned(
-        right: 16 + x,
+        right: 16 - x,
         bottom: fabBottom - y,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _showArcMenu ? 1.0 : 0.0,
           child: Transform.scale(
             scale: _showArcMenu ? 1.0 : 0.0,
-            child: Tooltip(
-              message: items[i].label,
-              child: FloatingActionButton(
-                heroTag: 'fab_arc_$i',
-                backgroundColor: items[i].color,
-                onPressed: () {
-                  setState(() => _showArcMenu = false);
-                  items[i].onPressed();
-                },
-                child: Icon(items[i].icon, color: Colors.white),
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton(
+                  heroTag: 'fab_arc_$i',
+                  backgroundColor: items[i].color,
+                  onPressed: () {
+                    setState(() => _showArcMenu = false);
+                    items[i].onPressed();
+                  },
+                  child: Icon(items[i].icon, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                Text(items[i].label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
         ),

@@ -1,40 +1,52 @@
-
-# ChurchPad Notes Blueprint
+# ChurchPad Notes Application Blueprint
 
 ## Overview
 
-ChurchPad Notes is a Flutter-based note-taking application designed for church members and attendees. It provides a simple and intuitive interface for creating, managing, and organizing notes, with a focus on features relevant to a church setting, such as bible lookup and sermon notes. The application leverages Firebase for backend services, including authentication and data storage.
+ChurchPad Notes is a Flutter-based mobile application designed for seamless note-taking, organization, and access to religious texts. It integrates with Firebase for user authentication and data persistence, providing a secure and synchronized experience across devices. The application features a rich text editor, note categorization (including favorites), and a searchable Bible interface.
 
-## Style and Design
+## Style, Design, and Features
 
-The application follows a clean and modern design aesthetic, with a focus on usability and readability.
+### Version 1.0
 
-*   **Typography:** The app uses the "Lato" font from Google Fonts, providing a clean and legible text style.
-*   **Color Scheme:** The primary color scheme is based on a seed color of `#2563EB`, a vibrant blue, with a light and airy theme.
-*   **Layout:** The layout is designed to be intuitive and easy to navigate, with a bottom navigation bar for switching between a user's primary views.
+*   **Core Functionality:**
+    *   User authentication (Email/Password & Google Sign-In) via Firebase Auth.
+    *   SQLite-based local database for storing notes.
+    *   CRUD operations for notes (Create, Read, Update, Delete).
+    *   Rich text editor using `flutter_quill`.
+    *   Notes list with grid and list view options.
+    *   Note filtering by 'All' and 'Favorites'.
+    *   Sorting notes by title (A-Z, Z-A).
+    *   Search functionality for notes.
+    *   Bible lookup screen.
+    *   Floating Action Button with an animated arc menu for creating different types of content.
 
-## Features
+*   **Design and UI:**
+    *   **Color Scheme:** Primary color is a vibrant blue (`#2563EB`). The overall theme is light and modern.
+    *   **Typography:** `GoogleFonts.latoTextTheme` is used for a clean and readable text style.
+    *   **Layout:**
+        *   The main screen features a top search bar and a profile avatar.
+        *   Filter chips for note categorization.
+        *   A bottom navigation bar for switching between Home, Bible, Shared, and Menu sections.
+        *   A full-screen profile card displaying user information and a logout button.
 
-### Implemented
+## Current Plan: Splash & Auth Screen Redesign
 
-*   **User Authentication:** Users can sign in to the application using Firebase Authentication.
-*   **Note Creation and Management:**
-    *   Create new notes with a rich text editor.
-    *   View a list of all notes on the home screen.
-    *   Mark notes as "favorites" for easy access.
-    *   Search for notes by title.
-*   **Bible Lookup:** Users can look up bible verses within the application.
-*   **File Upload:** A dedicated screen for uploading files to Firebase Storage, with progress tracking and controls for pausing, resuming, and canceling uploads.
-*   **User Profile:** A full-screen profile view displaying the user's name and email, with an option to log out.
-*   **Arc Menu:** A floating action button that reveals an animated arc menu with options to create different types of content (text, bible, audio, etc.).
+**Objective:** To create a more polished and modern user onboarding experience by redesigning the splash, sign-in, and sign-up screens based on a professional UI reference.
 
-### Current Plan
+**Steps:**
 
-*   **User-Specific Notes:**
-    *   Modify the database schema to include a `userId` field for each note to ensure that all notes are tied to the user who created them.
-    *   Update the `NoteRepository` to filter notes based on the currently logged-in user, so only their notes are displayed.
-*   **User-Specific File Storage:**
-    *   In the `FileUploadScreen`, change the upload path in Firebase Storage to be user-specific (i.e., `uploads/<user_id>/<filename>`).
-*   **Display Uploaded Files:**
-    *   Enhance the `FileUploadScreen` to fetch and display a list of the files that the signed-in user has uploaded.
-    *   Each item in the list will show the filename and a delete button.
+1.  **Create Splash Screen:**
+    *   Develop a new file `lib/splash_screen.dart`.
+    *   The screen will feature the "ChurchPad" name, a central illustration, a brief tagline, and a "Get Started" button.
+    *   The background will be a gradient based on the primary app color.
+
+2.  **Update Navigation:**
+    *   Modify `lib/main.dart` to set `SplashScreen` as the initial route for the application.
+
+3.  **Redesign Authentication Flow:**
+    *   Heavily refactor `lib/auth_screen.dart` to align with the new, unified design.
+    *   The screen will be a `StatefulWidget` capable of toggling between "Sign In" and "Sign Up" views.
+    *   The layout will consist of a gradient background with a white, rounded container for the input forms.
+    *   Implement custom-styled forms for both sign-in and sign-up, including text fields and a primary action button with a gradient.
+    *   Incorporate the existing Google Sign-In button with the new style.
+    *   Ensure all existing Firebase authentication logic is preserved and correctly linked to the new UI components.
