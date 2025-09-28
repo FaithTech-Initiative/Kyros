@@ -2,7 +2,7 @@
 # see: https://firebase.google.com/docs/studio/customize-workspace
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-24.05"; # or "unstable"
+  channel = "unstable"; # or "stable-24.05"
   # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.flutter
@@ -10,6 +10,7 @@
     pkgs.unzip
     pkgs.android-studio
     pkgs.cmake
+    pkgs.google-chrome
   ];
   # Sets environment variables in the workspace
   env = {};

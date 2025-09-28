@@ -275,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const double radius = 120.0;
     const double startAngle = pi;
     const double endAngle = pi / 2;
-    final double sweepAngle = startAngle - endAngle;
+    const double sweepAngle = startAngle - endAngle;
     final double angleStep = sweepAngle / (items.length - 1);
 
     return List.generate(items.length, (i) {
