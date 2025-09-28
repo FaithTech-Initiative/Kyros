@@ -26,6 +26,7 @@ dependencies:
   drift: ^2.15.0
   firebase_ai: ^3.1.0
   path: ^1.9.1
+  sqlite3_flutter_libs: ^0.5.2
 
 dev_dependencies:
   flutter_test:
