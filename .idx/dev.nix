@@ -1,43 +1,36 @@
-# To learn more about how to use Nix to configure your environment
-# see: https://firebase.google.com/docs/studio/customize-workspace
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "unstable"; # or "stable-24.05"
+  channel = "stable-23.11"; # or "unstable"
   # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.flutter
-    pkgs.jdk21
-    pkgs.unzip
-    pkgs.android-studio
-    pkgs.cmake
-    pkgs.google-chrome
+    pkgs.dart
   ];
   # Sets environment variables in the workspace
   env = {};
-  idx = {
-    # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
-    extensions = [
-      "Dart-Code.flutter"
-      "Dart-Code.dart-code"
+  # Fast way to define dev containers (built using nix)
+  # More info: https://devenv.sh/basics/
+  devenv.component = "Mobile";
+
+  # The following are automatically configured by IDX.
+  # Feel free to move them around but don't delete them.
+  # To learn more, visit https://developers.google.com/idx/guides/customize-idx-env
+  previews = {
+    enable = true;
+    previews = [
+      {
+        id = "web";
+        port = 3000;
+        manager = "flutter";
+      }
     ];
-    workspace = {
-      # Runs when a workspace is first created with this `dev.nix` file
-      onCreate = { };
-      # To run something each time the workspace is (re)started, use the `onStart` hook
-    };
-    # Enable previews and customize configuration
-    previews = {
-      enable = true;
-      previews = {
-        web = {
-          command = ["flutter" "run" "--machine" "-d" "web-server" "--web-hostname" "0.0.0.0" "--web-port" "$PORT"];
-          manager = "flutter";
-        };
-        android = {
-          command = ["flutter" "run" "--machine" "-d" "android" "-d" "localhost:5555"];
-          manager = "flutter";
-        };
-      };
-    };
+  };
+  idx.previews = {
+    enable = true;
+    previews = [{
+      id = "web";
+      port = 3000;
+      manager = "flutter";
+    }];
   };
 }
