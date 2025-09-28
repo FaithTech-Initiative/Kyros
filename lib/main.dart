@@ -10,12 +10,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
 import 'bible_lookup_screen.dart';
+import 'dart:developer' as developer;
 
 void main() async {
+  developer.log('Starting app...', name: 'myapp.main');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  developer.log('Firebase initialized.', name: 'myapp.main');
   runApp(const ChurchPadApp());
 }
 
@@ -97,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
     _notesFuture = _noteRepository.getNotes();
+    developer.log('Current user: ${FirebaseAuth.instance.currentUser?.uid}', name: 'myapp.home');
   }
 
   void _refreshNotes() {
@@ -179,13 +183,16 @@ class _HomeScreenState extends State<HomeScreen> {
               FutureBuilder<List<Note>>(
                 future: _notesFuture,
                 builder: (context, snapshot) {
+                  developer.log('Building notes list. Connection state: ${snapshot.connectionState}', name: 'myapp.home');
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
+                    developer.log('Error loading notes: ${snapshot.error}', name: 'myapp.home', level: 900);
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
                   final notes = snapshot.data ?? [];
+                  developer.log('Notes loaded successfully. Count: ${notes.length}', name: 'myapp.home');
                   return _HomePageContent(
                     notes: notes,
                     isGrid: _isGrid,
