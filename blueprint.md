@@ -6,6 +6,11 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
 
 ## Style, Design, and Features
 
+### Version 1.8
+
+*   **Definitive `flutter_quill` Fix:**
+    *   Resolved all remaining compilation errors in the note screen by correctly implementing the updated `flutter_quill` API. This included using `QuillToolbar.basic` and removing the invalid `readOnly` parameter from the editor.
+
 ### Version 1.7
 
 *   **Critical Bug Fixes for Note Screen:**
