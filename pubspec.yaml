@@ -28,6 +28,7 @@ dependencies:
   path: ^1.9.1
   sqlite3_flutter_libs: ^0.5.39
   google_sign_in: ^6.2.1
+  firebase_app_check: ^0.4.1
 
 dev_dependencies:
   flutter_test:
