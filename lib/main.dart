@@ -128,13 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _openBibleLookup() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const BibleLookupScreen()),
-    );
-  }
-
   void _openFileUpload() {
     Navigator.push(
       context,
@@ -219,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
+              const BibleLookupScreen(),
               const Center(child: Text('Shared (coming soon)')),
               const Center(child: Text('Menu (coming soon)')),
             ],
@@ -255,6 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.book), label: 'Bible'),
           NavigationDestination(icon: Icon(Icons.group), label: 'Shared'),
           NavigationDestination(icon: Icon(Icons.menu), label: 'Menu'),
         ],
@@ -264,7 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildArcMenuButtons(double fabBottom) {
     final List<_ArcMenuItem> items = [
-      _ArcMenuItem(icon: Icons.menu_book, label: 'Bible', color: Colors.brown, onPressed: _openBibleLookup),
       _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
       _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
       _ArcMenuItem(icon: Icons.brush, label: 'Drawing', color: Colors.orange, onPressed: () {}),
@@ -272,9 +266,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _ArcMenuItem(icon: Icons.upload_file, label: 'Upload', color: Colors.red, onPressed: _openFileUpload),
     ];
 
-    const double radius = 120.0;
+    const double radius = 130.0;
     const double startAngle = pi;
-    const double endAngle = pi / 2;
+    const double endAngle = pi / 3;
     const double sweepAngle = startAngle - endAngle;
     final double angleStep = sweepAngle / (items.length - 1);
 
