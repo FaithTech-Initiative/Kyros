@@ -12,7 +12,7 @@ This document outlines the plan and progress for creating a note-taking applicat
 
 - **Performance optimization:** Refactored the `HomeScreen` to move filtering and sorting logic out of the `build` method, improving UI performance and responsiveness.
 
-- **Firebase App Check:** Integrated Firebase App Check to address authentication and network errors, enhancing the app's security.
+- **Firebase App Check:** Integrated Firebase App Check and configured the debug provider to address authentication and network errors, enhancing the app's security during development.
 
 ## Implemented Features
 

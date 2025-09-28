@@ -22,9 +22,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await FirebaseAppCheck.instance.activate(
-    // You can also use a `ReCaptchaV3Provider` provider for instance
-    // androidProvider: AndroidProvider.debug,
-    // appleProvider: AppleProvider.debug,
+    androidProvider: AndroidProvider.debug,
   );
   developer.log('Firebase initialized.', name: 'myapp.main');
   runApp(const ChurchPadApp());
