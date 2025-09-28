@@ -250,26 +250,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildArcMenuButtons(double fabBottom) {
     final List<_ArcMenuItem> items = [
-      _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
-      _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
-      _ArcMenuItem(icon: Icons.list, label: 'List', color: Colors.red, onPressed: () {}),
       _ArcMenuItem(icon: Icons.text_fields, label: 'Text', color: Colors.blue, onPressed: _addNote),
+      _ArcMenuItem(icon: Icons.list, label: 'List', color: Colors.red, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.image, label: 'Image', color: Colors.green, onPressed: () {}),
+      _ArcMenuItem(icon: Icons.mic, label: 'Audio', color: Colors.deepPurple, onPressed: () {}),
     ];
 
     const double radius = 130.0;
-    const double startAngle = pi;
-    const double endAngle = pi / 3;
-    const double sweepAngle = startAngle - endAngle;
+    const double startAngle = -pi / 2;
+    const double endAngle = pi / 2;
+    const double sweepAngle = endAngle - startAngle;
     final double angleStep = sweepAngle / (items.length - 1);
 
     return List.generate(items.length, (i) {
-      final double angle = startAngle - (i * angleStep);
+      final double angle = startAngle + (i * angleStep);
       final double x = cos(angle) * radius;
       final double y = sin(angle) * radius;
 
       return Positioned(
         right: 16 - x,
-        bottom: fabBottom + y,
+        bottom: fabBottom - y,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _showArcMenu ? 1.0 : 0.0,

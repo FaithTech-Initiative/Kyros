@@ -40,6 +40,13 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    packagingOptions {
+        resources.pickFirsts.add("lib/x86/libsqlite3.so")
+        resources.pickFirsts.add("lib/x86_64/libsqlite3.so")
+        resources.pickFirsts.add("lib/armeabi-v7a/libsqlite3.so")
+        resources.pickFirsts.add("lib/arm64-v8a/libsqlite3.so")
+    }
 }
 
 flutter {
