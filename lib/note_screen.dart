@@ -95,10 +95,15 @@ class NoteScreenState extends State<NoteScreen> {
           ),
         ],
       ),
-      body: WillPopScope(
-        onWillPop: () async {
+      body: PopScope(
+        canPop: false,
+        // ignore: deprecated_member_use
+        onPopInvoked: (bool didPop) {
+          if (didPop) {
+            return;
+          }
           _saveNote();
-          return true;
+          Navigator.of(context).pop(true);
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -112,12 +117,19 @@ class NoteScreenState extends State<NoteScreen> {
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
-              QuillSimpleToolbar(
+              QuillToolbar.basic(
                 controller: _controller,
               ),
               Expanded(
-                child: QuillEditor.basic(
+                child: QuillEditor(
                   controller: _controller,
+                  readOnly: false,
+                  autoFocus: false,
+                  expands: false,
+                  focusNode: _focusNode,
+                  scrollable: true,
+                  scrollController: ScrollController(),
+                  padding: EdgeInsets.zero,
                 ),
               ),
             ],
