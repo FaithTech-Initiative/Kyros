@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -112,7 +114,7 @@ class NoteScreenState extends State<NoteScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: QuillEditor.basic(
+                child: quill.QuillEditor.basic(
                   controller: _controller,
                 ),
               ),
@@ -123,7 +125,7 @@ class NoteScreenState extends State<NoteScreen> {
       bottomNavigationBar: BottomAppBar(
           color: Colors.transparent,
           elevation: 0,
-          child: QuillToolbar.basic(
+          child: quill.QuillToolbar.basic(
             controller: _controller,
             multiRowsDisplay: false,
             showAlignmentButtons: true,
