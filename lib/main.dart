@@ -11,6 +11,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'firebase_options.dart';
 import 'auth_screen.dart';
 import 'bible_lookup_screen.dart';
@@ -137,7 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double fabBottom = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom + 16;
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -226,11 +226,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-          ..._buildArcMenuButtons(fabBottom),
+          ..._buildArcMenuButtons(24.0),
           if (_currentIndex == 0)
             Positioned(
               right: 16,
-              bottom: fabBottom,
+              bottom: 24.0,
               child: FloatingActionButton(
                 heroTag: 'main_fab',
                 onPressed: () => setState(() => _showArcMenu = !_showArcMenu),
