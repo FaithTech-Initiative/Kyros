@@ -59,24 +59,34 @@ class _AuthScreenState extends State<AuthScreen> {
   void _googleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // User canceled the process
+      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.signIn();
+      if (googleUser == null) {
+        // The user canceled the sign-in
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+        return;
+      }
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
       await FirebaseAuth.instance.signInWithCredential(credential);
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid)),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid)),
+        );
+      }
 
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In failed: $e')),
-      );
+        if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Google Sign-In failed: $e')),
+            );
+        }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
