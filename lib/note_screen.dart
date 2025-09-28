@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/flutter_quill_toolbar.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -113,57 +112,38 @@ class NoteScreenState extends State<NoteScreen> {
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
+              QuillToolbar(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      QuillToolbarHistoryButton(controller: _controller, isUndo: true),
+                      QuillToolbarHistoryButton(controller: _controller, isUndo: false),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.bold),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.italic),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.underline),
+                      QuillToolbarClearFormatButton(controller: _controller),
+                      const VerticalDivider(indent: 4, endIndent: 4, color: Colors.grey),
+                      QuillToolbarSelectHeaderStyleButton(controller: _controller),
+                      const VerticalDivider(indent: 4, endIndent: 4, color: Colors.grey),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.listBullet),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.listNumbered),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.blockQuote),
+                      QuillToolbarToggleStyleButton(controller: _controller, attribute: Attribute.codeBlock),
+                    ],
+                  ),
+                ),
+              ),
               Expanded(
-                child: QuillEditor(
+                child: QuillEditor.basic(
                   controller: _controller,
-                  scrollController: ScrollController(),
-                  focusNode: _focusNode,
-                  autoFocus: false,
                   readOnly: false,
-                  scrollable: true,
-                  padding: EdgeInsets.zero,
-                  expands: false,
                 ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-          color: Colors.transparent,
-          elevation: 0,
-          child: QuillToolbar.basic(
-            controller: _controller,
-            multiRowsDisplay: false,
-            showAlignmentButtons: true,
-            showBackgroundColorButton: true,
-            showCenterAlignment: true,
-            showClearFormat: true,
-            showCodeBlock: true,
-            showColorButton: true,
-            showDirection: true,
-            showDividers: true,
-            showFontFamily: true,
-            showFontSize: true,
-            showHeaderStyle: true,
-            showIndent: true,
-            showInlineCode: true,
-            showJustifyAlignment: true,
-            showLeftAlignment: true,
-            showLink: true,
-            showListBullets: true,
-            showListCheck: true,
-            showListNumbers: true,
-            showQuote: true,
-            showRightAlignment: true,
-            showSearchButton: true,
-            showSmallButton: true,
-            showStrikeThrough: true,
-            showSubscript: true,
-            showSuperscript: true,
-            showUndo: true,
-            showRedo: true,
-          )),
     );
   }
 }

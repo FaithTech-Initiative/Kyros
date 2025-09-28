@@ -52,14 +52,14 @@ class ChurchPadApp extends StatelessWidget {
         ),
         navigationBarTheme: NavigationBarThemeData(
           indicatorColor: const Color(0xFF2563EB),
-          labelTextStyle: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
               return const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold);
             }
             return const TextStyle(color: Color(0xFF64748B));
           }),
-          iconTheme: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
               return const IconThemeData(color: Colors.white);
             }
             return const IconThemeData(color: Color(0xFF64748B));
