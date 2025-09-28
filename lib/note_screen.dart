@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -17,7 +17,7 @@ class NoteScreen extends StatefulWidget {
 }
 
 class NoteScreenState extends State<NoteScreen> {
-  late quill.QuillController _controller;
+  late QuillController _controller;
   late TextEditingController _titleController;
   late final NoteRepository _noteRepository;
 
@@ -27,18 +27,18 @@ class NoteScreenState extends State<NoteScreen> {
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
     _titleController = TextEditingController(text: widget.note?.title);
 
-    quill.Document document;
+    Document document;
     if (widget.note != null && widget.note!.content.isNotEmpty) {
       try {
         final contentJson = jsonDecode(widget.note!.content);
-        document = quill.Document.fromJson(contentJson);
+        document = Document.fromJson(contentJson);
       } catch (e) {
-        document = quill.Document()..insert(0, widget.note!.content);
+        document = Document()..insert(0, widget.note!.content);
       }
     } else {
-      document = quill.Document();
+      document = Document();
     }
-    _controller = quill.QuillController(document: document, selection: const TextSelection.collapsed(offset: 0));
+    _controller = QuillController(document: document, selection: const TextSelection.collapsed(offset: 0));
   }
 
   void _saveNote() async {
@@ -111,12 +111,13 @@ class NoteScreenState extends State<NoteScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            quill.QuillToolbar.basic(
+            QuillToolbar.basic(
               controller: _controller,
             ),
             Expanded(
-              child: quill.QuillEditor.basic(
+              child: QuillEditor.basic(
                 controller: _controller,
+                readOnly: false,
               ),
             )
           ],
