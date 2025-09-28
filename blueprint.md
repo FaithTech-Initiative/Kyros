@@ -6,6 +6,15 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
 
 ## Style, Design, and Features
 
+### Version 1.1
+
+*   **Performance Optimization:**
+    *   Implemented a caching mechanism for converting rich text notes to plain text previews.
+    *   This resolves "App Not Responding" (ANR) errors by preventing expensive computations on every list render, significantly improving UI smoothness and responsiveness.
+*   **UI Enhancements:**
+    *   Changed the "Bible" navigation icon to an open book (`Icons.menu_book`) for better clarity.
+
+
 ### Version 1.0
 
 *   **Core Functionality:**
@@ -28,25 +37,6 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
         *   Filter chips for note categorization.
         *   A bottom navigation bar for switching between Home, Bible, Shared, and Menu sections.
         *   A full-screen profile card displaying user information and a logout button.
-
-## Current Plan: Splash & Auth Screen Redesign
-
-**Objective:** To create a more polished and modern user onboarding experience by redesigning the splash, sign-in, and sign-up screens based on a professional UI reference.
-
-**Steps:**
-
-1.  **Create Splash Screen:**
-    *   Develop a new file `lib/splash_screen.dart`.
-    *   The screen will feature the "ChurchPad" name, a central illustration, a brief tagline, and a "Get Started" button.
-    *   The background will be a gradient based on the primary app color.
-
-2.  **Update Navigation:**
-    *   Modify `lib/main.dart` to set `SplashScreen` as the initial route for the application.
-
-3.  **Redesign Authentication Flow:**
-    *   Heavily refactor `lib/auth_screen.dart` to align with the new, unified design.
-    *   The screen will be a `StatefulWidget` capable of toggling between "Sign In" and "Sign Up" views.
-    *   The layout will consist of a gradient background with a white, rounded container for the input forms.
-    *   Implement custom-styled forms for both sign-in and sign-up, including text fields and a primary action button with a gradient.
-    *   Incorporate the existing Google Sign-In button with the new style.
-    *   Ensure all existing Firebase authentication logic is preserved and correctly linked to the new UI components.
+    *   **Onboarding:**
+        *   A redesigned splash screen with a gradient background and "Get Started" button.
+        *   A unified authentication screen for both sign-in and sign-up with a modern, card-based UI.

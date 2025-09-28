@@ -21,14 +21,26 @@ void main() async {
   runApp(const ChurchPadApp());
 }
 
+final Map<String, String> _plainTextCache = {};
+
 String _getPlainText(String content) {
-  if (content.isEmpty) return '';
+  if (_plainTextCache.containsKey(content)) {
+    return _plainTextCache[content]!;
+  }
+  if (content.isEmpty) {
+    _plainTextCache[content] = '';
+    return '';
+  }
   try {
     final json = jsonDecode(content);
     final doc = quill.Document.fromJson(json);
-    return doc.toPlainText().replaceAll('\n', ' ').trim();
+    final plainText = doc.toPlainText().replaceAll('\n', ' ').trim();
+    _plainTextCache[content] = plainText;
+    return plainText;
   } catch (e) {
-    return content.replaceAll('\n', ' ').trim();
+    final plainText = content.replaceAll('\n', ' ').trim();
+    _plainTextCache[content] = plainText;
+    return plainText;
   }
 }
 
@@ -233,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.book), label: 'Bible'),
+          NavigationDestination(icon: Icon(Icons.menu_book), label: 'Bible'),
           NavigationDestination(icon: Icon(Icons.group), label: 'Shared'),
           NavigationDestination(icon: Icon(Icons.menu), label: 'Menu'),
         ],
