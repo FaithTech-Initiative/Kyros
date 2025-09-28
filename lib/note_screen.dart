@@ -19,7 +19,6 @@ class NoteScreenState extends State<NoteScreen> {
   late QuillController _controller;
   late TextEditingController _titleController;
   late final NoteRepository _noteRepository;
-  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -117,19 +116,17 @@ class NoteScreenState extends State<NoteScreen> {
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
-              QuillToolbar.basic(
-                controller: _controller,
+              QuillToolbar.simple(
+                configurations: QuillSimpleToolbarConfigurations(
+                  controller: _controller,
+                ),
               ),
               Expanded(
-                child: QuillEditor(
-                  controller: _controller,
-                  readOnly: false,
-                  autoFocus: false,
-                  expands: false,
-                  focusNode: _focusNode,
-                  scrollable: true,
-                  scrollController: ScrollController(),
-                  padding: EdgeInsets.zero,
+                child: QuillEditor.basic(
+                  configurations: QuillEditorConfigurations(
+                    controller: _controller,
+                    readOnly: false,
+                  ),
                 ),
               ),
             ],
