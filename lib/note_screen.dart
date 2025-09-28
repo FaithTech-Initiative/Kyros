@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'bible_lookup_screen.dart';
 
 class NoteScreen extends StatefulWidget {
@@ -29,7 +30,8 @@ class NoteScreenState extends State<NoteScreen> {
     quill.Document document;
     if (widget.note != null && widget.note!.content.isNotEmpty) {
       try {
-        document = quill.Document.fromJson(widget.note!.content as List);
+        final contentJson = jsonDecode(widget.note!.content);
+        document = quill.Document.fromJson(contentJson);
       } catch (e) {
         document = quill.Document()..insert(0, widget.note!.content);
       }
@@ -41,15 +43,14 @@ class NoteScreenState extends State<NoteScreen> {
 
   void _saveNote() async {
     final title = _titleController.text;
-    final content = _controller.document.toDelta().toJson();
+    final content = jsonEncode(_controller.document.toDelta().toJson());
 
     if (title.isNotEmpty) {
-      final now = DateTime.now();
       if (widget.note != null) {
         final updatedNote = NotesCompanion(
           id: Value(widget.note!.id),
           title: Value(title),
-          content: Value(content as String),
+          content: Value(content),
           createdAt: Value(widget.note!.createdAt),
           isFavorite: Value(widget.note!.isFavorite),
           userId: Value(widget.userId),
@@ -58,8 +59,8 @@ class NoteScreenState extends State<NoteScreen> {
       } else {
         final newNote = NotesCompanion(
           title: Value(title),
-          content: Value(content as String),
-          createdAt: Value(now),
+          content: Value(content),
+          createdAt: Value(DateTime.now()),
           isFavorite: const Value(false),
           userId: Value(widget.userId),
         );
@@ -111,22 +112,12 @@ class NoteScreenState extends State<NoteScreen> {
             ),
             const SizedBox(height: 16),
             quill.QuillToolbar.simple(
-              configurations: quill.QuillSimpleToolbarConfigurations(
-                controller: _controller,
-                sharedConfigurations: const quill.QuillSharedConfigurations(
-                  locale: Locale('en'),
-                ),
-              ),
+              controller: _controller,
             ),
             Expanded(
               child: quill.QuillEditor.basic(
-                configurations: quill.QuillEditorConfigurations(
-                  controller: _controller,
-                  readOnly: false,
-                  sharedConfigurations: const quill.QuillSharedConfigurations(
-                    locale: Locale('en'),
-                  ),
-                ),
+                controller: _controller,
+                readOnly: false,
               ),
             )
           ],
