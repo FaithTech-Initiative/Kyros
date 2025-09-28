@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -15,7 +16,7 @@ class NoteScreen extends StatefulWidget {
 }
 
 class NoteScreenState extends State<NoteScreen> {
-  late TextEditingController _contentController;
+  late QuillController _controller;
   late TextEditingController _titleController;
   late final NoteRepository _noteRepository;
 
@@ -24,33 +25,30 @@ class NoteScreenState extends State<NoteScreen> {
     super.initState();
     _noteRepository = NoteRepository(AppDatabase(), widget.userId);
     _titleController = TextEditingController(text: widget.note?.title);
-    _contentController = TextEditingController(text: _getPlainText(widget.note?.content));
-  }
 
-  String _getPlainText(String? jsonContent) {
-    if (jsonContent == null || jsonContent.isEmpty) {
-      return '';
-    }
-    try {
-      final decoded = jsonDecode(jsonContent);
-      if (decoded is List) {
-        return decoded.map((item) => item['insert'] ?? '').join();
+    Document document;
+    if (widget.note != null && widget.note!.content.isNotEmpty) {
+      try {
+        final contentJson = jsonDecode(widget.note!.content);
+        document = Document.fromJson(contentJson);
+      } catch (e) {
+        document = Document()..insert(0, widget.note!.content);
       }
-      return jsonContent;
-    } catch (e) {
-      return jsonContent; // Fallback for plain text content
+    } else {
+      document = Document();
     }
+    _controller = QuillController(document: document, selection: const TextSelection.collapsed(offset: 0));
   }
 
   void _saveNote() async {
     final title = _titleController.text;
-    final content = _contentController.text;
+    final content = jsonEncode(_controller.document.toDelta().toJson());
 
-    if (title.isNotEmpty || content.isNotEmpty) {
+    if (title.isNotEmpty) {
       final noteToSave = NotesCompanion(
         id: widget.note != null ? Value(widget.note!.id) : const Value.absent(),
         title: Value(title),
-        content: Value(content), // Saving as plain text now
+        content: Value(content),
         createdAt: widget.note != null ? Value(widget.note!.createdAt) : Value(DateTime.now()),
         isFavorite: widget.note != null ? Value(widget.note!.isFavorite) : const Value(false),
         userId: Value(widget.userId),
@@ -114,14 +112,8 @@ class NoteScreenState extends State<NoteScreen> {
               ),
               const SizedBox(height: 16),
               Expanded(
-                child: TextField(
-                  controller: _contentController,
-                  decoration: const InputDecoration.collapsed(
-                    hintText: 'Note',
-                  ),
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  style: const TextStyle(fontSize: 18),
+                child: QuillEditor.basic(
+                  controller: _controller,
                 ),
               ),
             ],
@@ -129,39 +121,40 @@ class NoteScreenState extends State<NoteScreen> {
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        color: Colors.transparent,
-        elevation: 0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.add_box_outlined, color: Colors.black54),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.palette_outlined, color: Colors.black54),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.text_format_outlined, color: Colors.black54),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: const Icon(Icons.more_horiz_outlined, color: Colors.black54),
-                onPressed: () {},
-              ),
-            ],
-          ),
-        ),
-      ),
+          color: Colors.transparent,
+          elevation: 0,
+          child: QuillToolbar.basic(
+            controller: _controller,
+            multiRowsDisplay: false,
+            showAlignmentButtons: true,
+            showBackgroundColorButton: true,
+            showCenterAlignment: true,
+            showClearFormat: true,
+            showCodeBlock: true,
+            showColorButton: true,
+            showDirection: true,
+            showDividers: true,
+            showFontFamily: true,
+            showFontSize: true,
+            showHeaderStyle: true,
+            showIndent: true,
+            showInlineCode: true,
+            showJustifyAlignment: true,
+            showLeftAlignment: true,
+            showLink: true,
+            showListBullets: true,
+            showListCheck: true,
+            showListNumbers: true,
+            showQuote: true,
+            showRightAlignment: true,
+            showSearchButton: true,
+            showSmallButton: true,
+            showStrikeThrough: true,
+            showSubscript: true,
+            showSuperscript: true,
+            showUndo: true,
+            showRedo: true,
+          )),
     );
   }
 }
