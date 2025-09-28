@@ -255,8 +255,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     const double radius = 100.0;
-    const double startAngle = -pi + pi / 4;
-    const double sweepAngle = pi / 2;
+    const double startAngle = -pi * 0.75;
+    const double sweepAngle = -pi * 0.5;
 
     return List.generate(items.length, (i) {
       final double angle = startAngle + (i / (items.length - 1)) * sweepAngle;
@@ -438,7 +438,7 @@ class _HomePageContent extends StatelessWidget {
         ? a.title.toLowerCase().compareTo(b.title.toLowerCase())
         : b.title.toLowerCase().compareTo(a.title.toLowerCase()));
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,20 +472,22 @@ class _HomePageContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          if (filteredNotes.isEmpty)
-            Center(
-              child: Column(
-                children: [
-                  Image.asset('assets/illustration.png', height: 180, fit: BoxFit.contain),
-                  const SizedBox(height: 24),
-                  const Text('Start creating your first note here.'),
-                ],
-              ),
-            )
-          else if (isGrid)
-            _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId)
-          else
-            _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId),
+          Expanded(
+            child: filteredNotes.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset('assets/illustration.png', height: 180, fit: BoxFit.contain),
+                        const SizedBox(height: 24),
+                        const Text('Start creating your first note here.'),
+                      ],
+                    ),
+                  )
+                : isGrid
+                    ? _NoteGridView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId)
+                    : _NoteListView(notes: filteredNotes, noteRepository: noteRepository, onNoteUpdated: onNoteUpdated, userId: userId),
+          ),
           const SizedBox(height: 120),
         ],
       ),
@@ -505,7 +507,6 @@ class _NoteGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
       itemCount: notes.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -574,8 +575,6 @@ class _NoteListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      shrinkWrap: true,        
-      physics: const NeverScrollableScrollPhysics(),
       itemCount: notes.length,
       itemBuilder: (context, index) {
         final note = notes[index];
