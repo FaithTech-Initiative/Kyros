@@ -112,19 +112,13 @@ class NoteScreenState extends State<NoteScreen> {
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
-              QuillToolbar.basic(
+              QuillSimpleToolbar(
                 controller: _controller,
               ),
               Expanded(
-                child: QuillEditor(
+                child: QuillEditor.basic(
                   controller: _controller,
-                  focusNode: _focusNode,
-                  scrollController: ScrollController(),
-                  scrollable: true,
-                  padding: EdgeInsets.zero,
-                  autoFocus: false,
                   readOnly: false,
-                  expands: false,
                 ),
               ),
             ],
