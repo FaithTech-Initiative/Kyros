@@ -1,6 +1,6 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -249,7 +249,7 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bible Lookup'),
+        title: Text('Bible Lookup', style: GoogleFonts.lato()),
         actions: [
           IconButton(
             icon: const Icon(Icons.list),
@@ -262,65 +262,91 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                labelText: 'Enter a Bible verse (e.g., John 3:16)',
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: (_) => _lookupVerse(),
-            ),
+            _buildSearchField(),
             const SizedBox(height: 20),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _lookupVerse,
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Lookup'),
-                ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _toggleHighlight,
-                    icon: Icon(
-                      _isHighlighted ? Icons.highlight_off : Icons.highlight,
-                    ),
-                    label: Text(_isHighlighted ? 'Unhighlight' : 'Highlight'),
-                  ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _getAiInsights,
-                    icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Insights'),
-                  ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _getCrossReferences,
-                    icon: const Icon(Icons.link),
-                    label: const Text('Cross-Refs'),
-                  ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _launchStudyTools,
-                    icon: const Icon(Icons.menu_book),
-                    label: const Text('Study Tools'),
-                  ),
-              ],
-            ),
+            _buildActionButtons(),
             const SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  color: _isHighlighted ? Colors.yellow.withAlpha(77) : null,
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(_verseText),
-                ),
-              ),
-            ),
+            _buildVerseDisplay(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      decoration: InputDecoration(
+        labelText: 'Enter a Bible verse (e.g., John 3:16)',
+        border: const OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: _lookupVerse,
+        ),
+      ),
+      onSubmitted: (_) => _lookupVerse(),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      alignment: WrapAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: _lookupVerse,
+          child: _isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white,),
+                )
+              : Text('Lookup', style: GoogleFonts.lato()),
+        ),
+        if (_verseText.isNotEmpty && !_isLoading)
+          ElevatedButton.icon(
+            onPressed: _toggleHighlight,
+            icon: Icon(
+              _isHighlighted ? Icons.highlight_off : Icons.highlight,
+            ),
+            label: Text(_isHighlighted ? 'Unhighlight' : 'Highlight', style: GoogleFonts.lato()),
+          ),
+        if (_verseText.isNotEmpty && !_isLoading)
+          ElevatedButton.icon(
+            onPressed: _getAiInsights,
+            icon: const Icon(Icons.auto_awesome),
+            label: Text('Insights', style: GoogleFonts.lato()),
+          ),
+        if (_verseText.isNotEmpty && !_isLoading)
+          ElevatedButton.icon(
+            onPressed: _getCrossReferences,
+            icon: const Icon(Icons.link),
+            label: Text('Cross-Refs', style: GoogleFonts.lato()),
+          ),
+        if (_verseText.isNotEmpty && !_isLoading)
+          ElevatedButton.icon(
+            onPressed: _launchStudyTools,
+            icon: const Icon(Icons.menu_book),
+            label: Text('Study Tools', style: GoogleFonts.lato()),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildVerseDisplay() {
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            color: _isHighlighted ? Colors.yellow.withOpacity(0.3) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(12.0),
+          child: Text(
+            _verseText,
+            style: GoogleFonts.lato(fontSize: 16, height: 1.5),
+          ),
         ),
       ),
     );

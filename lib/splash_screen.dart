@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'auth_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -42,33 +41,9 @@ class SplashScreen extends StatelessWidget {
                 'assets/illustration.png',
                 height: 300,
               ),
-              const Spacer(),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue.shade800,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const AuthScreen()),
-                    );
-                  },
-                  child: const Text(
-                    'Get Started',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
               const Spacer(flex: 2),
+              const CircularProgressIndicator(color: Colors.white,),
+              const Spacer(),
             ],
           ),
         ),

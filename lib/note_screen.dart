@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -96,7 +97,6 @@ class NoteScreenState extends State<NoteScreen> {
       ),
       body: PopScope(
         canPop: false,
-        // ignore: deprecated_member_use
         onPopInvoked: (bool didPop) {
           if (didPop) {
             return;
@@ -108,28 +108,47 @@ class NoteScreenState extends State<NoteScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration.collapsed(
-                  hintText: 'Title',
-                ),
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
-              ),
+              _buildTitleField(),
               const SizedBox(height: 16),
-              QuillToolbar.simple(
-                configurations: QuillSimpleToolbarConfigurations(
-                  controller: _controller,
-                ),
-              ),
-              Expanded(
-                child: QuillEditor.basic(
-                  configurations: QuillEditorConfigurations(
-                    controller: _controller,
-                    readOnly: false,
-                  ),
-                ),
-              ),
+              _buildToolbar(),
+              _buildEditor(),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleField() {
+    return TextField(
+      controller: _titleController,
+      decoration: InputDecoration.collapsed(
+        hintText: 'Title',
+        hintStyle: GoogleFonts.lato(fontSize: 26, fontWeight: FontWeight.w500),
+      ),
+      style: GoogleFonts.lato(fontSize: 26, fontWeight: FontWeight.w500),
+    );
+  }
+
+  Widget _buildToolbar() {
+    return QuillToolbar.simple(
+      configurations: QuillSimpleToolbarConfigurations(
+        controller: _controller,
+        sharedConfigurations: const QuillSharedConfigurations(
+          locale: Locale('en'),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditor() {
+    return Expanded(
+      child: QuillEditor.basic(
+        configurations: QuillEditorConfigurations(
+          controller: _controller,
+          readOnly: false,
+          sharedConfigurations: const QuillSharedConfigurations(
+            locale: Locale('en'),
           ),
         ),
       ),

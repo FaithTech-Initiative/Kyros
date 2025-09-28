@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:myapp/home_screen.dart';
 
@@ -79,113 +80,163 @@ class AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: 60),
-              Text(
-                'ChurchPad',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'ChurchPad',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 60),
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withAlpha(51),
-                      spreadRadius: 4,
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      _isLogin ? 'Welcome Back' : 'Create Account',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _isLogin ? 'Enter your details below' : 'Sign up to get started',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 24),
-                    TextField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(labelText: 'Email address'),
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: const InputDecoration(labelText: 'Password'),
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: _isLogin ? _signInWithEmailAndPassword : _createUserWithEmailAndPassword,
-                      child: Text(_isLogin ? 'Sign in' : 'Sign up'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _isLogin = !_isLogin;
-                        });
-                      },
-                      child: Text(_isLogin ? 'Don\'t have an account? Get Started' : 'Already have an account? Sign in'),
-                    ),
-                    const SizedBox(height: 24),
-                    const Row(
-                      children: [
-                        Expanded(child: Divider()),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text('Or sign up with', style: TextStyle(color: Colors.grey)),
-                        ),
-                        Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton.icon(
-                      onPressed: _signInWithGoogle,
-                      icon: Image.asset('assets/images/google_logo.png', height: 24.0), // Use local asset
-                      label: const Text('Google'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                const SizedBox(height: 40),
+                _buildAuthCard(),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAuthCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withAlpha(51),
+            spreadRadius: 4,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            _isLogin ? 'Welcome Back' : 'Create Account',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _isLogin ? 'Enter your details below' : 'Sign up to get started',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          _buildEmailField(),
+          const SizedBox(height: 16),
+          _buildPasswordField(),
+          const SizedBox(height: 24),
+          _buildAuthButton(),
+          _buildToggleAuthModeButton(),
+          const SizedBox(height: 24),
+          _buildDivider(),
+          const SizedBox(height: 16),
+          _buildGoogleSignInButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    return TextField(
+      controller: _emailController,
+      decoration: const InputDecoration(
+        labelText: 'Email address',
+        prefixIcon: Icon(Icons.email),
+      ),
+      keyboardType: TextInputType.emailAddress,
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextField(
+      controller: _passwordController,
+      decoration: const InputDecoration(
+        labelText: 'Password',
+        prefixIcon: Icon(Icons.lock),
+      ),
+      obscureText: true,
+    );
+  }
+
+  Widget _buildAuthButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+      ),
+      onPressed: _isLogin ? _signInWithEmailAndPassword : _createUserWithEmailAndPassword,
+      child: Text(
+        _isLogin ? 'Sign in' : 'Sign up',
+        style: GoogleFonts.lato(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleAuthModeButton() {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _isLogin = !_isLogin;
+        });
+      },
+      child: Text(
+        _isLogin ? 'Don\'t have an account? Get Started' : 'Already have an account? Sign in',
+        style: GoogleFonts.lato(),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        const Expanded(child: Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text('Or sign up with', style: GoogleFonts.lato(color: Colors.grey)),
+        ),
+        const Expanded(child: Divider()),
+      ],
+    );
+  }
+
+  Widget _buildGoogleSignInButton() {
+    return OutlinedButton.icon(
+      onPressed: _signInWithGoogle,
+      icon: Image.asset('assets/google_logo.png', height: 24.0), // Use local asset
+      label: Text(
+        'Google',
+        style: GoogleFonts.lato(),
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
