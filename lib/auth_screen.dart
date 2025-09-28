@@ -59,7 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
   void _googleSignIn() async {
     setState(() => _isLoading = true);
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.signIn();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
         // The user canceled the sign-in
         if (mounted) {
