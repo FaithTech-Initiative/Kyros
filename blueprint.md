@@ -1,84 +1,20 @@
-# ChurchPad Notes Application Blueprint
+# Blueprint
 
 ## Overview
 
-ChurchPad Notes is a Flutter-based mobile application designed for seamless note-taking, organization, and access to religious texts. It integrates with Firebase for user authentication and data persistence, providing a secure and synchronized experience across devices. The application features a rich text editor, note categorization (including favorites), and a searchable Bible interface.
+This document outlines the plan and progress for creating a note-taking application. It will serve as a guide for development, tracking features, and documenting architectural decisions.
 
-## Style, Design, and Features
+## Current State
 
-### Version 1.8
+- **Fixing build errors:** Resolved issues related to `flutter_quill` and constructor inconsistencies.
 
-*   **Definitive `flutter_quill` Fix:**
-    *   Resolved all remaining compilation errors in the note screen by correctly implementing the updated `flutter_quill` API. This included using `QuillToolbar.basic` and removing the invalid `readOnly` parameter from the editor.
+## Implemented Features
 
-### Version 1.7
+- **Note-taking functionality:** Users can create, edit, and save notes.
+- **Rich text editing:** The `flutter_quill` package is used for rich text editing capabilities.
+- **Local database:** Notes are stored locally using a database.
 
-*   **Critical Bug Fixes for Note Screen:**
-    *   **`flutter_quill` API Migration:** Updated the note screen to use the latest `flutter_quill` API, resolving breaking changes related to toolbar and editor configurations.
-    *   **Import Conflict Resolution:** Fixed a name collision by explicitly hiding the `Column` class from the `drift` package import, which was conflicting with Flutter's `Column` widget.
-    *   **Data Serialization:** Corrected the data handling logic to ensure note content is properly encoded to a JSON string before saving and decoded when loading, preventing serialization errors.
+## Next Steps
 
-### Version 1.6
-
-*   **Definitive ANR Fix & Arc Menu Correction:**
-    *   Resolved the "App Not Responding" (ANR) issue by restructuring the home screen to use an `Expanded` widget, ensuring only visible notes are rendered at any given time.
-    *   Permanently fixed the Floating Action Button's arc menu by correcting the trigonometric calculations for its animation, ensuring the menu expands correctly and with even spacing.
-
-### Version 1.5
-
-*   **FAB Menu Enhancement:**
-    *   Re-instated the "List" option to the Floating Action Button menu.
-    *   Corrected the arc layout calculations to ensure all four menu items ("Text", "Image", "List", and "Audio") are now evenly spaced and correctly positioned.
-
-### Version 1.4
-
-*   **Definitive ANR Fix:**
-    *   Resolved the core "App Not Responding" (ANR) issue by moving the expensive rich text-to-plain text conversion to a background isolate using Flutter's `compute` function. This stops the UI thread from blocking during list scrolls.
-    *   Created an `AsyncPlainTextPreview` widget that shows a loading indicator while the text conversion happens in the background, ensuring the UI remains smooth and responsive at all times.
-
-### Version 1.3
-
-*   **Performance & UI Bug Fixes:**
-    *   **Efficient List Rendering:** Replaced the note list's `Column` with a `ListView.builder` to ensure only visible notes are rendered.
-    *   **FAB Arc Menu:** Corrected the angle calculations for the Floating Action Button's arc menu to prevent it from appearing underneath the bottom navigation bar.
-    *   **Active Navbar Highlight:** Updated the theme to highlight the active navigation bar icon and label with a distinct color and bold font weight.
-    *   **Conditional AppBar:** The main AppBar is now hidden when the "Bible" screen is active, providing a more focused reading experience.
-
-### Version 1.2
-
-*   **UI Refinements:**
-    *   Removed the "List" option from the Floating Action Button (FAB) menu to simplify the content creation choices.
-
-### Version 1.1
-
-*   **Initial Performance Optimization:**
-    *   Implemented a caching mechanism for converting rich text notes to plain text previews.
-*   **UI Enhancements:**
-    *   Changed the "Bible" navigation icon to an open book (`Icons.menu_book`) for better clarity.
-
-
-### Version 1.0
-
-*   **Core Functionality:**
-    *   User authentication (Email/Password & Google Sign-In) via Firebase Auth.
-    *   SQLite-based local database for storing notes.
-    *   CRUD operations for notes (Create, Read, Update, Delete).
-    *   Rich text editor using `flutter_quill`.
-    *   Notes list with grid and list view options.
-    *   Note filtering by 'All' and 'Favorites'.
-    *   Sorting notes by title (A-Z, Z-A).
-    *   Search functionality for notes.
-    *   Bible lookup screen.
-    *   Floating Action Button with an animated arc menu for creating different types of content.
-
-*   **Design and UI:**
-    *   **Color Scheme:** Primary color is a vibrant blue (`#2563EB`). The overall theme is light and modern.
-    *   **Typography:** `GoogleFonts.latoTextTheme` is used for a clean and readable text style.
-    *   **Layout:**
-        *   The main screen features a top search bar and a profile avatar.
-        *   Filter chips for note categorization.
-        *   A bottom navigation bar for switching between Home, Bible, Shared, and Menu sections.
-        *   A full-screen profile card displaying user information and a logout button.
-    *   **Onboarding:**
-        *   A redesigned splash screen with a gradient background and "Get Started" button.
-        *   A unified authentication screen for both sign-in and sign-up with a modern, card-based UI.
+- **Enhance UI:** Improve the user interface for a better user experience.
+- **Add more features:** Consider adding features like categories, search, and reminders.

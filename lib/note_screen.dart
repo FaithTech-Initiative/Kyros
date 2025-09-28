@@ -1,46 +1,135 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:myapp/database.dart';
+import 'package:myapp/note_repository.dart';
+import 'package:drift/drift.dart' hide Column;
 
 class NoteScreen extends StatefulWidget {
-  const NoteScreen({super.key});
+  final Note? note;
+  final String userId;
+
+  const NoteScreen({super.key, this.note, required this.userId});
 
   @override
-  State<NoteScreen> createState() => _NoteScreenState();
+  NoteScreenState createState() => NoteScreenState();
 }
 
-class _NoteScreenState extends State<NoteScreen> {
-  final QuillController _controller = QuillController.basic();
+class NoteScreenState extends State<NoteScreen> {
+  late QuillController _controller;
+  late TextEditingController _titleController;
+  late final NoteRepository _noteRepository;
+  final FocusNode _focusNode = FocusNode();
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _noteRepository = NoteRepository(AppDatabase(), widget.userId);
+    _titleController = TextEditingController(text: widget.note?.title);
+
+    Document document;
+    if (widget.note != null && widget.note!.content.isNotEmpty) {
+      try {
+        final contentJson = jsonDecode(widget.note!.content);
+        document = Document.fromJson(contentJson);
+      } catch (e) {
+        document = Document()..insert(0, widget.note!.content);
+      }
+    } else {
+      document = Document();
+    }
+    _controller = QuillController(document: document, selection: const TextSelection.collapsed(offset: 0));
+  }
+
+  void _saveNote() async {
+    final title = _titleController.text;
+    final content = jsonEncode(_controller.document.toDelta().toJson());
+
+    if (title.isNotEmpty) {
+      final noteToSave = NotesCompanion(
+        id: widget.note != null ? Value(widget.note!.id) : const Value.absent(),
+        title: Value(title),
+        content: Value(content),
+        createdAt: widget.note != null ? Value(widget.note!.createdAt) : Value(DateTime.now()),
+        isFavorite: widget.note != null ? Value(widget.note!.isFavorite) : const Value(false),
+        userId: Value(widget.userId),
+      );
+
+      if (widget.note != null) {
+        await _noteRepository.updateNote(noteToSave);
+      } else {
+        await _noteRepository.addNote(noteToSave);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Note Screen'),
-      ),
-      body: Column(
-        children: [
-          // Remove `const` and provide the controller
-          QuillSimpleToolbar(
-            controller: _controller,
-            configurations: const QuillSimpleToolbarConfigurations(),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            _saveNote();
+            Navigator.pop(context, true);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.push_pin_outlined, color: Colors.black),
+            onPressed: () {},
           ),
-          Expanded(
-            child: QuillEditor.basic(
-              controller: _controller,
-              // Remove `const` from configurations
-              // readOnly is now a parameter of QuillEditorConfigurations
-              configurations: QuillEditorConfigurations(
-                readOnly: false,
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.notifications_none_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.archive_outlined, color: Colors.black),
+            onPressed: () {
+              _saveNote();
+              Navigator.pop(context, true);
+            },
           ),
         ],
+      ),
+      body: WillPopScope(
+        onWillPop: () async {
+          _saveNote();
+          return true;
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration.collapsed(
+                  hintText: 'Title',
+                ),
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 16),
+              QuillToolbar.basic(
+                controller: _controller,
+              ),
+              Expanded(
+                child: QuillEditor(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  scrollController: ScrollController(),
+                  scrollable: true,
+                  padding: EdgeInsets.zero,
+                  autoFocus: false,
+                  readOnly: false,
+                  expands: false,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
