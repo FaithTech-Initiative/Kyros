@@ -6,10 +6,16 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
 
 ## Style, Design, and Features
 
+### Version 1.4
+
+*   **Definitive ANR Fix:**
+    *   Resolved the core "App Not Responding" (ANR) issue by moving the expensive rich text-to-plain text conversion to a background isolate using Flutter's `compute` function. This stops the UI thread from blocking during list scrolls.
+    *   Created an `AsyncPlainTextPreview` widget that shows a loading indicator while the text conversion happens in the background, ensuring the UI remains smooth and responsive at all times.
+
 ### Version 1.3
 
 *   **Performance & UI Bug Fixes:**
-    *   **ANR Resolution:** Replaced the note list's `Column` with a `ListView.builder` to ensure only visible notes are rendered, completely resolving the "App Not Responding" issue.
+    *   **Efficient List Rendering:** Replaced the note list's `Column` with a `ListView.builder` to ensure only visible notes are rendered.
     *   **FAB Arc Menu:** Corrected the angle calculations for the Floating Action Button's arc menu to prevent it from appearing underneath the bottom navigation bar.
     *   **Active Navbar Highlight:** Updated the theme to highlight the active navigation bar icon and label with a distinct color and bold font weight.
     *   **Conditional AppBar:** The main AppBar is now hidden when the "Bible" screen is active, providing a more focused reading experience.
@@ -21,9 +27,8 @@ ChurchPad Notes is a Flutter-based mobile application designed for seamless note
 
 ### Version 1.1
 
-*   **Performance Optimization:**
+*   **Initial Performance Optimization:**
     *   Implemented a caching mechanism for converting rich text notes to plain text previews.
-    *   This resolves "App Not Responding" (ANR) errors by preventing expensive computations on every list render, significantly improving UI smoothness and responsiveness.
 *   **UI Enhancements:**
     *   Changed the "Bible" navigation icon to an open book (`Icons.menu_book`) for better clarity.
 

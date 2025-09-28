@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,26 +22,17 @@ void main() async {
   runApp(const ChurchPadApp());
 }
 
-final Map<String, String> _plainTextCache = {};
-
+// This is the background function that will be run in a separate isolate.
 String _getPlainText(String content) {
-  if (_plainTextCache.containsKey(content)) {
-    return _plainTextCache[content]!;
-  }
   if (content.isEmpty) {
-    _plainTextCache[content] = '';
     return '';
   }
   try {
     final json = jsonDecode(content);
     final doc = quill.Document.fromJson(json);
-    final plainText = doc.toPlainText().replaceAll('\n', ' ').trim();
-    _plainTextCache[content] = plainText;
-    return plainText;
+    return doc.toPlainText().replaceAll('\n', ' ').trim();
   } catch (e) {
-    final plainText = content.replaceAll('\n', ' ').trim();
-    _plainTextCache[content] = plainText;
-    return plainText;
+    return content.replaceAll('\n', ' ').trim();
   }
 }
 
@@ -575,7 +567,7 @@ class _NoteGridView extends StatelessWidget {
                   Text(note.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15), maxLines: 2, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 8),
                   Expanded(
-                    child: Text(_getPlainText(note.content), style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 3, overflow: TextOverflow.ellipsis),
+                    child: AsyncPlainTextPreview(content: note.content, style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 3, overflow: TextOverflow.ellipsis),
                   ),
                 ],
               ),
@@ -605,7 +597,7 @@ class _NoteListView extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: ListTile(
             title: Text(note.title),
-            subtitle: Text(_getPlainText(note.content), maxLines: 2, overflow: TextOverflow.ellipsis),
+            subtitle: AsyncPlainTextPreview(content: note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
             leading: Icon(Icons.note, color: note.isFavorite ? Colors.amber : Theme.of(context).colorScheme.primary),
             trailing: IconButton(
               icon: Icon(note.isFavorite ? Icons.star : Icons.star_border, color: Colors.amber),
@@ -625,6 +617,55 @@ class _NoteListView extends StatelessWidget {
               }
             },
           ),
+        );
+      },
+    );
+  }
+}
+
+class AsyncPlainTextPreview extends StatefulWidget {
+  final String content;
+  final TextStyle? style;
+  final int maxLines;
+  final TextOverflow overflow;
+
+  const AsyncPlainTextPreview({
+    super.key,
+    required this.content,
+    this.style,
+    required this.maxLines,
+    required this.overflow,
+  });
+
+  @override
+  State<AsyncPlainTextPreview> createState() => _AsyncPlainTextPreviewState();
+}
+
+class _AsyncPlainTextPreviewState extends State<AsyncPlainTextPreview> {
+  late Future<String> _plainTextFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _plainTextFuture = compute(_getPlainText, widget.content);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _plainTextFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Text('Error', style: widget.style);
+        }
+        return Text(
+          snapshot.data ?? '',
+          style: widget.style,
+          maxLines: widget.maxLines,
+          overflow: widget.overflow,
         );
       },
     );
