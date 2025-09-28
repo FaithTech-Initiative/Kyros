@@ -112,24 +112,13 @@ class NoteScreenState extends State<NoteScreen> {
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 16),
-              QuillToolbar.simple(
-                configurations: QuillSimpleToolbarConfigurations(
-                  controller: _controller,
-                  showUndo: true,
-                  showRedo: true,
-                  showBoldButton: true,
-                  showItalicButton: true,
-                  showUnderlineButton: true,
-                  showClearFormat: true,
-                  showHeaderStyle: true,
-                  showListBullets: true,
-                  showListNumbers: true,
-                  showQuote: true,
-                  showCodeBlock: true,
-                ),
+              QuillSimpleToolbar(
+                config: const QuillSimpleToolbarConfigurations(),
+                controller: _controller,
               ),
               Expanded(
                 child: QuillEditor.basic(
+                  config: const QuillEditorConfigurations(),
                   controller: _controller,
                   readOnly: false,
                 ),
