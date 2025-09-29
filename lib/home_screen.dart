@@ -201,12 +201,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           // TODO: Implement Giving functionality
                         },
-                        child: const Text('Give Now'),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: theme.colorScheme.onPrimary,
                           backgroundColor: theme.colorScheme.primary,
                           side: BorderSide(color: theme.colorScheme.onPrimary, width: 1.0),
                         ),
+                        child: const Text('Give Now'),
                       ),
                     ),
                     Column(
