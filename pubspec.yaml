@@ -17,12 +17,14 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.20
   path_provider: ^2.1.2
   path: ^1.9.0
-  google_fonts: ^6.3.2
+  google_fonts: ^6.2.1
   firebase_app_check: ^0.4.1
   cloud_firestore: ^6.0.2
   http: ^1.2.1
   url_launcher: ^6.2.5
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.2.3
+  carousel_slider: ^4.2.1
+  sign_in_with_apple: ^6.1.1
   
 dev_dependencies:
   flutter_test:
@@ -34,4 +36,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/
+    - assets/images/google_logo.png
+    - assets/images/apple_logo.png
+    - assets/images/carousel_1.png
+    - assets/images/carousel_2.png
+    - assets/images/carousel_3.png

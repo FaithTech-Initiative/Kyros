@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kyros/home_screen.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -15,6 +17,7 @@ class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -40,6 +43,7 @@ class AuthScreenState extends State<AuthScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      await userCredential.user?.updateDisplayName(_nameController.text);
       if (!mounted) return;
       _navigateToHome(userCredential.user);
     } on FirebaseAuthException catch (e) {
@@ -66,6 +70,30 @@ class AuthScreenState extends State<AuthScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
+      final AuthCredential credentialWithApple = oAuthProvider.credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      UserCredential userCredential = await _auth.signInWithCredential(credentialWithApple);
+      if (!mounted) return;
+      _navigateToHome(userCredential.user);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Apple Sign in failed: $e')));
     }
   }
 
@@ -97,13 +125,75 @@ class AuthScreenState extends State<AuthScreen> {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
+                const SizedBox(height: 20),
+                Text(
+                  'A distraction-free space for your thoughts.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                    fontSize: 18,
+                    color: Colors.grey,
+                  ),
+                ),
                 const SizedBox(height: 40),
+                if (!_isLogin) _buildOnboardingCarousel(),
                 _buildAuthCard(),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOnboardingCarousel() {
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 200.0,
+        autoPlay: true,
+        enlargeCenterPage: true,
+      ),
+      items: [
+        _buildCarouselItem(
+          'assets/images/carousel_1.png',
+          'Capture Freely',
+          'A distraction-free space to capture sermon notes and insights, just like pen and paper.',
+        ),
+        _buildCarouselItem(
+          'assets/images/carousel_2.png',
+          'Study Deeply',
+          'Instantly reference Bible verses and explore definitions right inside your notes.',
+        ),
+        _buildCarouselItem(
+          'assets/images/carousel_3.png',
+          'Organize Intuitively',
+          'Go beyond simple notes. Turn fleeting thoughts into a permanent knowledge base for your faith.',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCarouselItem(String imagePath, String title, String subtitle) {
+    return Column(
+      children: [
+        Image.asset(imagePath, height: 100),
+        const SizedBox(height: 10),
+        Text(
+          title,
+          style: GoogleFonts.lato(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          subtitle,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.lato(
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+        ),
+      ],
     );
   }
 
@@ -125,21 +215,8 @@ class AuthScreenState extends State<AuthScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            _isLogin ? 'Welcome Back' : 'Create Account',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.lato(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _isLogin ? 'Enter your details below' : 'Sign up to get started',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.lato(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
+          if (!_isLogin) _buildNameField(),
+          if (!_isLogin) const SizedBox(height: 16),
           _buildEmailField(),
           const SizedBox(height: 16),
           _buildPasswordField(),
@@ -149,8 +226,18 @@ class AuthScreenState extends State<AuthScreen> {
           const SizedBox(height: 24),
           _buildDivider(),
           const SizedBox(height: 16),
-          _buildGoogleSignInButton(),
+          _buildSocialButtons(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return TextField(
+      controller: _nameController,
+      decoration: const InputDecoration(
+        labelText: 'Name',
+        prefixIcon: Icon(Icons.person),
       ),
     );
   }
@@ -189,7 +276,7 @@ class AuthScreenState extends State<AuthScreen> {
       ),
       onPressed: _isLogin ? _signInWithEmailAndPassword : _createUserWithEmailAndPassword,
       child: Text(
-        _isLogin ? 'Sign in' : 'Sign up',
+        _isLogin ? 'Sign In' : 'Sign Up',
         style: GoogleFonts.lato(
           fontWeight: FontWeight.bold,
         ),
@@ -205,7 +292,7 @@ class AuthScreenState extends State<AuthScreen> {
         });
       },
       child: Text(
-        _isLogin ? 'Don\'t have an account? Get Started' : 'Already have an account? Sign in',
+        _isLogin ? 'Don\'t have an account? Sign Up' : 'Already have an account? Sign In',
         style: GoogleFonts.lato(color: Theme.of(context).colorScheme.primary),
       ),
     );
@@ -217,28 +304,39 @@ class AuthScreenState extends State<AuthScreen> {
         const Expanded(child: Divider()),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('Or sign up with', style: GoogleFonts.lato(color: Colors.grey)),
+          child: Text('Or continue with', style: GoogleFonts.lato(color: Colors.grey)),
         ),
         const Expanded(child: Divider()),
       ],
     );
   }
 
-  Widget _buildGoogleSignInButton() {
-    return OutlinedButton.icon(
-      onPressed: _signInWithGoogle,
-      icon: Image.asset('assets/google_logo.png', height: 24.0), // Use local asset
-      label: Text(
-        'Google',
-        style: GoogleFonts.lato(color: Theme.of(context).colorScheme.onSurface),
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+  Widget _buildSocialButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildSocialButton(
+          'assets/images/google_logo.png',
+          _signInWithGoogle,
         ),
+        const SizedBox(width: 20),
+        _buildSocialButton(
+          'assets/images/apple_logo.png',
+          _signInWithApple,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSocialButton(String imagePath, VoidCallback onPressed) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(12),
         side: BorderSide(color: Theme.of(context).colorScheme.primary),
       ),
+      child: Image.asset(imagePath, height: 24.0),
     );
   }
 }
