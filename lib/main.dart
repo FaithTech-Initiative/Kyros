@@ -39,16 +39,17 @@ class KyrosApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF0F4F8),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF5F9EA0),
-          primary: const Color(0xFF5F9EA0), // Sage Green
+          seedColor: const Color(0xFF6B8E23), // Sage Teal
+          primary: const Color(0xFF6B8E23), // Sage Teal
           secondary: const Color(0xFF9B89B3), // Muted Lilac
+          background: const Color(0xFFF0F4F8), // Desaturated Blue-White
           surface: const Color(0xFFF0F4F8), // Desaturated Blue-White
-          onSurface: const Color(0xFF2F4F4F), // Dark Slate Gray
+          onSurface: const Color(0xFF2C3E50), // Dark Slate Navy
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          foregroundColor: Color(0xFF2F4F4F),
+          foregroundColor: Color(0xFF2C3E50),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
@@ -60,14 +61,14 @@ class KyrosApp extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
         textTheme: textTheme.apply(
-          bodyColor: const Color(0xFF2F4F4F),
-          displayColor: const Color(0xFF2F4F4F),
+          bodyColor: const Color(0xFF2C3E50),
+          displayColor: const Color(0xFF2C3E50),
         ),
         navigationBarTheme: NavigationBarThemeData(
-          indicatorColor: const Color(0xFF5F9EA0),
+          indicatorColor: const Color(0xFF6B8E23),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: Color(0xFF5F9EA0), fontWeight: FontWeight.bold);
+              return const TextStyle(color: Color(0xFF6B8E23), fontWeight: FontWeight.bold);
             }
             return const TextStyle(color: Color(0xFF6B8E23));
           }),
