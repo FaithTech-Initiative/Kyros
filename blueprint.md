@@ -10,7 +10,7 @@ Kyros is a Flutter application designed for note-taking and personal knowledge m
 
 *   **Primary Background:** A subtle, desaturated blue-white (`#F0F4F8`). This provides a clean, modern canvas that feels organized and calm.
 *   **Primary Text:** A dark slate navy (`#2C3E50`). This color offers high contrast for readability while being softer than pure black, promoting focus during extended use.
-*   **Primary Accent (Interactive Elements):** A gentle sage teal (`#6B8E23`). Associated with tranquility and growth, this color is used for interactive elements like links and action buttons.
+*   **Primary Accent (Interactive Elements):** A calming Teal (`#008080`). Associated with tranquility and growth, this color is used for interactive elements like links and action buttons.
 *   **Secondary Accent (Highlights):** A muted lilac or amethyst (`#9B89B3`). With historical ties to reverence and wisdom, this color is used for features like Bible verse highlighting.
 
 ## Implemented Features

@@ -39,8 +39,8 @@ class KyrosApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF0F4F8),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6B8E23), // Sage Teal
-          primary: const Color(0xFF6B8E23), // Sage Teal
+          seedColor: const Color(0xFF008080), // Teal
+          primary: const Color(0xFF008080), // Teal
           secondary: const Color(0xFF9B89B3), // Muted Lilac
           background: const Color(0xFFF0F4F8), // Desaturated Blue-White
           surface: const Color(0xFFF0F4F8), // Desaturated Blue-White
@@ -65,18 +65,18 @@ class KyrosApp extends StatelessWidget {
           displayColor: const Color(0xFF2C3E50),
         ),
         navigationBarTheme: NavigationBarThemeData(
-          indicatorColor: const Color(0xFF6B8E23),
+          indicatorColor: const Color(0xFF008080),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: Color(0xFF6B8E23), fontWeight: FontWeight.bold);
+              return const TextStyle(color: Color(0xFF008080), fontWeight: FontWeight.bold);
             }
-            return const TextStyle(color: Color(0xFF6B8E23));
+            return const TextStyle(color: Color(0xFF008080));
           }),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
               return const IconThemeData(color: Colors.white);
             }
-            return const IconThemeData(color: Color(0xFF6B8E23));
+            return const IconThemeData(color: Color(0xFF008080));
           }),
         ),
       ),
