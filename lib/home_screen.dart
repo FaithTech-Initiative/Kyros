@@ -5,6 +5,7 @@ import 'package:kyros/note_screen.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kyros/auth_screen.dart';
+import 'package:kyros/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -50,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -61,6 +64,22 @@ class _HomeScreenState extends State<HomeScreen> {
             _scaffoldKey.currentState!.openDrawer();
           },
         ),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+            },
+            child: CircleAvatar(
+              backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+              child: user?.photoURL == null
+                  ? const Icon(
+                      Icons.person,
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 16),
+        ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
@@ -85,11 +104,23 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+              UserAccountsDrawerHeader(
+                accountName: Text(user?.displayName ?? 'No Name'),
+                accountEmail: Text(user?.email ?? 'No Email'),
+                currentAccountPicture: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+                  },
+                  child: CircleAvatar(
+                    backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+                    child: user?.photoURL == null
+                        ? const Icon(
+                            Icons.person,
+                            size: 50,
+                          )
+                        : null,
+                  ),
                 ),
-                child: const Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
               ),
               ListTile(
                 leading: const Icon(Icons.archive),
