@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:developer' as developer;
 
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -8,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/auth_screen.dart';
 import 'package:myapp/bible_lookup_screen.dart';
-import 'package:myapp/database.dart';
 import 'package:myapp/home_screen.dart';
-import 'package:myapp/note_repository.dart';
 import 'package:myapp/splash_screen.dart';
 
 import 'firebase_options.dart';
