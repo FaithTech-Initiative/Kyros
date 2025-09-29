@@ -39,13 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 2) {
-      _scaffoldKey.currentState!.openDrawer();
-    } else {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   Future<void> _handleLogout() async {
@@ -171,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: Icon(Icons.menu_book),
             label: 'Bible',
           ),
           BottomNavigationBarItem(
@@ -225,6 +221,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         : null,
                   ),
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.collections_bookmark),
+                title: const Text('Notebooks or Collection'),
+                onTap: () {
+                  // TODO: Implement Notebooks or Collection functionality
+                  Navigator.pop(context);
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.archive),
