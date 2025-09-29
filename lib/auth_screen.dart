@@ -25,6 +25,7 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithEmailAndPassword() async {
     try {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
@@ -33,12 +34,13 @@ class AuthScreenState extends State<AuthScreen> {
       _navigateToHome(userCredential.user);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Authentication failed.')));
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text(e.message ?? 'Authentication failed.')));
     }
   }
 
   Future<void> _createUserWithEmailAndPassword() async {
     try {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
@@ -48,12 +50,12 @@ class AuthScreenState extends State<AuthScreen> {
       _navigateToHome(userCredential.user);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Sign up failed.')));
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text(e.message ?? 'Sign up failed.')));
     }
   }
 
   Future<void> _signInWithGoogle() async {
-    try {
+    try {      final scaffoldMessenger = ScaffoldMessenger.of(context);
       final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
       if (googleSignInAccount != null) {
         final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
@@ -69,12 +71,13 @@ class AuthScreenState extends State<AuthScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
     }
   }
 
   Future<void> _signInWithApple() async {
-    try {
+    try {      final scaffoldMessenger = ScaffoldMessenger.of(context);
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -93,7 +96,8 @@ class AuthScreenState extends State<AuthScreen> {
       _navigateToHome(userCredential.user);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Apple Sign in failed: $e')));
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text('Apple Sign in failed: $e')));
     }
   }
 
