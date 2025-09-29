@@ -164,7 +164,6 @@ class HomeScreenContent extends StatelessWidget {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(
             'Welcome Back!',
@@ -184,8 +183,10 @@ class HomeScreenContent extends StatelessWidget {
               color: theme.colorScheme.onSurface.withAlpha(178),
             ),
           ),
-          const SizedBox(height: 48),
-          _buildFeatureButton(
+          const SizedBox(height: 30),
+          _buildQuickJotCard(context),
+          const SizedBox(height: 20),
+          _buildFeatureCard(
             context,
             icon: Icons.edit,
             label: 'My Notes',
@@ -194,7 +195,7 @@ class HomeScreenContent extends StatelessWidget {
             },
           ),
           const SizedBox(height: 20),
-          _buildFeatureButton(
+          _buildFeatureCard(
             context,
             icon: Icons.bookmark,
             label: 'Highlighted Verses',
@@ -207,21 +208,60 @@ class HomeScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureButton(BuildContext context, {required IconData icon, required String label, required VoidCallback onPressed}) {
+  Widget _buildQuickJotCard(BuildContext context) {
     final theme = Theme.of(context);
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 24),
-      label: Text(label, style: const TextStyle(fontSize: 18)),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: theme.colorScheme.primary,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+    final TextEditingController quickJotController = TextEditingController();
+    return Card(
+      elevation: 4,
+      shadowColor: theme.colorScheme.primary.withAlpha(102),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: quickJotController,
+              decoration: const InputDecoration(
+                hintText: 'Jot down a quick thought...',
+                border: InputBorder.none,
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Save the quick jot
+              },
+              child: const Text('Save Jot'),
+            ),
+          ],
         ),
-        elevation: 4,
-        shadowColor: theme.colorScheme.primary.withAlpha(102),
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard(BuildContext context, {required IconData icon, required String label, required VoidCallback onPressed}) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 4,
+      shadowColor: theme.colorScheme.primary.withAlpha(102),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(icon, size: 28, color: theme.colorScheme.primary),
+              const SizedBox(width: 20),
+              Text(label, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
       ),
     );
   }
