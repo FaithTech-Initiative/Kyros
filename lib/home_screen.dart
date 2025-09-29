@@ -360,7 +360,7 @@ class HomeScreenContent extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: Padding(
-          padding: aconst EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Row(
             children: [
               Icon(icon, size: 28, color: theme.colorScheme.primary),
