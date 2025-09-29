@@ -1,4 +1,4 @@
-name: myapp
+name: kyros
 description: A new Flutter project.
 publish_to: 'none' 
 version: 1.0.0+1
@@ -9,19 +9,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.27.0
-  firebase_auth: ^4.17.8
+  firebase_core: ^4.1.1
+  firebase_auth: ^6.1.0
   google_sign_in: ^6.2.1
-  flutter_quill: ^9.2.3
+  flutter_quill: ^9.0.0
   drift: ^2.15.0
   sqlite3_flutter_libs: ^0.5.20
   path_provider: ^2.1.2
   path: ^1.9.0
   google_fonts: ^6.3.2
-  firebase_app_check: ^0.2.1+16
-  cloud_firestore: ^4.15.8
+  firebase_app_check: ^0.4.1
+  cloud_firestore: ^6.0.2
   http: ^1.2.1
   url_launcher: ^6.2.5
+  shared_preferences: ^2.5.3
   
 dev_dependencies:
   flutter_test:
@@ -33,4 +34,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/

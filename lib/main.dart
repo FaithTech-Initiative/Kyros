@@ -5,16 +5,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:myapp/auth_screen.dart';
-import 'package:myapp/bible_lookup_screen.dart';
-import 'package:myapp/home_screen.dart';
-import 'package:myapp/splash_screen.dart';
+import 'package:kyros/auth_screen.dart';
+import 'package:kyros/bible_lookup_screen.dart';
+import 'package:kyros/home_screen.dart';
+import 'package:kyros/splash_screen.dart';
 
 import 'firebase_options.dart';
 import 'note_screen.dart';
 
 void main() async {
-  developer.log('Starting app...', name: 'myapp.main');
+  developer.log('Starting app...', name: 'kyros.main');
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -22,32 +22,37 @@ void main() async {
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.debug,
   );
-  developer.log('Firebase initialized.', name: 'myapp.main');
-  runApp(const ChurchPadApp());
+  developer.log('Firebase initialized.', name: 'kyros.main');
+  runApp(const KyrosApp());
 }
 
-class ChurchPadApp extends StatelessWidget {
-  const ChurchPadApp({super.key});
+class KyrosApp extends StatelessWidget {
+  const KyrosApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     final textTheme = GoogleFonts.latoTextTheme();
 
     return MaterialApp(
-      title: 'ChurchPad Notes',
+      title: 'Kyros',
       theme: ThemeData(
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF0F4F8),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
+          seedColor: const Color(0xFF5F9EA0),
+          primary: const Color(0xFF5F9EA0), // Sage Green
+          secondary: const Color(0xFF9B89B3), // Muted Lilac
+          surface: const Color(0xFFF0F4F8), // Desaturated Blue-White
+          onSurface: const Color(0xFF2F4F4F), // Dark Slate Gray
         ),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          foregroundColor: Colors.black,
+          foregroundColor: Color(0xFF2F4F4F),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFFE5EDF8),
+          fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(32),
             borderSide: BorderSide.none,
@@ -55,21 +60,22 @@ class ChurchPadApp extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         ),
         textTheme: textTheme.apply(
-          bodyColor: const Color(0xFF334155),
+          bodyColor: const Color(0xFF2F4F4F),
+          displayColor: const Color(0xFF2F4F4F),
         ),
         navigationBarTheme: NavigationBarThemeData(
-          indicatorColor: const Color(0xFF2563EB),
+          indicatorColor: const Color(0xFF5F9EA0),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold);
+              return const TextStyle(color: Color(0xFF5F9EA0), fontWeight: FontWeight.bold);
             }
-            return const TextStyle(color: Color(0xFF64748B));
+            return const TextStyle(color: Color(0xFF6B8E23));
           }),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
               return const IconThemeData(color: Colors.white);
             }
-            return const IconThemeData(color: Color(0xFF64748B));
+            return const IconThemeData(color: Color(0xFF6B8E23));
           }),
         ),
       ),
@@ -77,7 +83,7 @@ class ChurchPadApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SplashScreen(); 
+            return const SplashScreen();
           }
           if (snapshot.hasData) {
             return HomeScreen(userId: snapshot.data!.uid);

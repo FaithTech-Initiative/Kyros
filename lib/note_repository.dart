@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:myapp/database.dart';
+import 'package:kyros/database.dart';
 
 // Helper function to convert Quill delta to plain text
 String _getPlainText(String content) {

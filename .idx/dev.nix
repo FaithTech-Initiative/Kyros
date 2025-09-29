@@ -3,12 +3,12 @@
   channel = "stable-23.11";
 
   packages = [
-    pkgs.flutter
-    pkgs.dart
-    pkgs.cmake
-    pkgs.google-chrome
-    pkgs.clang
-    pkgs.ninja
+    pkgs.flutter,
+    pkgs.dart,
+    pkgs.cmake,
+    pkgs.google-chrome,
+    pkgs.clang,
+    pkgs.ninja,
     pkgs.pkg-config
   ];
 
@@ -16,19 +16,27 @@
 
   idx = {
     extensions = [
-      "dart-code.dart-code"
+      "dart-code.dart-code",
       "dart-code.flutter"
     ];
 
     previews = {
       enable = true;
-      previews = [
-        {
-          command = "flutter run -d web-server --web-port $PORT --web-hostname 0.0.0.0";
+      previews = {
+        web = {
+          command = [
+            "flutter"
+            "run"
+            "-d"
+            "web-server"
+            "--web-port"
+            "$PORT"
+            "--web-hostname"
+            "0.0.0.0"
+          ];
           manager = "flutter";
-          label = "Web";
-        }
-      ];
+        };
+      };
     };
   };
 }

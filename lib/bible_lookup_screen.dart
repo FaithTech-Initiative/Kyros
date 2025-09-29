@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'highlighted_verses_screen.dart';
+import 'package:kyros/highlighted_verses_screen.dart';
 
 class BibleLookupScreen extends StatefulWidget {
   const BibleLookupScreen({super.key});
@@ -245,12 +246,14 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bible Lookup'),
+        title: Text('Bible Lookup', style: GoogleFonts.lato()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.list),
+            icon: Icon(Icons.list, color: theme.colorScheme.primary),
             onPressed: _openHighlightedVerses,
             tooltip: 'Highlighted Verses',
           ),
@@ -260,79 +263,109 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Enter a Bible verse (e.g., John 3:16)',
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _lookupVerse,
-                ),
-              ),
-              onSubmitted: (_) => _lookupVerse(),
-            ),
+            _buildSearchField(),
             const SizedBox(height: 20),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _lookupVerse,
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white,),
-                        )
-                      : const Text('Lookup'),
-                ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _toggleHighlight,
-                    icon: Icon(
-                      _isHighlighted ? Icons.highlight_off : Icons.highlight,
-                    ),
-                    label: Text(_isHighlighted ? 'Unhighlight' : 'Highlight'),
-                  ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _getAiInsights,
-                    icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Insights'),
-                  ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _getCrossReferences,
-                    icon: const Icon(Icons.link),
-                    label: const Text('Cross-Refs'),
-                  ),
-                if (_verseText.isNotEmpty && !_isLoading)
-                  ElevatedButton.icon(
-                    onPressed: _launchStudyTools,
-                    icon: const Icon(Icons.menu_book),
-                    label: const Text('Study Tools'),
-                  ),
-              ],
-            ),
+            if (_verseText.isNotEmpty && !_isLoading)
+              _buildActionButtons(theme),
             const SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: _isHighlighted ? Colors.yellow.withOpacity(0.3) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    _verseText,
-                    style: const TextStyle(fontSize: 16, height: 1.5),
-                  ),
-                ),
-              ),
-            ),
+            _buildVerseDisplay(theme),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _searchController,
+      decoration: InputDecoration(
+        labelText: 'Enter a Bible verse (e.g., John 3:16)',
+        prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.send, color: Theme.of(context).colorScheme.primary),
+          onPressed: _lookupVerse,
+        ),
+      ),
+      onSubmitted: (_) => _lookupVerse(),
+    );
+  }
+
+  Widget _buildActionButtons(ThemeData theme) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      alignment: WrapAlignment.center,
+      children: [
+        _buildActionButton(
+          theme,
+          onPressed: _toggleHighlight,
+          icon: _isHighlighted ? Icons.highlight_off : Icons.highlight,
+          label: _isHighlighted ? 'Unhighlight' : 'Highlight',
+          color: theme.colorScheme.secondary,
+        ),
+        _buildActionButton(
+          theme,
+          onPressed: _getAiInsights,
+          icon: Icons.auto_awesome,
+          label: 'Insights',
+        ),
+        _buildActionButton(
+          theme,
+          onPressed: _getCrossReferences,
+          icon: Icons.link,
+          label: 'Cross-Refs',
+        ),
+        _buildActionButton(
+          theme,
+          onPressed: _launchStudyTools,
+          icon: Icons.menu_book,
+          label: 'Study Tools',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(ThemeData theme, {required VoidCallback onPressed, required IconData icon, required String label, Color? color}) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: color ?? theme.colorScheme.primary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVerseDisplay(ThemeData theme) {
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            color: _isHighlighted ? theme.colorScheme.secondary.withAlpha(51) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withAlpha(26),
+                spreadRadius: 2,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(16.0),
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Text(
+                  _verseText,
+                  style: GoogleFonts.lato(
+                    fontSize: 18,
+                    height: 1.6,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
         ),
       ),
     );

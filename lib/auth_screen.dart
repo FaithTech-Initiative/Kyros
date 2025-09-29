@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:myapp/home_screen.dart';
+import 'package:kyros/home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -80,7 +80,6 @@ class AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -90,12 +89,12 @@ class AuthScreenState extends State<AuthScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'ChurchPad',
+                  'Kyros',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.lato(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -185,7 +184,7 @@ class AuthScreenState extends State<AuthScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       onPressed: _isLogin ? _signInWithEmailAndPassword : _createUserWithEmailAndPassword,
@@ -207,7 +206,7 @@ class AuthScreenState extends State<AuthScreen> {
       },
       child: Text(
         _isLogin ? 'Don\'t have an account? Get Started' : 'Already have an account? Sign in',
-        style: GoogleFonts.lato(),
+        style: GoogleFonts.lato(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -231,13 +230,14 @@ class AuthScreenState extends State<AuthScreen> {
       icon: Image.asset('assets/google_logo.png', height: 24.0), // Use local asset
       label: Text(
         'Google',
-        style: GoogleFonts.lato(),
+        style: GoogleFonts.lato(color: Theme.of(context).colorScheme.onSurface),
       ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+        side: BorderSide(color: Theme.of(context).colorScheme.primary),
       ),
     );
   }

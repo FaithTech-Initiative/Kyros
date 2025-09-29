@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:myapp/database.dart';
-import 'package:myapp/note_repository.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:kyros/database.dart';
+import 'package:kyros/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
 
 class NoteScreen extends StatefulWidget {
@@ -64,16 +65,19 @@ class NoteScreenState extends State<NoteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Note'),
+        title: Text(widget.note == null ? 'New Note' : 'Edit Note', style: GoogleFonts.lato()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
+            icon: Icon(Icons.save, color: theme.colorScheme.primary),
             onPressed: () {
               _saveNote();
               Navigator.pop(context, true);
             },
+            tooltip: 'Save Note',
           ),
         ],
       ),
@@ -81,27 +85,48 @@ class NoteScreenState extends State<NoteScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-              ),
-            ),
+            _buildTitleField(theme),
             const SizedBox(height: 16),
             QuillToolbar.simple(
               configurations: QuillSimpleToolbarConfigurations(
                 controller: _controller,
+                sharedConfigurations: const QuillSharedConfigurations(locale: Locale('en')),
               ),
             ),
-            Expanded(
-              child: QuillEditor.basic(
-                configurations: QuillEditorConfigurations(
-                  controller: _controller,
-                  readOnly: false,
-                ),
-              ),
-            ),
+            const SizedBox(height: 8),
+            _buildEditor(theme),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleField(ThemeData theme) {
+    return TextField(
+      controller: _titleController,
+      style: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold),
+      decoration: InputDecoration(
+        hintText: 'Title',
+        border: InputBorder.none,
+        hintStyle: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey),
+      ),
+    );
+  }
+
+  Widget _buildEditor(ThemeData theme) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: QuillEditor.basic(
+          configurations: QuillEditorConfigurations(
+            controller: _controller,
+            readOnly: false,
+            padding: const EdgeInsets.all(12),
+          ),
         ),
       ),
     );

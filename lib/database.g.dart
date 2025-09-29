@@ -21,7 +21,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
       'title', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 255),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
@@ -33,9 +36,7 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
   @override
   late final GeneratedColumn<String> plainTextContent = GeneratedColumn<String>(
       'plain_text_content', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(''));
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -90,6 +91,8 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, Note> {
           _plainTextContentMeta,
           plainTextContent.isAcceptableOrUnknown(
               data['plain_text_content']!, _plainTextContentMeta));
+    } else if (isInserting) {
+      context.missing(_plainTextContentMeta);
     }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
@@ -292,12 +295,13 @@ class NotesCompanion extends UpdateCompanion<Note> {
     this.id = const Value.absent(),
     required String title,
     required String content,
-    this.plainTextContent = const Value.absent(),
+    required String plainTextContent,
     required DateTime createdAt,
     this.isFavorite = const Value.absent(),
     required String userId,
   })  : title = Value(title),
         content = Value(content),
+        plainTextContent = Value(plainTextContent),
         createdAt = Value(createdAt),
         userId = Value(userId);
   static Insertable<Note> custom({
@@ -396,7 +400,7 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   Value<int> id,
   required String title,
   required String content,
-  Value<String> plainTextContent,
+  required String plainTextContent,
   required DateTime createdAt,
   Value<bool> isFavorite,
   required String userId,
@@ -411,22 +415,122 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<String> userId,
 });
 
+class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
+  $$NotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get plainTextContent => $composableBuilder(
+      column: $table.plainTextContent,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+}
+
+class $$NotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $NotesTable> {
+  $$NotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get plainTextContent => $composableBuilder(
+      column: $table.plainTextContent,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+}
+
+class $$NotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NotesTable> {
+  $$NotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get plainTextContent => $composableBuilder(
+      column: $table.plainTextContent, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+}
+
 class $$NotesTableTableManager extends RootTableManager<
     _$AppDatabase,
     $NotesTable,
     Note,
     $$NotesTableFilterComposer,
     $$NotesTableOrderingComposer,
+    $$NotesTableAnnotationComposer,
     $$NotesTableCreateCompanionBuilder,
-    $$NotesTableUpdateCompanionBuilder> {
+    $$NotesTableUpdateCompanionBuilder,
+    (Note, BaseReferences<_$AppDatabase, $NotesTable, Note>),
+    Note,
+    PrefetchHooks Function()> {
   $$NotesTableTableManager(_$AppDatabase db, $NotesTable table)
       : super(TableManagerState(
           db: db,
           table: table,
-          filteringComposer:
-              $$NotesTableFilterComposer(ComposerState(db, table)),
-          orderingComposer:
-              $$NotesTableOrderingComposer(ComposerState(db, table)),
+          createFilteringComposer: () =>
+              $$NotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NotesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> title = const Value.absent(),
@@ -449,7 +553,7 @@ class $$NotesTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             required String title,
             required String content,
-            Value<String> plainTextContent = const Value.absent(),
+            required String plainTextContent,
             required DateTime createdAt,
             Value<bool> isFavorite = const Value.absent(),
             required String userId,
@@ -463,86 +567,25 @@ class $$NotesTableTableManager extends RootTableManager<
             isFavorite: isFavorite,
             userId: userId,
           ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ));
 }
 
-class $$NotesTableFilterComposer
-    extends FilterComposer<_$AppDatabase, $NotesTable> {
-  $$NotesTableFilterComposer(super.$state);
-  ColumnFilters<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get title => $state.composableBuilder(
-      column: $state.table.title,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get content => $state.composableBuilder(
-      column: $state.table.content,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get plainTextContent => $state.composableBuilder(
-      column: $state.table.plainTextContent,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<DateTime> get createdAt => $state.composableBuilder(
-      column: $state.table.createdAt,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<bool> get isFavorite => $state.composableBuilder(
-      column: $state.table.isFavorite,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get userId => $state.composableBuilder(
-      column: $state.table.userId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-}
-
-class $$NotesTableOrderingComposer
-    extends OrderingComposer<_$AppDatabase, $NotesTable> {
-  $$NotesTableOrderingComposer(super.$state);
-  ColumnOrderings<int> get id => $state.composableBuilder(
-      column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get title => $state.composableBuilder(
-      column: $state.table.title,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get content => $state.composableBuilder(
-      column: $state.table.content,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get plainTextContent => $state.composableBuilder(
-      column: $state.table.plainTextContent,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<DateTime> get createdAt => $state.composableBuilder(
-      column: $state.table.createdAt,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<bool> get isFavorite => $state.composableBuilder(
-      column: $state.table.isFavorite,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get userId => $state.composableBuilder(
-      column: $state.table.userId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-}
+typedef $$NotesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $NotesTable,
+    Note,
+    $$NotesTableFilterComposer,
+    $$NotesTableOrderingComposer,
+    $$NotesTableAnnotationComposer,
+    $$NotesTableCreateCompanionBuilder,
+    $$NotesTableUpdateCompanionBuilder,
+    (Note, BaseReferences<_$AppDatabase, $NotesTable, Note>),
+    Note,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
