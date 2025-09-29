@@ -57,7 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Kyros', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
-        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
@@ -65,6 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              // TODO: Implement search functionality
+            },
+          ),
           GestureDetector(
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
