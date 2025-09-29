@@ -189,44 +189,65 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              UserAccountsDrawerHeader(
-                accountName: Row(
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                ),
+                child: Stack(
                   children: [
-                    Text(user?.displayName ?? 'No Name'),
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO: Implement Giving functionality
-                      },
-                      child: const Text('Give Now'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        backgroundColor: theme.colorScheme.primary,
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // TODO: Implement Giving functionality
+                        },
+                        child: const Text('Give Now'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          backgroundColor: theme.colorScheme.primary,
+                          side: BorderSide(color: theme.colorScheme.onPrimary, width: 1.0),
+                        ),
                       ),
                     ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+                          },
+                          child: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+                            child: user?.photoURL == null
+                                ? const Icon(
+                                    Icons.person,
+                                    size: 40,
+                                  )
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          user?.displayName ?? 'No Name',
+                          style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 18),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          user?.email ?? 'No Email',
+                          style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 14),
+                        ),
+                      ],
+                    ),
                   ],
-                ),
-                accountEmail: Text(user?.email ?? 'No Email'),
-                currentAccountPicture: GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
-                  },
-                  child: CircleAvatar(
-                    backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-                    child: user?.photoURL == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 50,
-                          )
-                        : null,
-                  ),
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.collections_bookmark),
-                title: const Text('Notebooks or Collection'),
+                title: const Text('Collections'),
                 onTap: () {
-                  // TODO: Implement Notebooks or Collection functionality
+                  // TODO: Implement Collections functionality
                   Navigator.pop(context);
                 },
               ),
