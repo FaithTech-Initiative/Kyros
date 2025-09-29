@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/database.dart';
 import 'package:myapp/note_repository.dart';
 import 'package:drift/drift.dart' hide Column;
@@ -66,28 +65,11 @@ class NoteScreenState extends State<NoteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            _saveNote();
-            Navigator.pop(context, true);
-          },
-        ),
+        title: const Text('Note'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.push_pin_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.archive_outlined, color: Colors.black),
+            icon: const Icon(Icons.save),
             onPressed: () {
               _saveNote();
               Navigator.pop(context, true);
@@ -95,61 +77,31 @@ class NoteScreenState extends State<NoteScreen> {
           ),
         ],
       ),
-      body: PopScope(
-        canPop: false,
-        onPopInvoked: (bool didPop) {
-          if (didPop) {
-            return;
-          }
-          _saveNote();
-          Navigator.of(context).pop(true);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            children: [
-              _buildTitleField(),
-              const SizedBox(height: 16),
-              _buildToolbar(),
-              _buildEditor(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitleField() {
-    return TextField(
-      controller: _titleController,
-      decoration: InputDecoration.collapsed(
-        hintText: 'Title',
-        hintStyle: GoogleFonts.lato(fontSize: 26, fontWeight: FontWeight.w500),
-      ),
-      style: GoogleFonts.lato(fontSize: 26, fontWeight: FontWeight.w500),
-    );
-  }
-
-  Widget _buildToolbar() {
-    return QuillToolbar.simple(
-      configurations: QuillSimpleToolbarConfigurations(
-        controller: _controller,
-        sharedConfigurations: const QuillSharedConfigurations(
-          locale: Locale('en'),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditor() {
-    return Expanded(
-      child: QuillEditor.basic(
-        configurations: QuillEditorConfigurations(
-          controller: _controller,
-          readOnly: false,
-          sharedConfigurations: const QuillSharedConfigurations(
-            locale: Locale('en'),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                labelText: 'Title',
+              ),
+            ),
+            const SizedBox(height: 16),
+            QuillToolbar.simple(
+              configurations: QuillSimpleToolbarConfigurations(
+                controller: _controller,
+              ),
+            ),
+            Expanded(
+              child: QuillEditor.basic(
+                configurations: QuillEditorConfigurations(
+                  controller: _controller,
+                  readOnly: false,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
