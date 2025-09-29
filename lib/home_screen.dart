@@ -181,7 +181,22 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: EdgeInsets.zero,
             children: [
               UserAccountsDrawerHeader(
-                accountName: Text(user?.displayName ?? 'No Name'),
+                accountName: Row(
+                  children: [
+                    Text(user?.displayName ?? 'No Name'),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO: Implement Giving functionality
+                      },
+                      child: const Text('Give Now'),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: theme.colorScheme.onPrimary,
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
                 accountEmail: Text(user?.email ?? 'No Email'),
                 currentAccountPicture: GestureDetector(
                   onTap: () {
