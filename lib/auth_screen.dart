@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kyros/home_screen.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -146,29 +146,46 @@ class AuthScreenState extends State<AuthScreen> {
   }
 
   Widget _buildOnboardingCarousel() {
-    return CarouselSlider(
+    final List<Map<String, String>> carouselItems = [
+      {
+        'imagePath': 'assets/images/carousel_1.png',
+        'title': 'Capture Freely',
+        'subtitle':
+            'A distraction-free space to capture sermon notes and insights, just like pen and paper.',
+      },
+      {
+        'imagePath': 'assets/images/carousel_2.png',
+        'title': 'Study Deeply',
+        'subtitle':
+            'Instantly reference Bible verses and explore definitions right inside your notes.',
+      },
+      {
+        'imagePath': 'assets/images/carousel_3.png',
+        'title': 'Organize Intuitively',
+        'subtitle':
+            'Go beyond simple notes. Turn fleeting thoughts into a permanent knowledge base for your faith.',
+      },
+    ];
+
+    return FlutterCarousel(
       options: CarouselOptions(
         height: 200.0,
         autoPlay: true,
         enlargeCenterPage: true,
+        showIndicator: true,
+        slideIndicator: const CircularSlideIndicator(),
       ),
-      items: [
-        _buildCarouselItem(
-          'assets/images/carousel_1.png',
-          'Capture Freely',
-          'A distraction-free space to capture sermon notes and insights, just like pen and paper.',
-        ),
-        _buildCarouselItem(
-          'assets/images/carousel_2.png',
-          'Study Deeply',
-          'Instantly reference Bible verses and explore definitions right inside your notes.',
-        ),
-        _buildCarouselItem(
-          'assets/images/carousel_3.png',
-          'Organize Intuitively',
-          'Go beyond simple notes. Turn fleeting thoughts into a permanent knowledge base for your faith.',
-        ),
-      ],
+      items: carouselItems.map((item) {
+        return Builder(
+          builder: (BuildContext context) {
+            return _buildCarouselItem(
+              item['imagePath']!,
+              item['title']!,
+              item['subtitle']!,
+            );
+          },
+        );
+      }).toList(),
     );
   }
 
