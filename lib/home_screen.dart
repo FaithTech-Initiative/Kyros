@@ -94,10 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: InputDecoration(
                       hintText: 'Search...',
                       filled: true,
-                      fillColor: theme.colorScheme.surface.withAlpha(200),
+                      fillColor: theme.colorScheme.surface.withAlpha(245),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide(color: theme.colorScheme.onSurface.withAlpha(80), width: 1.0),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withAlpha(150)),
