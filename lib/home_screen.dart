@@ -63,6 +63,45 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _showQuickAddMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: <Widget>[
+            ListTile(
+              leading: const Icon(Icons.note_add),
+              title: const Text('New Note'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NoteScreen(userId: widget.userId)),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.audiotrack),
+              title: const Text('Audio'),
+              onTap: () {
+                // TODO: Implement Audio functionality
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Image'),
+              onTap: () {
+                // TODO: Implement Image functionality
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -252,6 +291,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.bookmark),
+                title: const Text('Highlights'),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const HighlightedVersesScreen()));
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.archive),
                 title: const Text('Archive'),
                 onTap: () {
@@ -309,6 +355,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showQuickAddMenu(context),
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
@@ -345,24 +395,6 @@ class HomeScreenContent extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           _buildQuickJotCard(context),
-          const SizedBox(height: 20),
-          _buildFeatureCard(
-            context,
-            icon: Icons.edit,
-            label: 'My Notes',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => NoteScreen(userId: userId)));
-            },
-          ),
-          const SizedBox(height: 20),
-          _buildFeatureCard(
-            context,
-            icon: Icons.bookmark,
-            label: 'Highlighted Verses',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const HighlightedVersesScreen()));
-            },
-          ),
         ],
       ),
     );
@@ -397,30 +429,6 @@ class HomeScreenContent extends StatelessWidget {
               child: const Text('Save Jot'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard(BuildContext context, {required IconData icon, required String label, required VoidCallback onPressed}) {
-    final theme = Theme.of(context);
-    return Card(
-      elevation: 4,
-      shadowColor: theme.colorScheme.primary.withAlpha(102),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Icon(icon, size: 28, color: theme.colorScheme.primary),
-              const SizedBox(width: 20),
-              Text(label, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ],
-          ),
         ),
       ),
     );
