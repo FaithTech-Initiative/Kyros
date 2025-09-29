@@ -19,6 +19,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isSearchActive = false;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   late final List<Widget> _widgetOptions;
 
@@ -49,6 +52,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _toggleSearch() {
+    setState(() {
+      _isSearchActive = !_isSearchActive;
+      if (_isSearchActive) {
+        _searchFocusNode.requestFocus();
+      } else {
+        _searchController.clear();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -56,35 +70,73 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Kyros', style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
+        titleSpacing: 0.0,
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            final offsetAnimation = Tween<Offset>(
+              begin: const Offset(1.0, 0.0),
+              end: Offset.zero,
+            ).animate(animation);
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+          child: _isSearchActive
+              ? TextField(
+                  key: const ValueKey('search-field'),
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
+                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 18.0),
+                  onChanged: (value) {
+                    // TODO: Implement search logic
+                  },
+                )
+              : Text(
+                  key: const ValueKey('app-title'),
+                  'Kyros',
+                  style: GoogleFonts.lato(fontWeight: FontWeight.bold),
+                ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
             _scaffoldKey.currentState!.openDrawer();
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
-            },
-            child: CircleAvatar(
-              backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-              child: user?.photoURL == null
-                  ? const Icon(
-                      Icons.person,
-                    )
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 16),
-        ],
+        actions: _isSearchActive
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _toggleSearch,
+                ),
+              ]
+            : [
+                IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _toggleSearch,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+                  },
+                  child: CircleAvatar(
+                    backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+                    child: user?.photoURL == null
+                        ? const Icon(
+                            Icons.person,
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
