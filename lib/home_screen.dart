@@ -83,11 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.deepPurple,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              child: Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
+              child: const Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(
               leading: const Icon(Icons.logout),

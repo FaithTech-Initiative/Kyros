@@ -4,6 +4,15 @@
 
 Kyros is a Flutter application designed for note-taking and personal knowledge management, with a focus on a clean, distraction-free user experience. It integrates with Firebase for authentication and data storage, and includes features for rich text editing, Bible verse lookup, and a personalized user dashboard.
 
+## Design
+
+### Brand Colors
+
+*   **Primary Background:** A subtle, desaturated blue-white (`#F0F4F8`). This provides a clean, modern canvas that feels organized and calm.
+*   **Primary Text:** A dark slate navy (`#2C3E50`). This color offers high contrast for readability while being softer than pure black, promoting focus during extended use.
+*   **Primary Accent (Interactive Elements):** A gentle sage teal (`#6B8E23`). Associated with tranquility and growth, this color is used for interactive elements like links and action buttons.
+*   **Secondary Accent (Highlights):** A muted lilac or amethyst (`#9B89B3`). With historical ties to reverence and wisdom, this color is used for features like Bible verse highlighting.
+
 ## Implemented Features
 
 *   **Authentication:**
