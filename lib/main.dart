@@ -42,7 +42,6 @@ class KyrosApp extends StatelessWidget {
           seedColor: const Color(0xFF008080), // Teal
           primary: const Color(0xFF008080), // Teal
           secondary: const Color(0xFF9B89B3), // Muted Lilac
-          background: const Color(0xFFF0F4F8), // Desaturated Blue-White
           surface: const Color(0xFFF0F4F8), // Desaturated Blue-White
           onSurface: const Color(0xFF2C3E50), // Dark Slate Navy
         ),
