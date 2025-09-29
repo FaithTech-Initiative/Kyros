@@ -6,6 +6,8 @@ import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kyros/auth_screen.dart';
 import 'package:kyros/profile_screen.dart';
+import 'package:kyros/study_tools_screen.dart';
+import 'package:kyros/my_wiki_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -31,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _widgetOptions = <Widget>[
       HomeScreenContent(userId: widget.userId),
       const BibleLookupScreen(),
+      const StudyToolsScreen(),
+      const MyWikiScreen(),
     ];
   }
 
@@ -170,9 +174,18 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.book),
             label: 'Bible',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.build),
+            label: 'Study Tools',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_edu),
+            label: 'My Wiki',
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
       drawer: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
