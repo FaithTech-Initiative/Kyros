@@ -79,22 +79,74 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+      drawer: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: const Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
               ),
-              child: const Text('Menu', style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
-              onTap: _handleLogout,
-            ),
-          ],
+              ListTile(
+                leading: const Icon(Icons.archive),
+                title: const Text('Archive'),
+                onTap: () {
+                  // TODO: Implement Archive functionality
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Trash'),
+                onTap: () {
+                  // TODO: Implement Trash functionality
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('About'),
+                onTap: () {
+                  // TODO: Implement About functionality
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.volunteer_activism),
+                title: const Text('Giving'),
+                onTap: () {
+                  // TODO: Implement Giving functionality
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Setting'),
+                onTap: () {
+                  // TODO: Implement Setting functionality
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.help),
+                title: const Text('Help & Feedback'),
+                onTap: () {
+                  // TODO: Implement Help & Feedback functionality
+                  Navigator.pop(context);
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Logout'),
+                onTap: _handleLogout,
+              ),
+            ],
+          ),
         ),
       ),
     );
