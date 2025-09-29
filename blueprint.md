@@ -2,29 +2,51 @@
 
 ## Overview
 
-Kyros is a note-taking application that allows users to create, edit, and manage their notes. The application is built with Flutter and uses Firebase for authentication and data storage.
+Kyros is a Flutter application designed for note-taking and personal knowledge management, with a focus on a clean, distraction-free user experience. It integrates with Firebase for authentication and data storage, and includes features for rich text editing, Bible verse lookup, and a personalized user dashboard.
 
-## Features
+## Implemented Features
 
-### Implemented
+*   **Authentication:**
+    *   Email/password sign-up and sign-in.
+    *   Google Sign-In.
+    *   Apple Sign-In.
+    *   Onboarding carousel for new users.
+    *   Secure session management with Firebase Auth.
 
-*   **Authentication:** Users can sign up and sign in using their email and password, or with their Google account.
-*   **Note-taking:** Users can create, edit, and save their notes. The note editor supports rich text formatting.
-*   **Data storage:** Notes are stored in a local SQLite database using the `drift` package.
-*   **Styling:** The application uses `google_fonts` for custom typography and has a consistent color scheme.
+*   **Note-Taking:**
+    *   Rich text editor using Flutter Quill.
+    *   Local database for storing notes using Drift.
+    *   Synchronization of notes with Firestore.
 
-### Current Task
+*   **Dashboard:**
+    *   Personalized greeting to the user.
+    *   Display of recent notes.
+    *   Quick access to create new notes.
 
-*   **Redesign Authentication Screen:** The current task is to redesign the authentication screen to combine the sign-in and sign-up flows, add social login options for Google and Apple, and include an onboarding carousel to introduce the app's key features.
+*   **Bible Integration:**
+    *   Ability to look up Bible verses using an external API.
+    *   Display of Bible verse content within the app.
 
-## Plan
+*   **Styling and UI:**
+    *   Modern, clean UI with a custom color scheme.
+    *   Use of Google Fonts for consistent typography.
+    *   Responsive design for different screen sizes.
 
-1.  **Add Dependencies:** Add the `carousel_slider` and `sign_in_with_apple` packages to `pubspec.yaml`.
-2.  **Create Placeholders:** Create placeholder assets for the onboarding carousel.
-3.  **Update `pubspec.yaml`:** Add the new dependencies and assets.
-4.  **Refactor `auth_screen.dart`:** 
-    *   Combine the sign-in and sign-up UI into a single screen with a toggle.
-    *   Add prominent buttons for "Continue with Google" and "Continue with Apple".
-    *   Include a name field in the sign-up form.
-    *   Implement an onboarding carousel that appears on the sign-up screen.
-5.  **Verify and Test:** Ensure the new authentication screen works as expected and that all existing functionality is preserved.
+## Current Task: Add Navigation Bar
+
+### Plan
+
+1.  **Modify `HomeScreen`:**
+    *   Add a `BottomNavigationBar` to the `Scaffold` in `lib/home_screen.dart`.
+    *   Create three navigation items: "Home", "Bible", and "Menu".
+    *   Assign appropriate icons to each item (`Icons.home`, `Icons.book`, `Icons.menu`).
+
+2.  **Implement Navigation:**
+    *   Manage the selected index of the navigation bar.
+    *   The "Home" item will display the main content of the `HomeScreen`.
+    *   The "Bible" item will navigate to the `BibleLookupScreen`.
+    *   The "Menu" item will open a drawer for future functionality.
+
+3.  **Create Drawer:**
+    *   Add a `Drawer` to the `Scaffold` in `lib/home_screen.dart`.
+    *   The drawer will contain a logout button.
