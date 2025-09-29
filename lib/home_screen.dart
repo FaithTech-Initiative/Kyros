@@ -73,15 +73,24 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         titleSpacing: 0.0,
         title: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 400),
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
           transitionBuilder: (Widget child, Animation<double> animation) {
+            final isSearchField = child.key == const ValueKey('search-field');
             final offsetAnimation = Tween<Offset>(
-              begin: const Offset(1.0, 0.0),
+              begin: isSearchField ? const Offset(1.0, 0.0) : const Offset(-1.0, 0.0),
               end: Offset.zero,
             ).animate(animation);
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
+            
+            return ClipRRect(
+              child: SlideTransition(
+                position: offsetAnimation,
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+              ),
             );
           },
           child: _isSearchActive
@@ -351,7 +360,7 @@ class HomeScreenContent extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: aconst EdgeInsets.all(20.0),
           child: Row(
             children: [
               Icon(icon, size: 28, color: theme.colorScheme.primary),
