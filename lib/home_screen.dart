@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final theme = Theme.of(context);
 
     return Scaffold(
       key: _scaffoldKey,
@@ -84,19 +85,28 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
           child: _isSearchActive
-              ? TextField(
-                  key: const ValueKey('search-field'),
-                  controller: _searchController,
-                  focusNode: _searchFocusNode,
-                  decoration: InputDecoration(
-                    hintText: 'Search...',
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  child: TextField(
+                    key: const ValueKey('search-field'),
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      filled: true,
+                      fillColor: theme.colorScheme.onPrimary.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                      hintStyle: TextStyle(color: theme.colorScheme.onPrimary.withOpacity(0.8)),
+                    ),
+                    style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 18.0),
+                    onChanged: (value) {
+                      // TODO: Implement search logic
+                    },
                   ),
-                  style: const TextStyle(color: Colors.white, fontSize: 18.0),
-                  onChanged: (value) {
-                    // TODO: Implement search logic
-                  },
                 )
               : Text(
                   key: const ValueKey('app-title'),
