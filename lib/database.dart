@@ -1,37 +1,65 @@
-import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+class Note {
+  final String id;
+  final String title;
+  final String content;
+  final DateTime updatedAt;
+  final String? collectionId;
 
-part 'database.g.dart';
-
-class Notes extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get title => text().withLength(min: 1, max: 255)();
-  TextColumn get content => text()();
-  TextColumn get plainTextContent => text().named('plain_text_content')();
-  DateTimeColumn get createdAt => dateTime()();
-  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
-  TextColumn get userId => text()();
-}
-
-@DriftDatabase(tables: [Notes])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase._internal() : super(_openConnection());
-
-  static final AppDatabase _instance = AppDatabase._internal();
-  factory AppDatabase() => _instance;
-
-  @override
-  int get schemaVersion => 2;
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db.sqlite'));
-    return NativeDatabase(file);
+  Note({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.updatedAt,
+    this.collectionId,
   });
+
+  factory Note.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Note(
+      id: doc.id,
+      title: data['title'] ?? '',
+      content: data['content'] ?? '',
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      collectionId: data['collectionId'],
+    );
+  }
+}
+
+class FirestoreService {
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  Future<void> addNote(String userId, String title, String content, {String? collectionId}) {
+    return _db.collection('users').doc(userId).collection('notes').add({
+      'title': title,
+      'content': content,
+      'updatedAt': FieldValue.serverTimestamp(),
+      'collectionId': collectionId,
+    });
+  }
+
+  Future<void> updateNote(String userId, String noteId, String title, String content, {String? collectionId}) {
+    return _db.collection('users').doc(userId).collection('notes').doc(noteId).update({
+      'title': title,
+      'content': content,
+      'updatedAt': FieldValue.serverTimestamp(),
+      'collectionId': collectionId,
+    });
+  }
+
+  Future<void> deleteNote(String userId, String noteId) {
+    return _db.collection('users').doc(userId).collection('notes').doc(noteId).delete();
+  }
+
+  Stream<List<Note>> getNotes(String userId, {String? collectionId}) {
+    Query query = _db.collection('users').doc(userId).collection('notes');
+
+    if (collectionId != null) {
+      query = query.where('collectionId', isEqualTo: collectionId);
+    }
+
+    return query.orderBy('updatedAt', descending: true).snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList());
+  }
 }

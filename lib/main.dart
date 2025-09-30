@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/auth_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
+import 'package:kyros/collections_screen.dart';
 import 'package:kyros/home_screen.dart';
 import 'package:kyros/splash_screen.dart';
 
 import 'firebase_options.dart';
-import 'note_screen.dart';
 
 void main() async {
   developer.log('Starting app...', name: 'kyros.main');
@@ -95,7 +95,7 @@ class KyrosApp extends StatelessWidget {
       routes: {
         '/home': (context) => HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid),
         '/bible_lookup': (context) => const BibleLookupScreen(),
-        '/notes': (context) => NoteScreen(userId: FirebaseAuth.instance.currentUser!.uid),
+        '/collections': (context) => const CollectionsScreen(),
       },
       debugShowCheckedModeBanner: false,
     );

@@ -13,8 +13,6 @@ dependencies:
   firebase_auth: ^6.1.0
   google_sign_in: ^6.2.1
   flutter_quill: ^9.0.0
-  drift: ^2.15.0
-  sqlite3_flutter_libs: ^0.5.20
   path_provider: ^2.1.2
   path: ^1.9.0
   google_fonts: ^6.2.1
@@ -25,6 +23,8 @@ dependencies:
   shared_preferences: ^2.2.3
   flutter_carousel_widget: ^2.2.0
   sign_in_with_apple: ^6.1.1
+  flutter_staggered_animations: ^1.1.1
+  timeago: ^3.7.1
 
 dev_dependencies:
   flutter_test:

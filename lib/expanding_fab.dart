@@ -105,9 +105,17 @@ class _ExpandingFabState extends State<ExpandingFab> with SingleTickerProviderSt
           directionInDegrees: angleInDegrees,
           maxDistance: widget.distance,
           progress: _expandAnimation,
-          child: widget.children[i],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: widget.children[i],
+          ),
         ),
       );
+      if (i != count - 1) {
+        children.add(
+          const SizedBox(height: 8.0),
+        );
+      }
     }
     return children;
   }
@@ -193,32 +201,20 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(51),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(label, style: theme.textTheme.titleMedium),
-        ),
-        const SizedBox(width: 8),
-        FloatingActionButton.small(
-          heroTag: label,
-          onPressed: onPressed,
-          child: icon,
-        ),
-      ],
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          const SizedBox(width: 8.0),
+          icon,
+        ],
+      ),
     );
   }
 }

@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/bible_lookup_screen.dart';
-import 'package:kyros/note_screen.dart';
+import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kyros/auth_screen.dart';
@@ -9,6 +11,8 @@ import 'package:kyros/profile_screen.dart';
 import 'package:kyros/study_tools_screen.dart';
 import 'package:kyros/my_wiki_screen.dart';
 import 'package:kyros/expanding_fab.dart';
+import 'package:kyros/database.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -25,18 +29,35 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSearchActive = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  String _searchQuery = '';
 
   late final List<Widget> _widgetOptions;
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
     _widgetOptions = <Widget>[
-      HomeScreenContent(userId: widget.userId),
+      HomeScreenContent(
+        userId: widget.userId,
+        navigateToNotePage: _navigateToNotePage,
+        searchQuery: _searchQuery,
+      ),
       const BibleLookupScreen(),
       const StudyToolsScreen(),
       const MyWikiScreen(),
     ];
+  }
+
+  void _navigateToNotePage(BuildContext context, {Note? note}) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MainNotePage(userId: widget.userId, note: note)),
+    );
   }
 
   void _onItemTapped(int index) {
@@ -69,6 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final theme = Theme.of(context);
 
+    _widgetOptions[0] = HomeScreenContent(
+      userId: widget.userId,
+      navigateToNotePage: _navigateToNotePage,
+      searchQuery: _searchQuery,
+    );
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -83,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
               begin: isSearchField ? const Offset(1.0, 0.0) : const Offset(-1.0, 0.0),
               end: Offset.zero,
             ).animate(animation);
-            
+
             return ClipRRect(
               child: SlideTransition(
                 position: offsetAnimation,
@@ -102,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     controller: _searchController,
                     focusNode: _searchFocusNode,
                     decoration: InputDecoration(
-                      hintText: 'Search...',
+                      hintText: 'Search notes...',
                       filled: true,
                       fillColor: theme.colorScheme.surface.withAlpha(245),
                       border: OutlineInputBorder(
@@ -111,11 +138,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                       hintStyle: TextStyle(color: theme.colorScheme.onSurface.withAlpha(150)),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                              },
+                            )
+                          : null,
                     ),
                     style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 18.0),
-                    onChanged: (value) {
-                      // TODO: Implement search logic
-                    },
                   ),
                 )
               : Text(
@@ -248,8 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.collections_bookmark),
                 title: const Text('Collections'),
                 onTap: () {
-                  // TODO: Implement Collections functionality
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/collections');
                 },
               ),
               ListTile(
@@ -324,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               // TODO: Implement Audio functionality
             },
-            icon: const Icon(Icons.audiotrack),
+            icon: const Icon(Icons.mic),
             label: 'Audio',
           ),
           ActionButton(
@@ -335,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Image',
           ),
           ActionButton(
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NoteScreen(userId: widget.userId))),
+            onPressed: () => _navigateToNotePage(context),
             icon: const Icon(Icons.note_add),
             label: 'New Note',
           ),
@@ -343,76 +374,192 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 }
 
-class HomeScreenContent extends StatelessWidget {
+class HomeScreenContent extends StatefulWidget {
   final String userId;
-  const HomeScreenContent({super.key, required this.userId});
+  final Function(BuildContext, {Note? note}) navigateToNotePage;
+  final String searchQuery;
+  const HomeScreenContent({
+    super.key,
+    required this.userId,
+    required this.navigateToNotePage,
+    required this.searchQuery,
+  });
+
+  @override
+  State<HomeScreenContent> createState() => _HomeScreenContentState();
+}
+
+class _HomeScreenContentState extends State<HomeScreenContent> {
+  late final FirestoreService _firestoreService;
+  late Stream<List<Note>> _notesStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _firestoreService = FirestoreService();
+    _notesStream = _firestoreService.getNotes(widget.userId);
+  }
+
+  String _getPlainText(String jsonString) {
+    if (jsonString.isEmpty) return '';
+    try {
+      final json = jsonDecode(jsonString) as List<dynamic>;
+      final buffer = StringBuffer();
+      for (var item in json) {
+        if (item is Map<String, dynamic> && item.containsKey('insert')) {
+          buffer.write(item['insert']);
+        }
+      }
+      return buffer.toString().replaceAll('\n', ' ').trim();
+    } catch (e) {
+      return '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            'Welcome Back!',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.lato(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
+    return StreamBuilder<List<Note>>(
+      stream: _notesStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.note_outlined, size: 80, color: Colors.grey),
+                const SizedBox(height: 20),
+                Text(
+                  'You have no notes yet.',
+                  style: GoogleFonts.lato(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Tap the "+" button to create your first note!',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'What would you like to do today?',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.lato(
-              fontSize: 18,
-              color: theme.colorScheme.onSurface.withAlpha(178),
-            ),
-          ),
-          const SizedBox(height: 30),
-          _buildQuickJotCard(context),
-        ],
-      ),
-    );
-  }
+          );
+        } else {
+          final allNotes = snapshot.data!;
+          final filteredNotes = allNotes.where((note) {
+            final title = note.title.toLowerCase();
+            final content = _getPlainText(note.content).toLowerCase();
+            final query = widget.searchQuery.toLowerCase();
+            return title.contains(query) || content.contains(query);
+          }).toList();
 
-  Widget _buildQuickJotCard(BuildContext context) {
-    final theme = Theme.of(context);
-    final TextEditingController quickJotController = TextEditingController();
-    return Card(
-      elevation: 4,
-      shadowColor: theme.colorScheme.primary.withAlpha(102),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: quickJotController,
-              decoration: const InputDecoration(
-                hintText: 'Jot down a quick thought...',
-                border: InputBorder.none,
+          if (filteredNotes.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.search_off, size: 80, color: Colors.grey),
+                  const SizedBox(height: 20),
+                  Text(
+                    'No notes found.',
+                    style: GoogleFonts.lato(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Try a different search term or create a new note.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
               ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Save the quick jot
+            );
+          }
+
+          return AnimationLimiter(
+            child: GridView.builder(
+              padding: const EdgeInsets.all(12.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12.0,
+                mainAxisSpacing: 12.0,
+                childAspectRatio: 0.8,
+              ),
+              itemCount: filteredNotes.length,
+              itemBuilder: (context, index) {
+                final note = filteredNotes[index];
+                final plainTextContent = _getPlainText(note.content);
+
+                return AnimationConfiguration.staggeredGrid(
+                  position: index,
+                  duration: const Duration(milliseconds: 375),
+                  columnCount: 2,
+                  child: ScaleAnimation(
+                    child: FadeInAnimation(
+                      child: GestureDetector(
+                        onTap: () => widget.navigateToNotePage(context, note: note),
+                        child: Card(
+                          elevation: 4.0,
+                          shadowColor: theme.colorScheme.primary.withAlpha(75),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  note.title,
+                                  style: GoogleFonts.lato(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Expanded(
+                                  child: Text(
+                                    plainTextContent,
+                                    style: GoogleFonts.lato(
+                                      fontSize: 13,
+                                      color: theme.colorScheme.onSurface.withAlpha(180),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 5,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  timeago.format(note.updatedAt),
+                                  style: GoogleFonts.lato(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
               },
-              child: const Text('Save Jot'),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+      },
     );
   }
 }

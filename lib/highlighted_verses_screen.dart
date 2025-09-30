@@ -1,10 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kyros/highlight_service.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
-class HighlightedVersesScreen extends StatelessWidget {
+class HighlightedVersesScreen extends StatefulWidget {
   const HighlightedVersesScreen({super.key});
+
+  @override
+  State<HighlightedVersesScreen> createState() => _HighlightedVersesScreenState();
+}
+
+class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
+  final HighlightService _highlightService = HighlightService();
+
+  Future<void> _deleteHighlight(String highlightId) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      await _highlightService.deleteHighlight(highlightId);
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Highlight deleted.')),
+      );
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error deleting highlight: $e')),
+      );
+    }
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String highlightId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Highlight'),
+          content: const Text('Are you sure you want to delete this highlight?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteHighlight(highlightId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,49 +89,69 @@ class HighlightedVersesScreen extends StatelessWidget {
   }
 
   Widget _buildHighlightedVersesList(User user, ThemeData theme) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('highlights')
-          .where('userId', isEqualTo: user.uid)
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Highlight>>(
+      stream: _highlightService.getHighlights(user.uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return _buildEmptyView(theme);
         }
-        final docs = snapshot.data!.docs;
+        final highlights = snapshot.data!;
         return ListView.builder(
-          padding: const EdgeInsets.all(8.0),
-          itemCount: docs.length,
+          padding: const EdgeInsets.all(12.0),
+          itemCount: highlights.length,
           itemBuilder: (context, index) {
-            final doc = docs[index];
-            final data = doc.data() as Map<String, dynamic>;
+            final highlight = highlights[index];
             return Card(
-              elevation: 2,
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(16),
-                title: Text(
-                  data['reference'] ?? 'No Reference',
-                  style: GoogleFonts.lato(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    data['text'] ?? 'No Text',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.lato(fontSize: 16, color: theme.colorScheme.onSurface.withAlpha(204)),
-                  ),
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: theme.colorScheme.error),
-                  onPressed: () => doc.reference.delete(),
-                  tooltip: 'Delete Highlight',
+              elevation: 4.0,
+              margin: const EdgeInsets.symmetric(vertical: 10.0),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+              shadowColor: theme.colorScheme.primary.withAlpha(75),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      highlight.reference,
+                      style: GoogleFonts.lato(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      highlight.text,
+                      style: GoogleFonts.lato(
+                        fontSize: 16,
+                        height: 1.5, // Line height
+                        color: theme.colorScheme.onSurface.withAlpha(220),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          timeago.format(highlight.createdAt),
+                          style: GoogleFonts.lato(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete_outline, color: theme.colorScheme.error.withAlpha(200)),
+                          onPressed: () => _showDeleteConfirmation(context, highlight.id),
+                          tooltip: 'Delete Highlight',
+                        ),
+                      ],
+                    )
+                  ],
                 ),
               ),
             );
@@ -96,12 +166,18 @@ class HighlightedVersesScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.highlight_off, size: 50, color: theme.colorScheme.secondary),
-          const SizedBox(height: 16),
+          Icon(Icons.highlight_off, size: 60, color: theme.colorScheme.secondary.withAlpha(150)),
+          const SizedBox(height: 20),
           Text(
             'You have no highlighted verses yet.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.lato(fontSize: 18, color: theme.colorScheme.onSurface),
+            style: GoogleFonts.lato(fontSize: 20, color: theme.colorScheme.onSurface.withAlpha(200)),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'You can highlight verses from the Bible screen.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
           ),
         ],
       ),
