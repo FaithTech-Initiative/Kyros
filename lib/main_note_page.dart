@@ -34,7 +34,7 @@ class _MainNotePageState extends State<MainNotePage> {
     _titleController = TextEditingController(text: widget.note?.title);
     _selectedCollectionId = widget.note?.collectionId ?? widget.collectionId;
 
-    if (widget.note != null) {
+    if (widget.note != null && widget.note!.content.isNotEmpty) {
       try {
         final content = jsonDecode(widget.note!.content);
         _controller = QuillController(
@@ -158,21 +158,17 @@ class _MainNotePageState extends State<MainNotePage> {
           Expanded(
             child: Column(
               children: [
-                QuillToolbar.simple(
-                  configurations: QuillSimpleToolbarConfigurations(
-                    controller: _controller,
-                  ),
+                QuillToolbar.basic(
+                  controller: _controller,
                 ),
                 const Divider(),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: QuillEditor.basic(
-                      configurations: QuillEditorConfigurations(
-                        controller: _controller,
-                        readOnly: false,
-                      ),
+                      controller: _controller,
                       focusNode: _editorFocusNode,
+                      readOnly: false,
                     ),
                   ),
                 )

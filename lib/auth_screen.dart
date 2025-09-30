@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -173,7 +174,7 @@ class AuthScreenState extends State<AuthScreen> {
         autoPlay: true,
         enlargeCenterPage: true,
         showIndicator: true,
-        slideIndicator: CircularSlideIndicator(),
+        slideIndicator: const CircularSlideIndicator(),
       ),
       items: carouselItems.map((item) {
         return Builder(
