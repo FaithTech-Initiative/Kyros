@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/auth_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
+import 'package:kyros/highlight_service.dart';
 import 'package:kyros/collections_screen.dart';
 import 'package:kyros/home_screen.dart';
 import 'package:kyros/splash_screen.dart';
@@ -26,9 +27,12 @@ void main() async {
   );
   developer.log('Firebase initialized.', name: 'kyros.main');
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      child: const KyrosApp(),
+  MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => ThemeProvider()),
+      Provider(create: (context) => HighlightService()),
+    ],
+    child: const KyrosApp(),
     ),
   );
 }
@@ -104,7 +108,7 @@ class KyrosApp extends StatelessWidget {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.black,
-          backgroundColor: Colors.teal.shade100,
+          backgroundColor: Colors.teal.shade200,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),

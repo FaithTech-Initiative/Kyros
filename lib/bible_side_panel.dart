@@ -37,6 +37,13 @@ class _BibleSidePanelState extends State<BibleSidePanel> {
       final response = await http.get(Uri.parse('https://bible-api.com/$passage?translation=kjv'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+      if (data['error'] != null) {
+        setState(() {
+          _error = data['error'];
+          _isLoading = false;
+        });
+        return;
+      }
         setState(() {
           _passage = data['text'];
           _reference = data['reference'];
@@ -44,7 +51,7 @@ class _BibleSidePanelState extends State<BibleSidePanel> {
         });
       } else {
         setState(() {
-          _error = 'Could not find the specified passage.';
+        _error = 'Could not find passage. Status code: ${response.statusCode}';
           _isLoading = false;
         });
       }

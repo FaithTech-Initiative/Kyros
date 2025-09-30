@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/main_note_page.dart';
@@ -16,6 +15,7 @@ import 'package:kyros/study_tools_screen.dart';
 import 'package:kyros/my_wiki_screen.dart';
 import 'package:kyros/expanding_fab.dart';
 import 'package:kyros/database.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class HomeScreen extends StatefulWidget {
@@ -105,12 +105,12 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
       final Uint8List imageData = await image.readAsBytes();
-      final content = [Content.multi([
-        TextPart('What do you see in this image? Provide a detailed description.'),
+      final content = Content.multi([
+        const TextPart('What do you see in this image? Provide a detailed description.'), // No-op change to trigger re-analysis
         DataPart('image/jpeg', imageData),
-      ])];
+      ]);
 
-      final response = await model.generateContent(content);
+      final response = await model.generateContent([content]);
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Dismiss loading dialog
@@ -312,7 +312,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            if (!mounted) return;
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
                           },
                           child: CircleAvatar(

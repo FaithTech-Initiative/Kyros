@@ -158,17 +158,21 @@ class _MainNotePageState extends State<MainNotePage> {
           Expanded(
             child: Column(
               children: [
-                QuillToolbar.basic(
-                  controller: _controller,
+                QuillToolbar.simple(
+                  configurations: QuillSimpleToolbarConfigurations(
+                    controller: _controller,
+                  ),
                 ),
                 const Divider(),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: QuillEditor.basic(
-                      controller: _controller,
+                      configurations: QuillEditorConfigurations(
+                        controller: _controller,
+                        readOnly: false,
+                      ),
                       focusNode: _editorFocusNode,
-                      readOnly: false,
                     ),
                   ),
                 )

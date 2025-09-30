@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/highlight_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:provider/provider.dart';
 
 class HighlightedVersesScreen extends StatefulWidget {
   const HighlightedVersesScreen({super.key});
@@ -12,12 +13,11 @@ class HighlightedVersesScreen extends StatefulWidget {
 }
 
 class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
-  final HighlightService _highlightService = HighlightService();
 
   Future<void> _deleteHighlight(String highlightId) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
-      await _highlightService.deleteHighlight(highlightId);
+      await context.read<HighlightService>().deleteHighlight(highlightId);
       scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Highlight deleted.')),
       );
@@ -90,7 +90,7 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
 
   Widget _buildHighlightedVersesList(User user, ThemeData theme) {
     return StreamBuilder<List<Highlight>>(
-      stream: _highlightService.getHighlights(user.uid),
+      stream: context.watch<HighlightService>().getHighlights(user.uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

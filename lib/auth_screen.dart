@@ -16,7 +16,7 @@ class AuthScreen extends StatefulWidget {
 
 class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -55,19 +55,17 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+      final GoogleSignInAccount googleSignInAccount = await _googleSignIn.authenticate();
+      final GoogleSignInAuthentication googleSignInAuthentication = googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
-        );
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.idToken, // Or handle nullable accessToken
+        idToken: googleSignInAuthentication.idToken,
+      );
 
-        UserCredential userCredential = await _auth.signInWithCredential(credential);
-        if (!mounted) return;
-        _navigateToHome(userCredential.user);
-      }
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      if (!mounted) return;
+      _navigateToHome(userCredential.user);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
@@ -168,15 +166,10 @@ class AuthScreenState extends State<AuthScreen> {
       },
     ];
 
-    return FlutterCarousel(
-      options: CarouselOptions(
-        height: 200.0,
-        autoPlay: true,
-        enlargeCenterPage: true,
-        showIndicator: true,
-        slideIndicator: const CircularSlideIndicator(),
-      ),
-      items: carouselItems.map((item) {
+    return FlutterCarousel.builder(
+      itemCount: carouselItems.length,
+      itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
+        final item = carouselItems[itemIndex];
         return Builder(
           builder: (BuildContext context) {
             return _buildCarouselItem(
@@ -186,7 +179,14 @@ class AuthScreenState extends State<AuthScreen> {
             );
           },
         );
-      }).toList(),
+      },
+      options: CarouselOptions(
+        height: 200.0,
+        autoPlay: true,
+        enlargeCenterPage: true,
+        showIndicator: true,
+        slideIndicator: const CircularSlideIndicator(),
+      ),
     );
   }
 
