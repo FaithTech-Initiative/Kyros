@@ -163,11 +163,7 @@ class _MainNotePageState extends State<MainNotePage> {
           Expanded(
             child: Column(
               children: [
-                QuillToolbar.simple(
-                  configurations: QuillSimpleToolbarConfigurations(
-                    controller: _controller,
-                  ),
-                ),
+                QuillToolbar.simple(controller: _controller),
                 const Divider(),
                 Expanded(
                   child: Padding(
@@ -177,6 +173,7 @@ class _MainNotePageState extends State<MainNotePage> {
                         controller: _controller,
                         readOnly: false,
                       ),
+                      focusNode: _editorFocusNode,
                     ),
                   ),
                 )

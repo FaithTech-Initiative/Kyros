@@ -15,7 +15,7 @@ class AuthScreen extends StatefulWidget {
 
 class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -57,21 +57,19 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
+      final GoogleSignInAccount googleSignInAccount =
+          await _googleSignIn.authenticate();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
-        );
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.idToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
 
-        UserCredential userCredential =
-            await _auth.signInWithCredential(credential);
-        if (!mounted) return;
-        _navigateToHome(userCredential.user);
-      }
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      if (!mounted) return;
+      _navigateToHome(userCredential.user);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

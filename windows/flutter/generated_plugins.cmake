@@ -7,6 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   firebase_auth
   firebase_core
+  gal
+  irondash_engine_context
+  super_native_extensions
   url_launcher_windows
 )
 
