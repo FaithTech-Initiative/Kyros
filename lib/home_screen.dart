@@ -11,6 +11,7 @@ import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kyros/auth_screen.dart';
 import 'package:kyros/profile_screen.dart';
+import 'package:kyros/settings_screen.dart';
 import 'package:kyros/study_tools_screen.dart';
 import 'package:kyros/my_wiki_screen.dart';
 import 'package:kyros/expanding_fab.dart';
@@ -384,8 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.settings),
                 title: const Text('Setting'),
                 onTap: () {
-                  // TODO: Implement Setting functionality
-                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
                 },
               ),
               ListTile(
