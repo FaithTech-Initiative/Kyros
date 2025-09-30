@@ -140,7 +140,7 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
         title: Text('Collections', style: GoogleFonts.lato()),
       ),
       body: user == null
-          ? Center(child: Text('Please log in to see your collections.'))
+          ? const Center(child: Text('Please log in to see your collections.'))
           : StreamBuilder<List<Collection>>(
               stream: _collectionService.getCollections(user.uid),
               builder: (context, snapshot) {

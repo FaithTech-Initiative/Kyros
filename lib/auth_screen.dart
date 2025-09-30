@@ -173,7 +173,7 @@ class AuthScreenState extends State<AuthScreen> {
         autoPlay: true,
         enlargeCenterPage: true,
         showIndicator: true,
-        slideIndicator: const CircularSlideIndicator(),
+        slideIndicator: CircularSlideIndicator(),
       ),
       items: carouselItems.map((item) {
         return Builder(

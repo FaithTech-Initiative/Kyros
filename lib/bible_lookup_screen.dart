@@ -355,7 +355,7 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
               ),
             ],
           ),
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Text(

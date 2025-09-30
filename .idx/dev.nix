@@ -3,13 +3,9 @@
   channel = "stable-23.11";
 
   packages = [
-    pkgs.flutter,
-    pkgs.dart,
-    pkgs.cmake,
-    pkgs.google-chrome,
-    pkgs.clang,
-    pkgs.ninja,
-    pkgs.pkg-config
+    pkgs.flutter
+    pkgs.dart
+    pkgs.google-chrome
   ];
 
   env = {};
@@ -28,11 +24,9 @@
             "flutter"
             "run"
             "-d"
-            "web-server"
+            "chrome"
             "--web-port"
             "$PORT"
-            "--web-hostname"
-            "0.0.0.0"
           ];
           manager = "flutter";
         };

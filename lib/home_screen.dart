@@ -95,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (image == null) return;
 
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -104,15 +105,17 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
       final Uint8List imageData = await image.readAsBytes();
-      final content = Content.multi([
+      final content = [Content.multi([
         TextPart('What do you see in this image? Provide a detailed description.'),
         DataPart('image/jpeg', imageData),
-      ]);
+      ])];
 
-      final response = await model.generateContent([content]);
+      final response = await model.generateContent(content);
 
+      if (!mounted) return;
       Navigator.of(context).pop(); // Dismiss loading dialog
 
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -127,7 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       Navigator.of(context).pop(); // Dismiss loading dialog
+      if (!mounted) return;
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -307,6 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
+                            if (!mounted) return;
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
                           },
                           child: CircleAvatar(
