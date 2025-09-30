@@ -13,7 +13,8 @@ class CollectionsScreen extends StatefulWidget {
 
 class _CollectionsScreenState extends State<CollectionsScreen> {
   final CollectionService _collectionService = CollectionService();
-  final TextEditingController _collectionNameController = TextEditingController();
+  final TextEditingController _collectionNameController =
+      TextEditingController();
 
   void _showAddCollectionDialog(BuildContext context, String userId) {
     showDialog(
@@ -33,7 +34,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
             TextButton(
               onPressed: () {
                 if (_collectionNameController.text.isNotEmpty) {
-                  _collectionService.addCollection(userId, _collectionNameController.text);
+                  _collectionService.addCollection(
+                      userId, _collectionNameController.text);
                   _collectionNameController.clear();
                   Navigator.of(context).pop();
                 }
@@ -46,7 +48,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
     );
   }
 
-  void _showRenameCollectionDialog(BuildContext context, Collection collection) {
+  void _showRenameCollectionDialog(
+      BuildContext context, Collection collection) {
     _collectionNameController.text = collection.name;
     showDialog(
       context: context,
@@ -65,7 +68,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
             TextButton(
               onPressed: () {
                 if (_collectionNameController.text.isNotEmpty) {
-                  _collectionService.updateCollection(collection.id, _collectionNameController.text);
+                  _collectionService.updateCollection(
+                      collection.id, _collectionNameController.text);
                   _collectionNameController.clear();
                   Navigator.of(context).pop();
                 }
@@ -102,7 +106,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                   builder: (context) {
                     return AlertDialog(
                       title: const Text('Delete Collection'),
-                      content: const Text('Are you sure you want to delete this collection and all its notes?'),
+                      content: const Text(
+                          'Are you sure you want to delete this collection and all its notes?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
@@ -113,7 +118,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                             _collectionService.deleteCollection(collection.id);
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Collection deleted')),
+                              const SnackBar(
+                                  content: Text('Collection deleted')),
                             );
                           },
                           child: const Text('Delete'),
@@ -151,7 +157,8 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                   return Center(
                     child: Text(
                       'No collections yet.',
-                      style: GoogleFonts.lato(fontSize: 18, color: theme.colorScheme.onSurface),
+                      style: GoogleFonts.lato(
+                          fontSize: 18, color: theme.colorScheme.onSurface),
                     ),
                   );
                 }
@@ -183,10 +190,12 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
                 );
               },
             ),
-      floatingActionButton: user != null ? FloatingActionButton(
-        onPressed: () => _showAddCollectionDialog(context, user.uid),
-        child: const Icon(Icons.add),
-      ) : null,
+      floatingActionButton: user != null
+          ? FloatingActionButton(
+              onPressed: () => _showAddCollectionDialog(context, user.uid),
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

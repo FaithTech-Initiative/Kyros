@@ -34,16 +34,17 @@ class _BibleSidePanelState extends State<BibleSidePanel> {
     }
 
     try {
-      final response = await http.get(Uri.parse('https://bible-api.com/$passage?translation=kjv'));
+      final response = await http
+          .get(Uri.parse('https://bible-api.com/$passage?translation=kjv'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-      if (data['error'] != null) {
-        setState(() {
-          _error = data['error'];
-          _isLoading = false;
-        });
-        return;
-      }
+        if (data['error'] != null) {
+          setState(() {
+            _error = data['error'];
+            _isLoading = false;
+          });
+          return;
+        }
         setState(() {
           _passage = data['text'];
           _reference = data['reference'];
@@ -51,7 +52,8 @@ class _BibleSidePanelState extends State<BibleSidePanel> {
         });
       } else {
         setState(() {
-        _error = 'Could not find passage. Status code: ${response.statusCode}';
+          _error =
+              'Could not find passage. Status code: ${response.statusCode}';
           _isLoading = false;
         });
       }
@@ -78,7 +80,8 @@ class _BibleSidePanelState extends State<BibleSidePanel> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Study Panel',
-              style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold),
+              style:
+                  GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
           const Divider(),
@@ -125,13 +128,18 @@ class _BibleSidePanelState extends State<BibleSidePanel> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(_reference, style: GoogleFonts.lato(fontWeight: FontWeight.bold)),
+                                    Text(_reference,
+                                        style: GoogleFonts.lato(
+                                            fontWeight: FontWeight.bold)),
                                     IconButton(
-                                      icon: Icon(Icons.add_comment, color: theme.colorScheme.primary),
+                                      icon: Icon(Icons.add_comment,
+                                          color: theme.colorScheme.primary),
                                       onPressed: () {
-                                        final fullPassage = '"$_passage" - $_reference';
+                                        final fullPassage =
+                                            '"$_passage" - $_reference';
                                         widget.onInsertPassage(fullPassage);
                                       },
                                       tooltip: 'Insert passage into note',

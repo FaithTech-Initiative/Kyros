@@ -11,7 +11,8 @@ class MainNotePage extends StatefulWidget {
   final String userId;
   final Note? note;
   final String? collectionId;
-  const MainNotePage({super.key, required this.userId, this.note, this.collectionId});
+  const MainNotePage(
+      {super.key, required this.userId, this.note, this.collectionId});
 
   @override
   State<MainNotePage> createState() => _MainNotePageState();
@@ -79,9 +80,12 @@ class _MainNotePageState extends State<MainNotePage> {
 
     try {
       if (widget.note == null) {
-        await _firestoreService.addNote(widget.userId, title, content, collectionId: _selectedCollectionId);
+        await _firestoreService.addNote(widget.userId, title, content,
+            collectionId: _selectedCollectionId);
       } else {
-        await _firestoreService.updateNote(widget.userId, widget.note!.id, title, content, collectionId: _selectedCollectionId);
+        await _firestoreService.updateNote(
+            widget.userId, widget.note!.id, title, content,
+            collectionId: _selectedCollectionId);
       }
       navigator.pop(true);
     } catch (e) {
@@ -147,7 +151,8 @@ class _MainNotePageState extends State<MainNotePage> {
             tooltip: 'Toggle Bible Panel',
           ),
           IconButton(
-            icon: Icon(Icons.save, color: Theme.of(context).colorScheme.primary),
+            icon:
+                Icon(Icons.save, color: Theme.of(context).colorScheme.primary),
             onPressed: _saveNote,
             tooltip: 'Save Note',
           ),

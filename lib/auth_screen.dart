@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,13 +33,15 @@ class AuthScreenState extends State<AuthScreen> {
       _navigateToHome(userCredential.user);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Authentication failed.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Authentication failed.')));
     }
   }
 
   Future<void> _createUserWithEmailAndPassword() async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
@@ -49,26 +50,33 @@ class AuthScreenState extends State<AuthScreen> {
       _navigateToHome(userCredential.user);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Sign up failed.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Sign up failed.')));
     }
   }
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount googleSignInAccount = await _googleSignIn.authenticate();
-      final GoogleSignInAuthentication googleSignInAuthentication = googleSignInAccount.authentication;
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+      if (googleSignInAccount != null) {
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.idToken, // Or handle nullable accessToken
-        idToken: googleSignInAuthentication.idToken,
-      );
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleSignInAuthentication.accessToken,
+          idToken: googleSignInAuthentication.idToken,
+        );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
-      if (!mounted) return;
-      _navigateToHome(userCredential.user);
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+        if (!mounted) return;
+        _navigateToHome(userCredential.user);
+      }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
     }
   }
 
@@ -87,12 +95,14 @@ class AuthScreenState extends State<AuthScreen> {
         accessToken: credential.authorizationCode,
       );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credentialWithApple);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credentialWithApple);
       if (!mounted) return;
       _navigateToHome(userCredential.user);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Apple Sign in failed: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Apple Sign in failed: $e')));
     }
   }
 
@@ -292,7 +302,9 @@ class AuthScreenState extends State<AuthScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
-      onPressed: _isLogin ? _signInWithEmailAndPassword : _createUserWithEmailAndPassword,
+      onPressed: _isLogin
+          ? _signInWithEmailAndPassword
+          : _createUserWithEmailAndPassword,
       child: Text(
         _isLogin ? 'Sign In' : 'Sign Up',
         style: GoogleFonts.lato(
@@ -310,7 +322,9 @@ class AuthScreenState extends State<AuthScreen> {
         });
       },
       child: Text(
-        _isLogin ? 'Don\'t have an account? Sign Up' : 'Already have an account? Sign In',
+        _isLogin
+            ? 'Don\'t have an account? Sign Up'
+            : 'Already have an account? Sign In',
         style: GoogleFonts.lato(color: Theme.of(context).colorScheme.primary),
       ),
     );
@@ -322,7 +336,8 @@ class AuthScreenState extends State<AuthScreen> {
         const Expanded(child: Divider()),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('Or continue with', style: GoogleFonts.lato(color: Colors.grey)),
+          child: Text('Or continue with',
+              style: GoogleFonts.lato(color: Colors.grey)),
         ),
         const Expanded(child: Divider()),
       ],

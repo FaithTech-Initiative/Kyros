@@ -60,7 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToNotePage(BuildContext context, {Note? note}) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MainNotePage(userId: widget.userId, note: note)),
+      MaterialPageRoute(
+          builder: (context) =>
+              MainNotePage(userId: widget.userId, note: note)),
     );
   }
 
@@ -103,10 +105,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     try {
-      final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
+      final model =
+          FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
       final Uint8List imageData = await image.readAsBytes();
       final content = Content.multi([
-        const TextPart('What do you see in this image? Provide a detailed description.'), // No-op change to trigger re-analysis
+        const TextPart(
+            'What do you see in this image? Provide a detailed description.'), // No-op change to trigger re-analysis
         DataPart('image/jpeg', imageData),
       ]);
 
@@ -171,7 +175,9 @@ class _HomeScreenState extends State<HomeScreen> {
           transitionBuilder: (Widget child, Animation<double> animation) {
             final isSearchField = child.key == const ValueKey('search-field');
             final offsetAnimation = Tween<Offset>(
-              begin: isSearchField ? const Offset(1.0, 0.0) : const Offset(-1.0, 0.0),
+              begin: isSearchField
+                  ? const Offset(1.0, 0.0)
+                  : const Offset(-1.0, 0.0),
               end: Offset.zero,
             ).animate(animation);
 
@@ -187,7 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           child: _isSearchActive
               ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 8.0),
                   child: TextField(
                     key: const ValueKey('search-field'),
                     controller: _searchController,
@@ -198,10 +205,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       fillColor: theme.colorScheme.surface.withAlpha(245),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(color: theme.colorScheme.onSurface.withAlpha(80), width: 1.0),
+                        borderSide: BorderSide(
+                            color: theme.colorScheme.onSurface.withAlpha(80),
+                            width: 1.0),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                      hintStyle: TextStyle(color: theme.colorScheme.onSurface.withAlpha(150)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 0, horizontal: 16),
+                      hintStyle: TextStyle(
+                          color: theme.colorScheme.onSurface.withAlpha(150)),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear),
@@ -211,7 +222,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           : null,
                     ),
-                    style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 18.0),
+                    style: TextStyle(
+                        color: theme.colorScheme.onSurface, fontSize: 18.0),
                   ),
                 )
               : Text(
@@ -240,10 +252,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ProfileScreen()));
                   },
                   child: CircleAvatar(
-                    backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+                    backgroundImage: user?.photoURL != null
+                        ? NetworkImage(user!.photoURL!)
+                        : null,
                     child: user?.photoURL == null
                         ? const Icon(
                             Icons.person,
@@ -301,7 +318,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: ElevatedButton.styleFrom(
                           foregroundColor: theme.colorScheme.onPrimary,
                           backgroundColor: theme.colorScheme.primary,
-                          side: BorderSide(color: theme.colorScheme.onPrimary, width: 1.0),
+                          side: BorderSide(
+                              color: theme.colorScheme.onPrimary, width: 1.0),
                         ),
                         child: const Text('Give Now'),
                       ),
@@ -312,11 +330,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const ProfileScreen()));
                           },
                           child: CircleAvatar(
                             radius: 30,
-                            backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+                            backgroundImage: user?.photoURL != null
+                                ? NetworkImage(user!.photoURL!)
+                                : null,
                             child: user?.photoURL == null
                                 ? const Icon(
                                     Icons.person,
@@ -328,12 +352,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 10),
                         Text(
                           user?.displayName ?? 'No Name',
-                          style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 18),
+                          style: TextStyle(
+                              color: theme.colorScheme.onPrimary, fontSize: 18),
                         ),
                         const SizedBox(height: 5),
                         Text(
                           user?.email ?? 'No Email',
-                          style: TextStyle(color: theme.colorScheme.onPrimary, fontSize: 14),
+                          style: TextStyle(
+                              color: theme.colorScheme.onPrimary, fontSize: 14),
                         ),
                       ],
                     ),
@@ -351,7 +377,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.bookmark),
                 title: const Text('Highlights'),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const HighlightedVersesScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const HighlightedVersesScreen()));
                 },
               ),
               ListTile(
@@ -390,7 +420,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.settings),
                 title: const Text('Setting'),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SettingsScreen()));
                 },
               ),
               ListTile(
@@ -504,7 +537,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                 const SizedBox(height: 20),
                 Text(
                   'You have no notes yet.',
-                  style: GoogleFonts.lato(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.lato(
+                      fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -533,7 +567,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                   const SizedBox(height: 20),
                   Text(
                     'No notes found.',
-                    style: GoogleFonts.lato(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.lato(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -567,7 +602,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                   child: ScaleAnimation(
                     child: FadeInAnimation(
                       child: GestureDetector(
-                        onTap: () => widget.navigateToNotePage(context, note: note),
+                        onTap: () =>
+                            widget.navigateToNotePage(context, note: note),
                         child: Card(
                           elevation: 4.0,
                           shadowColor: theme.colorScheme.primary.withAlpha(75),
@@ -594,7 +630,8 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                                     plainTextContent,
                                     style: GoogleFonts.lato(
                                       fontSize: 13,
-                                      color: theme.colorScheme.onSurface.withAlpha(180),
+                                      color: theme.colorScheme.onSurface
+                                          .withAlpha(180),
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 5,

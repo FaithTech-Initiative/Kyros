@@ -27,12 +27,12 @@ void main() async {
   );
   developer.log('Firebase initialized.', name: 'kyros.main');
   runApp(
-  MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (context) => ThemeProvider()),
-      Provider(create: (context) => HighlightService()),
-    ],
-    child: const KyrosApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        Provider(create: (context) => HighlightService()),
+      ],
+      child: const KyrosApp(),
     ),
   );
 }
@@ -69,7 +69,8 @@ class KyrosApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(32),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       ),
       textTheme: appTextTheme.apply(
         bodyColor: const Color(0xFF2C3E50),
@@ -79,7 +80,8 @@ class KyrosApp extends StatelessWidget {
         indicatorColor: primarySeedColor,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const TextStyle(color: primarySeedColor, fontWeight: FontWeight.bold);
+            return const TextStyle(
+                color: primarySeedColor, fontWeight: FontWeight.bold);
           }
           return const TextStyle(color: primarySeedColor);
         }),
@@ -103,7 +105,8 @@ class KyrosApp extends StatelessWidget {
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.grey[900],
         foregroundColor: Colors.white,
-        titleTextStyle: GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold),
+        titleTextStyle:
+            GoogleFonts.lato(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -111,7 +114,8 @@ class KyrosApp extends StatelessWidget {
           backgroundColor: Colors.teal.shade200,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          textStyle: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -137,7 +141,8 @@ class KyrosApp extends StatelessWidget {
             },
           ),
           routes: {
-            '/home': (context) => HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid),
+            '/home': (context) =>
+                HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid),
             '/bible_lookup': (context) => const BibleLookupScreen(),
             '/collections': (context) => const CollectionsScreen(),
           },

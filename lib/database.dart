@@ -30,7 +30,8 @@ class Note {
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<void> addNote(String userId, String title, String content, {String? collectionId}) {
+  Future<void> addNote(String userId, String title, String content,
+      {String? collectionId}) {
     return _db.collection('users').doc(userId).collection('notes').add({
       'title': title,
       'content': content,
@@ -39,8 +40,15 @@ class FirestoreService {
     });
   }
 
-  Future<void> updateNote(String userId, String noteId, String title, String content, {String? collectionId}) {
-    return _db.collection('users').doc(userId).collection('notes').doc(noteId).update({
+  Future<void> updateNote(
+      String userId, String noteId, String title, String content,
+      {String? collectionId}) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(noteId)
+        .update({
       'title': title,
       'content': content,
       'updatedAt': FieldValue.serverTimestamp(),
@@ -49,7 +57,12 @@ class FirestoreService {
   }
 
   Future<void> deleteNote(String userId, String noteId) {
-    return _db.collection('users').doc(userId).collection('notes').doc(noteId).delete();
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .doc(noteId)
+        .delete();
   }
 
   Stream<List<Note>> getNotes(String userId, {String? collectionId}) {
@@ -59,7 +72,8 @@ class FirestoreService {
       query = query.where('collectionId', isEqualTo: collectionId);
     }
 
-    return query.orderBy('updatedAt', descending: true).snapshots().map((snapshot) =>
-        snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList());
+    return query.orderBy('updatedAt', descending: true).snapshots().map(
+        (snapshot) =>
+            snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList());
   }
 }

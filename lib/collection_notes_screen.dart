@@ -63,7 +63,8 @@ class CollectionNotesScreen extends StatelessWidget {
             return Center(
               child: Text(
                 'No notes in this collection yet.',
-                style: GoogleFonts.lato(fontSize: 18, color: theme.colorScheme.onSurface),
+                style: GoogleFonts.lato(
+                    fontSize: 18, color: theme.colorScheme.onSurface),
               ),
             );
           }

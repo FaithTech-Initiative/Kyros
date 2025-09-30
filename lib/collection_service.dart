@@ -33,7 +33,8 @@ class CollectionService {
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Collection.fromFirestore(doc)).toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Collection.fromFirestore(doc)).toList());
   }
 
   Future<void> addCollection(String userId, String name) {

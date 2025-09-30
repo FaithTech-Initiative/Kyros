@@ -72,7 +72,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to save highlights.')),
+        const SnackBar(
+            content: Text('You must be logged in to save highlights.')),
       );
       return;
     }
@@ -82,7 +83,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     });
 
     if (_isHighlighted) {
-      final docRef = await FirebaseFirestore.instance.collection('highlights').add({
+      final docRef =
+          await FirebaseFirestore.instance.collection('highlights').add({
         'userId': user.uid,
         'reference': _searchController.text,
         'text': _verseText,
@@ -92,7 +94,10 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
         _highlightId = docRef.id;
       });
     } else if (_highlightId != null) {
-      await FirebaseFirestore.instance.collection('highlights').doc(_highlightId).delete();
+      await FirebaseFirestore.instance
+          .collection('highlights')
+          .doc(_highlightId)
+          .delete();
       setState(() {
         _highlightId = null;
       });
@@ -110,7 +115,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     );
 
     try {
-      final url = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_googleAiApiKey');
+      final url = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_googleAiApiKey');
       final response = await http.post(
         url,
         headers: {
@@ -121,7 +127,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
             {
               'parts': [
                 {
-                  'text': 'Summarize the following Bible verse in a few bullet points: $_verseText'
+                  'text':
+                      'Summarize the following Bible verse in a few bullet points: $_verseText'
                 }
               ]
             }
@@ -151,7 +158,9 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
       } else {
         final error = json.decode(response.body);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error generating insights: ${error['error']['message']}')),
+          SnackBar(
+              content: Text(
+                  'Error generating insights: ${error['error']['message']}')),
         );
       }
     } catch (e) {
@@ -225,7 +234,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     }
 
     final query = _searchController.text;
-    final url = Uri.parse('https://www.blueletterbible.org/search/search.cfm?Criteria=$query&t=ESV');
+    final url = Uri.parse(
+        'https://www.blueletterbible.org/search/search.cfm?Criteria=$query&t=ESV');
 
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
@@ -280,7 +290,8 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
       controller: _searchController,
       decoration: InputDecoration(
         labelText: 'Enter a Bible verse (e.g., John 3:16)',
-        prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
+        prefixIcon:
+            Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
         suffixIcon: IconButton(
           icon: Icon(Icons.send, color: Theme.of(context).colorScheme.primary),
           onPressed: _lookupVerse,
@@ -325,7 +336,11 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
     );
   }
 
-  Widget _buildActionButton(ThemeData theme, {required VoidCallback onPressed, required IconData icon, required String label, Color? color}) {
+  Widget _buildActionButton(ThemeData theme,
+      {required VoidCallback onPressed,
+      required IconData icon,
+      required String label,
+      Color? color}) {
     return ElevatedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 16),
@@ -345,7 +360,9 @@ class _BibleLookupScreenState extends State<BibleLookupScreen> {
       child: SingleChildScrollView(
         child: Container(
           decoration: BoxDecoration(
-            color: _isHighlighted ? theme.colorScheme.secondary.withAlpha(51) : Colors.white,
+            color: _isHighlighted
+                ? theme.colorScheme.secondary.withAlpha(51)
+                : Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

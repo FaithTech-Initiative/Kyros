@@ -9,11 +9,11 @@ class HighlightedVersesScreen extends StatefulWidget {
   const HighlightedVersesScreen({super.key});
 
   @override
-  State<HighlightedVersesScreen> createState() => _HighlightedVersesScreenState();
+  State<HighlightedVersesScreen> createState() =>
+      _HighlightedVersesScreenState();
 }
 
 class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
-
   Future<void> _deleteHighlight(String highlightId) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
@@ -34,7 +34,8 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Highlight'),
-          content: const Text('Are you sure you want to delete this highlight?'),
+          content:
+              const Text('Are you sure you want to delete this highlight?'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
@@ -43,7 +44,8 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
               },
             ),
             TextButton(
-              child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              child: Text('Delete',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onPressed: () {
                 Navigator.of(context).pop();
                 _deleteHighlight(highlightId);
@@ -54,7 +56,6 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +82,8 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
           Text(
             'Please log in to see your highlighted verses.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.lato(fontSize: 18, color: theme.colorScheme.onSurface),
+            style: GoogleFonts.lato(
+                fontSize: 18, color: theme.colorScheme.onSurface),
           ),
         ],
       ),
@@ -110,7 +112,8 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
             return Card(
               elevation: 4.0,
               margin: const EdgeInsets.symmetric(vertical: 10.0),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0)),
               shadowColor: theme.colorScheme.primary.withAlpha(75),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -145,8 +148,10 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete_outline, color: theme.colorScheme.error.withAlpha(200)),
-                          onPressed: () => _showDeleteConfirmation(context, highlight.id),
+                          icon: Icon(Icons.delete_outline,
+                              color: theme.colorScheme.error.withAlpha(200)),
+                          onPressed: () =>
+                              _showDeleteConfirmation(context, highlight.id),
                           tooltip: 'Delete Highlight',
                         ),
                       ],
@@ -166,12 +171,15 @@ class _HighlightedVersesScreenState extends State<HighlightedVersesScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.highlight_off, size: 60, color: theme.colorScheme.secondary.withAlpha(150)),
+          Icon(Icons.highlight_off,
+              size: 60, color: theme.colorScheme.secondary.withAlpha(150)),
           const SizedBox(height: 20),
           Text(
             'You have no highlighted verses yet.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.lato(fontSize: 20, color: theme.colorScheme.onSurface.withAlpha(200)),
+            style: GoogleFonts.lato(
+                fontSize: 20,
+                color: theme.colorScheme.onSurface.withAlpha(200)),
           ),
           const SizedBox(height: 10),
           Text(

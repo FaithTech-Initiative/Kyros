@@ -36,7 +36,8 @@ class HighlightService {
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => Highlight.fromFirestore(doc)).toList());
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Highlight.fromFirestore(doc)).toList());
   }
 
   Future<void> deleteHighlight(String highlightId) {
