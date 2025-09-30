@@ -15,7 +15,7 @@ class AuthScreen extends StatefulWidget {
 
 class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -57,19 +57,22 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount googleSignInAccount =
-          await _googleSignIn.authenticate();
-      final GoogleSignInAuthentication googleSignInAuthentication =
-          googleSignInAccount.authentication;
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+      if (googleSignInAccount != null) {
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.idToken,
-        idToken: googleSignInAuthentication.idToken,
-      );
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleSignInAuthentication.accessToken,
+          idToken: googleSignInAuthentication.idToken,
+        );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
-      if (!mounted) return;
-      _navigateToHome(userCredential.user);
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+        if (!mounted) return;
+        _navigateToHome(userCredential.user);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -173,16 +176,7 @@ class AuthScreenState extends State<AuthScreen> {
       },
     ];
 
-    return FlutterCarousel.builder(
-      itemCount: carouselItems.length,
-      itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
-        final item = carouselItems[itemIndex];
-        return _buildCarouselItem(
-          item['imagePath']!,
-          item['title']!,
-          item['subtitle']!,
-        );
-      },
+    return FlutterCarousel(
       options: CarouselOptions(
         height: 200.0,
         autoPlay: true,
@@ -190,6 +184,17 @@ class AuthScreenState extends State<AuthScreen> {
         showIndicator: true,
         slideIndicator: const CircularSlideIndicator(),
       ),
+      items: carouselItems.map((item) {
+        return Builder(
+          builder: (BuildContext context) {
+            return _buildCarouselItem(
+              item['imagePath']!,
+              item['title']!,
+              item['subtitle']!,
+            );
+          },
+        );
+      }).toList(),
     );
   }
 
