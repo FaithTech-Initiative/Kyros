@@ -177,7 +177,6 @@ class _MainNotePageState extends State<MainNotePage> {
                         controller: _controller,
                         readOnly: false,
                       ),
-                      focusNode: _editorFocusNode,
                     ),
                   ),
                 )

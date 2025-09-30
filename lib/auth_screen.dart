@@ -15,7 +15,7 @@ class AuthScreen extends StatefulWidget {
 
 class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -57,8 +57,7 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleSignInAccount =
-          await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
       if (googleSignInAccount != null) {
         final GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
@@ -180,14 +179,10 @@ class AuthScreenState extends State<AuthScreen> {
       itemCount: carouselItems.length,
       itemBuilder: (BuildContext context, int itemIndex, int pageViewIndex) {
         final item = carouselItems[itemIndex];
-        return Builder(
-          builder: (BuildContext context) {
-            return _buildCarouselItem(
-              item['imagePath']!,
-              item['title']!,
-              item['subtitle']!,
-            );
-          },
+        return _buildCarouselItem(
+          item['imagePath']!,
+          item['title']!,
+          item['subtitle']!,
         );
       },
       options: CarouselOptions(

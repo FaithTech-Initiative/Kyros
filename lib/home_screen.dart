@@ -108,13 +108,12 @@ class _HomeScreenState extends State<HomeScreen> {
       final model =
           FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
       final Uint8List imageData = await image.readAsBytes();
-      final content = Content.multi([
-        const TextPart(
-            'What do you see in this image? Provide a detailed description.'), // No-op change to trigger re-analysis
+      final content = [Content.multi([
+        TextPart('What do you see in this image? Provide a detailed description.'),
         DataPart('image/jpeg', imageData),
-      ]);
+      ])];
 
-      final response = await model.generateContent([content]);
+      final response = await model.generateContent(content);
 
       if (!mounted) return;
       Navigator.of(context).pop(); // Dismiss loading dialog
