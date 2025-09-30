@@ -25,6 +25,8 @@ dependencies:
   sign_in_with_apple: ^6.1.1
   flutter_staggered_animations: ^1.1.1
   timeago: ^3.7.1
+  firebase_ai: ^3.3.0
+  image_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:

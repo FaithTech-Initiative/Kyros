@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
@@ -83,6 +86,61 @@ class _HomeScreenState extends State<HomeScreen> {
         _searchController.clear();
       }
     });
+  }
+
+  Future<void> _analyzeImage() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
+      final Uint8List imageData = await image.readAsBytes();
+      final content = Content.multi([
+        TextPart('What do you see in this image? Provide a detailed description.'),
+        DataPart('image/jpeg', imageData),
+      ]);
+
+      final response = await model.generateContent([content]);
+
+      Navigator.of(context).pop(); // Dismiss loading dialog
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Image Analysis'),
+          content: Text(response.text ?? 'No description generated.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // Dismiss loading dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('Failed to analyze image: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -359,9 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Audio',
           ),
           ActionButton(
-            onPressed: () {
-              // TODO: Implement Image functionality
-            },
+            onPressed: _analyzeImage,
             icon: const Icon(Icons.image),
             label: 'Image',
           ),
