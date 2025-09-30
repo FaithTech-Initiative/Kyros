@@ -8,6 +8,7 @@ import 'package:kyros/auth_screen.dart';
 import 'package:kyros/profile_screen.dart';
 import 'package:kyros/study_tools_screen.dart';
 import 'package:kyros/my_wiki_screen.dart';
+import 'package:kyros/expanding_fab.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userId;
@@ -61,45 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _searchController.clear();
       }
     });
-  }
-
-  void _showQuickAddMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Wrap(
-          children: <Widget>[
-            ListTile(
-              leading: const Icon(Icons.note_add),
-              title: const Text('New Note'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NoteScreen(userId: widget.userId)),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.audiotrack),
-              title: const Text('Audio'),
-              onTap: () {
-                // TODO: Implement Audio functionality
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.image),
-              title: const Text('Image'),
-              onTap: () {
-                // TODO: Implement Image functionality
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -355,9 +317,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showQuickAddMenu(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: ExpandingFab(
+        distance: 112.0,
+        children: [
+          ActionButton(
+            onPressed: () {
+              // TODO: Implement Audio functionality
+            },
+            icon: const Icon(Icons.audiotrack),
+            label: 'Audio',
+          ),
+          ActionButton(
+            onPressed: () {
+              // TODO: Implement Image functionality
+            },
+            icon: const Icon(Icons.image),
+            label: 'Image',
+          ),
+          ActionButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NoteScreen(userId: widget.userId))),
+            icon: const Icon(Icons.note_add),
+            label: 'New Note',
+          ),
+        ],
       ),
     );
   }
