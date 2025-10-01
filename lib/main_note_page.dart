@@ -174,11 +174,12 @@ class _MainNotePageState extends State<MainNotePage> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: QuillEditor.basic(
-                      configurations: QuillEditorBasicConfigurations(
+                    child: QuillEditor(
+                      configurations: QuillEditorConfigurations(
                         controller: _controller,
-                        readOnly: false,
                       ),
+                      focusNode: _editorFocusNode,
+                      scrollController: _scrollController,
                     ),
                   ),
                 )

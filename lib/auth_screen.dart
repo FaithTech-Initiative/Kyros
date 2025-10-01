@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kyros/home_screen.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_carousel_widget/flutter_carousel_widget.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -176,13 +176,11 @@ class AuthScreenState extends State<AuthScreen> {
       },
     ];
 
-    return FlutterCarousel(
+    return CarouselSlider(
       options: CarouselOptions(
         height: 200.0,
         autoPlay: true,
         enlargeCenterPage: true,
-        showIndicator: true,
-        slideIndicator: CircularSlideIndicator(),
       ),
       items: carouselItems.map((item) {
         return Builder(
