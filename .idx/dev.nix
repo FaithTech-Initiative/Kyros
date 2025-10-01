@@ -6,6 +6,8 @@
     pkgs.flutter
     pkgs.dart
     pkgs.google-chrome
+    pkgs.android-tools
+    pkgs.android-sdk
   ];
 
   env = {};
@@ -27,6 +29,15 @@
             "chrome"
             "--web-port"
             "$PORT"
+          ];
+          manager = "flutter";
+        };
+        android = {
+          command = [
+            "flutter"
+            "run"
+            "-d"
+            "android"
           ];
           manager = "flutter";
         };
