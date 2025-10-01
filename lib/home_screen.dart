@@ -392,8 +392,15 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Audio',
           ),
           ActionButton(
+            onPressed: () {
+              // TODO: Implement Image functionality
+            },
+            icon: const Icon(Icons.image),
+            label: 'Image',
+          ),
+          ActionButton(
             onPressed: () => _navigateToNotePage(context),
-            icon: const Icon(Icons.note_add),
+            icon: const Icon(Icons.edit),
             label: 'New Note',
           ),
         ],
