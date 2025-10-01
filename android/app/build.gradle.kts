@@ -8,6 +8,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
+
 android {
     namespace = "com.example.myapp"
     compileSdk = flutter.compileSdkVersion
@@ -22,33 +31,40 @@ android {
         jvmTarget = "1.8"
     }
 
+    sourceSets {
+        getByName("main").java.srcDirs("src/main/kotlin")
+    }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.myapp"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = flutterVersionCode.toInt()
+        versionName = flutterVersionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
 
     packagingOptions {
-        resources.pickFirsts.add("lib/x86/libsqlite3.so")
-        resources.pickFirsts.add("lib/x86_64/libsqlite3.so")
-        resources.pickFirsts.add("lib/armeabi-v7a/libsqlite3.so")
-        resources.pickFirsts.add("lib/arm64-v8a/libsqlite3.so")
+        resources {
+            pickFirsts.addAll(listOf(
+                "lib/x86/libsqlite3.so",
+                "lib/x86_64/libsqlite3.so",
+                "lib/armeabi-v7a/libsqlite3.so",
+                "lib/arm64-v8a/libsqlite3.so"
+            ))
+        }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
 }

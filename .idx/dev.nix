@@ -1,20 +1,21 @@
 { pkgs, ... }:
-{
-  channel = "stable-23.11";
 
+{
+  # Which nixpkgs channel to use.
+  channel = "stable-23.11"; # Or "unstable"
+
+  # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.flutter
     pkgs.dart
-    pkgs.google-chrome
-    pkgs.android-tools
-    pkgs.android-sdk
+    pkgs.chromium
   ];
 
-  env = {};
-
+  # Search for nix options here: https://search.nixos.org/options
+  # Or commands here: https://search.nixos.org/cmds
   idx = {
     extensions = [
-      "dart-code.dart-code",
+      "dart-code.dart-code"
       "dart-code.flutter"
     ];
 
@@ -26,21 +27,19 @@
             "flutter"
             "run"
             "-d"
-            "chrome"
+            "linux"
             "--web-port"
             "$PORT"
           ];
           manager = "flutter";
         };
-        android = {
-          command = [
-            "flutter"
-            "run"
-            "-d"
-            "android"
-          ];
-          manager = "flutter";
-        };
+      };
+    };
+    
+    workspace = {
+      onStart = {
+        # Check flutter setup
+        doctor = "flutter doctor";
       };
     };
   };

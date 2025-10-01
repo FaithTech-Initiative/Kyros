@@ -22,6 +22,7 @@ class _MainNotePageState extends State<MainNotePage> {
   late final QuillController _controller;
   late final TextEditingController _titleController;
   final FocusNode _editorFocusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
   bool _isPanelVisible = true;
   late final FirestoreService _firestoreService;
   late final CollectionService _collectionService;
@@ -55,6 +56,7 @@ class _MainNotePageState extends State<MainNotePage> {
     _controller.dispose();
     _titleController.dispose();
     _editorFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -163,15 +165,20 @@ class _MainNotePageState extends State<MainNotePage> {
           Expanded(
             child: Column(
               children: [
-                QuillToolbar.simple(controller: _controller),
+                QuillToolbar.simple(
+                  configurations: QuillSimpleToolbarConfigurations(
+                    controller: _controller,
+                  ),
+                ),
                 const Divider(),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: QuillEditor.basic(
-                      controller: _controller,
-                      readOnly: false,
-                      focusNode: _editorFocusNode,
+                      configurations: QuillEditorBasicConfigurations(
+                        controller: _controller,
+                        readOnly: false,
+                      ),
                     ),
                   ),
                 )
