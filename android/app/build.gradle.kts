@@ -39,7 +39,7 @@ android {
 
     defaultConfig {
         applicationId = "com.faithtech.kyros"
-        minSdk = flutter.minSdkVersion
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
