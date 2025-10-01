@@ -391,20 +391,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ActionButton(
             onPressed: () {
-              // TODO: Implement Image functionality
-            },
-            icon: const Icon(Icons.image),
-            label: 'Image',
-          ),
-          ActionButton(
-            onPressed: () {
               // TODO: Implement Audio functionality
             },
             icon: const Icon(Icons.mic),
             label: 'Audio',
           ),
-          
-          
+          const SizedBox(height: 8.0),
+          ActionButton(
+            onPressed: () {
+              // TODO: Implement Image functionality
+            },
+            icon: const Icon(Icons.image),
+            label: 'Image',
+          ),
         ],
       ),
     );
