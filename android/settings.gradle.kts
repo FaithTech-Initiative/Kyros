@@ -27,3 +27,6 @@ plugins {
 }
 
 include(":app")
+
+
+project(":flutter").projectDir = file("../.android/Flutter")
