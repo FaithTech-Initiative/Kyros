@@ -385,11 +385,9 @@ class _HomeScreenState extends State<HomeScreen> {
         distance: 112.0,
         children: [
           ActionButton(
-            onPressed: () {
-              // TODO: Implement Audio functionality
-            },
-            icon: const Icon(Icons.mic),
-            label: 'Audio',
+            onPressed: () => _navigateToNotePage(context),
+            icon: const Icon(Icons.edit),
+            label: 'New Note',
           ),
           ActionButton(
             onPressed: () {
@@ -399,10 +397,14 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Image',
           ),
           ActionButton(
-            onPressed: () => _navigateToNotePage(context),
-            icon: const Icon(Icons.edit),
-            label: 'New Note',
+            onPressed: () {
+              // TODO: Implement Audio functionality
+            },
+            icon: const Icon(Icons.mic),
+            label: 'Audio',
           ),
+          
+          
         ],
       ),
     );

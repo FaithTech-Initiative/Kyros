@@ -64,6 +64,15 @@ class _ExpandingFabState extends State<ExpandingFab>
         alignment: Alignment.bottomRight,
         clipBehavior: Clip.none,
         children: [
+          if (_open)
+            GestureDetector(
+              onTap: _toggle,
+              child: Container(
+                color: Colors.transparent,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
           _buildTapToCloseFab(),
           ..._buildExpandingActionButtons(),
           _buildTapToOpenFab(),
@@ -108,17 +117,9 @@ class _ExpandingFabState extends State<ExpandingFab>
           directionInDegrees: angleInDegrees,
           maxDistance: widget.distance,
           progress: _expandAnimation,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: widget.children[i],
-          ),
+          child: widget.children[i],
         ),
       );
-      if (i != count - 1) {
-        children.add(
-          const SizedBox(height: 8.0),
-        );
-      }
     }
     return children;
   }
@@ -204,19 +205,22 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        shape: const StadiumBorder(),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label),
-          const SizedBox(width: 8.0),
-          icon,
-        ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          shape: const StadiumBorder(),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(label),
+            const SizedBox(width: 8.0),
+            icon,
+          ],
+        ),
       ),
     );
   }
