@@ -1,3 +1,4 @@
+
 allprojects {
     repositories {
         google()
@@ -21,4 +22,8 @@ subprojects {
 
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
+}
+
+ext {
+    set("kotlin_version", "1.7.10")
 }
