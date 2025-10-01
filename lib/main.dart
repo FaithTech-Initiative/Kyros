@@ -10,6 +10,7 @@ import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/highlight_service.dart';
 import 'package:kyros/collections_screen.dart';
 import 'package:kyros/home_screen.dart';
+import 'package:kyros/l10n/app_localizations.dart';
 import 'package:kyros/splash_screen.dart';
 import 'package:kyros/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -127,6 +128,8 @@ class KyrosApp extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {
