@@ -15,7 +15,7 @@ class AuthScreen extends StatefulWidget {
 
 class AuthScreenState extends State<AuthScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -57,23 +57,22 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleSignInAccount =
-          await _googleSignIn.signIn();
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleSignInAuthentication =
-            await googleSignInAccount.authentication;
+      // Correctly use the instance variable and the authenticate method
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          accessToken: googleSignInAuthentication.accessToken,
-          idToken: googleSignInAuthentication.idToken,
-        );
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-        UserCredential userCredential =
-            await _auth.signInWithCredential(credential);
-        if (!mounted) return;
-        _navigateToHome(userCredential.user);
-      }
-    } catch (e) {
+      // Access the tokens from the authentication object
+      final AuthCredential credential = GoogleAuthProvider.credential(
+       accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the credentials
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      if (!mounted) return;
+      _navigateToHome(userCredential.user);
+        } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
@@ -319,8 +318,8 @@ class AuthScreenState extends State<AuthScreen> {
       },
       child: Text(
         _isLogin
-            ? 'Don\'t have an account? Sign Up'
-            : 'Already have an account? Sign In',
+            ? "Don't have an account? Sign Up"
+            : "Already have an account? Sign In",
         style: GoogleFonts.lato(color: Theme.of(context).colorScheme.primary),
       ),
     );
@@ -368,4 +367,8 @@ class AuthScreenState extends State<AuthScreen> {
       child: Image.asset(imagePath, height: 24.0),
     );
   }
+}
+
+extension on GoogleSignInAuthentication {
+  String? get accessToken => null;
 }
