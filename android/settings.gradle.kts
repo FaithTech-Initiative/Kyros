@@ -28,5 +28,9 @@ plugins {
 
 include(":app")
 
-
-project(":flutter").projectDir = file("../.android/Flutter")
+val flutterPlugin = "dev.flutter.flutter-plugin-loader"
+val flutterPluginVersion = "1.0.0"
+val flutterPluginOrigin = settings.pluginManagement.resolutionStrategy.eachPlugin.find {
+    it.requested.id.id == flutterPlugin && it.requested.version == flutterPluginVersion
+}!!.origin
+apply(from = flutterPluginOrigin)
