@@ -4,6 +4,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/auth_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
@@ -128,7 +129,10 @@ class KyrosApp extends StatelessWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeProvider.themeMode,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: [
+            ...AppLocalizations.localizationsDelegates,
+            FlutterQuillLocalizations.delegate,
+          ],
           supportedLocales: AppLocalizations.supportedLocales,
           home: StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
