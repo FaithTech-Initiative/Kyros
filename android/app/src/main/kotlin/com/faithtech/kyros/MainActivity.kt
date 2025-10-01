@@ -1,4 +1,4 @@
-package com.example.myapp
+package com.faithtech.kyros
 
 import io.flutter.embedding.android.FlutterActivity
 
