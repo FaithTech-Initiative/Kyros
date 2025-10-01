@@ -12,7 +12,7 @@ dependencies:
   firebase_core: ^2.24.2
   firebase_auth: ^4.16.0
   google_sign_in: ^6.1.5
-  flutter_quill: ^9.2.3
+  flutter_quill: ^11.4.2
   path_provider: ^2.1.1
   path: ^1.8.3
   google_fonts: ^6.1.0
@@ -27,8 +27,8 @@ dependencies:
   timeago: ^3.6.0
   image_picker: ^1.0.4
   provider: ^6.1.1
-  flutter_quill_extensions: ^9.2.6
-  flutter_inappwebview: ^5.8.0
+  flutter_quill_extensions: ^11.4.2
+  flutter_inappwebview: ^6.0.0
 
 dev_dependencies:
   flutter_test:
