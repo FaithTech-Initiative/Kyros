@@ -21,7 +21,9 @@ class Note {
       id: doc.id,
       title: data['title'] ?? '',
       content: data['content'] ?? '',
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      updatedAt: data['updatedAt'] == null
+          ? DateTime.now()
+          : (data['updatedAt'] as Timestamp).toDate(),
       collectionId: data['collectionId'],
     );
   }
