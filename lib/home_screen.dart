@@ -1,13 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:kyros/about_screen.dart';
 import 'package:kyros/archived_notes_screen.dart';
+import 'package:kyros/audio_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/collections_screen.dart';
 import 'package:kyros/giving_screen.dart';
 import 'package:kyros/help_and_feedback_screen.dart';
+import 'package:kyros/image_screen.dart';
 import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -77,6 +81,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageScreen(imageFile: File(pickedFile.path)),
+        ),
+      );
+    }
   }
 
   void _onItemTapped(int index) {
@@ -418,16 +436,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ActionButton(
             onPressed: () {
-              // TODO: Implement Audio functionality
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AudioScreen(userId: widget.userId),
+                ),
+              );
             },
             icon: const Icon(Icons.mic),
             label: 'Audio',
           ),
           const SizedBox(height: 8.0),
           ActionButton(
-            onPressed: () {
-              // TODO: Implement Image functionality
-            },
+            onPressed: _pickImage,
             icon: const Icon(Icons.image),
             label: 'Image',
           ),
