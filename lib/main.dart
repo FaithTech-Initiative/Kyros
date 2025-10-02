@@ -1,3 +1,5 @@
+
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +12,7 @@ import 'package:kyros/collections_screen.dart';
 import 'package:kyros/highlight_service.dart';
 import 'package:kyros/home_screen.dart';
 import 'package:kyros/l10n/app_localizations.dart';
+import 'package:kyros/settings_screen.dart';
 import 'package:kyros/splash_screen.dart';
 import 'package:kyros/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +43,11 @@ class KyrosApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const MaterialColor primarySeedColor = Colors.deepPurple;
+    // Define the custom color palette
+    const Color primaryColor = Color(0xFF008080); // Teal
+    const Color secondaryColor = Color(0xFFC8A2C8); // Lilac
+    const Color lightBackgroundColor = Color(0xFFF0F8FF); // Alice Blue
+    const Color darkBackgroundColor = Color(0xFF29465B); // Dark Slate Blue
 
     // Define a common TextTheme
     final TextTheme appTextTheme = TextTheme(
@@ -49,23 +56,29 @@ class KyrosApp extends StatelessWidget {
       bodyMedium: GoogleFonts.openSans(fontSize: 14),
     );
 
-    // Light Theme
+    // --- Static Light Theme ---
+    final ColorScheme lightColorScheme = ColorScheme.fromSeed(
+      seedColor: primaryColor,
+      brightness: Brightness.light,
+      secondary: secondaryColor,
+    ).copyWith(
+      surface: lightBackgroundColor, // Use surface for main background
+    );
+
     final ThemeData lightTheme = ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primarySeedColor,
-        brightness: Brightness.light,
-      ),
+      colorScheme: lightColorScheme,
+      scaffoldBackgroundColor: lightBackgroundColor,
       textTheme: appTextTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: primarySeedColor,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         titleTextStyle: GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: Colors.white,
-          backgroundColor: primarySeedColor,
+          backgroundColor: primaryColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
@@ -73,23 +86,29 @@ class KyrosApp extends StatelessWidget {
       ),
     );
 
-    // Dark Theme
+    // --- Static Dark Theme ---
+    final ColorScheme darkColorScheme = ColorScheme.fromSeed(
+      seedColor: primaryColor,
+      brightness: Brightness.dark,
+      secondary: secondaryColor,
+    ).copyWith(
+      surface: darkBackgroundColor,
+    );
+
     final ThemeData darkTheme = ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: primarySeedColor,
-        brightness: Brightness.dark,
-      ),
+      colorScheme: darkColorScheme,
+      scaffoldBackgroundColor: darkBackgroundColor,
       textTheme: appTextTheme,
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: darkBackgroundColor,
         foregroundColor: Colors.white,
         titleTextStyle: GoogleFonts.oswald(fontSize: 24, fontWeight: FontWeight.bold),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.black,
-          backgroundColor: primarySeedColor.shade200,
+          foregroundColor: darkColorScheme.onPrimaryContainer,
+          backgroundColor: darkColorScheme.primaryContainer,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500),
@@ -99,36 +118,57 @@ class KyrosApp extends StatelessWidget {
 
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        return MaterialApp(
-          title: 'Kyros',
-          theme: lightTheme,
-          darkTheme: darkTheme,
-          themeMode: themeProvider.themeMode,
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            FlutterQuillLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SplashScreen();
-              }
-              if (snapshot.hasData) {
-                return HomeScreen(userId: snapshot.data!.uid);
-              } else {
-                return const AuthScreen();
-              }
-            },
-          ),
-          routes: {
-            '/home': (context) =>
-                HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid),
-            '/bible_lookup': (context) => const BibleLookupScreen(),
-            '/collections': (context) => const CollectionsScreen(),
+        return DynamicColorBuilder(
+          builder: (lightDynamic, darkDynamic) {
+            ThemeData activeLightTheme = lightTheme;
+            ThemeData activeDarkTheme = darkTheme;
+
+            if (themeProvider.isDynamic && lightDynamic != null && darkDynamic != null) {
+              activeLightTheme = ThemeData(
+                useMaterial3: true,
+                colorScheme: lightDynamic,
+                textTheme: appTextTheme,
+              );
+              activeDarkTheme = ThemeData(
+                useMaterial3: true,
+                colorScheme: darkDynamic,
+                textTheme: appTextTheme,
+              );
+            }
+
+            return MaterialApp(
+              title: 'Kyros',
+              theme: activeLightTheme,
+              darkTheme: activeDarkTheme,
+              themeMode: themeProvider.themeMode,
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                FlutterQuillLocalizations.delegate,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: StreamBuilder<User?>(
+                stream: FirebaseAuth.instance.authStateChanges(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SplashScreen();
+                  }
+                  if (snapshot.hasData) {
+                    return HomeScreen(userId: snapshot.data!.uid);
+                  } else {
+                    return const AuthScreen();
+                  }
+                },
+              ),
+              routes: {
+                '/home': (context) =>
+                    HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid),
+                '/bible_lookup': (context) => const BibleLookupScreen(),
+                '/collections': (context) => const CollectionsScreen(),
+                '/settings': (context) => const SettingsScreen(),
+              },
+              debugShowCheckedModeBanner: false,
+            );
           },
-          debugShowCheckedModeBanner: false,
         );
       },
     );
