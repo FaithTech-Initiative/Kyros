@@ -55,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
         searchQuery: _searchQuery,
       ),
       const BibleLookupScreen(),
-      CollectionsScreen(userId: widget.userId),
       const StudyToolsScreen(),
       const MyWikiScreen(),
     ];
@@ -233,10 +232,6 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Bible',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.collections_bookmark),
-            label: 'Collections',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.build),
             label: 'Study Tools',
           ),
@@ -322,10 +317,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.collections_bookmark),
                 title: const Text('Collections'),
                 onTap: () {
-                  setState(() {
-                    _selectedIndex = 2;
-                    Navigator.pop(context);
-                  });
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CollectionsScreen(userId: widget.userId),
+                    ),
+                  );
                 },
               ),
               ListTile(
