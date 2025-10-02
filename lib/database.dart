@@ -6,6 +6,7 @@ class Note {
   final String content;
   final DateTime updatedAt;
   final String? collectionId;
+  final bool isArchived;
 
   Note({
     required this.id,
@@ -13,6 +14,7 @@ class Note {
     required this.content,
     required this.updatedAt,
     this.collectionId,
+    this.isArchived = false,
   });
 
   factory Note.fromFirestore(DocumentSnapshot doc) {
@@ -25,6 +27,7 @@ class Note {
           ? DateTime.now()
           : (data['updatedAt'] as Timestamp).toDate(),
       collectionId: data['collectionId'],
+      isArchived: data['isArchived'] ?? false,
     );
   }
 }
@@ -33,18 +36,19 @@ class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<void> addNote(String userId, String title, String content,
-      {String? collectionId}) {
+      {String? collectionId, bool isArchived = false}) {
     return _db.collection('users').doc(userId).collection('notes').add({
       'title': title,
       'content': content,
       'updatedAt': FieldValue.serverTimestamp(),
       'collectionId': collectionId,
+      'isArchived': isArchived,
     });
   }
 
   Future<void> updateNote(
       String userId, String noteId, String title, String content,
-      {String? collectionId}) {
+      {String? collectionId, bool? isArchived}) {
     return _db
         .collection('users')
         .doc(userId)
@@ -55,6 +59,7 @@ class FirestoreService {
       'content': content,
       'updatedAt': FieldValue.serverTimestamp(),
       'collectionId': collectionId,
+      if (isArchived != null) 'isArchived': isArchived,
     });
   }
 
@@ -68,7 +73,11 @@ class FirestoreService {
   }
 
   Stream<List<Note>> getNotes(String userId, {String? collectionId}) {
-    Query query = _db.collection('users').doc(userId).collection('notes');
+    Query query = _db
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .where('isArchived', isEqualTo: false);
 
     if (collectionId != null) {
       query = query.where('collectionId', isEqualTo: collectionId);
@@ -76,6 +85,18 @@ class FirestoreService {
 
     return query.orderBy('updatedAt', descending: true).snapshots().map(
         (snapshot) =>
+            snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList());
+  }
+
+  Stream<List<Note>> getArchivedNotes(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .where('isArchived', isEqualTo: true)
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .map((snapshot) =>
             snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList());
   }
 }

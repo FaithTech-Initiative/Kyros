@@ -85,12 +85,71 @@ class _MainNotePageState extends State<MainNotePage> {
       } else {
         await _firestoreService.updateNote(
             widget.userId, widget.note!.id, title, content,
-            collectionId: _selectedCollectionId);
+            collectionId: _selectedCollectionId,
+            isArchived: widget.note!.isArchived);
       }
       navigator.pop(true);
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Error saving note: $e')),
+      );
+    }
+  }
+
+  Future<void> _archiveNote() async {
+    if (widget.note == null) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    try {
+      final title = _titleController.text.trim();
+      final content = jsonEncode(_controller.document.toDelta().toJson());
+
+      await _firestoreService.updateNote(
+        widget.userId,
+        widget.note!.id,
+        title.isEmpty ? 'Untitled Note' : title,
+        content,
+        collectionId: _selectedCollectionId,
+        isArchived: true,
+      );
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Note archived.')),
+      );
+      navigator.pop(true);
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error archiving note: $e')),
+      );
+    }
+  }
+
+  Future<void> _unarchiveNote() async {
+    if (widget.note == null) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    try {
+      final title = _titleController.text.trim();
+      final content = jsonEncode(_controller.document.toDelta().toJson());
+
+      await _firestoreService.updateNote(
+        widget.userId,
+        widget.note!.id,
+        title.isEmpty ? 'Untitled Note' : title,
+        content,
+        collectionId: _selectedCollectionId,
+        isArchived: false,
+      );
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Note unarchived.')),
+      );
+      navigator.pop(true);
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error unarchiving note: $e')),
       );
     }
   }
@@ -145,6 +204,18 @@ class _MainNotePageState extends State<MainNotePage> {
               );
             },
           ),
+          if (widget.note != null && !widget.note!.isArchived)
+            IconButton(
+              icon: const Icon(Icons.archive_outlined),
+              onPressed: _archiveNote,
+              tooltip: 'Archive Note',
+            ),
+          if (widget.note != null && widget.note!.isArchived)
+            IconButton(
+              icon: const Icon(Icons.unarchive_outlined),
+              onPressed: _unarchiveNote,
+              tooltip: 'Unarchive Note',
+            ),
           IconButton(
             icon: Icon(_isPanelVisible ? Icons.menu_book : Icons.menu_open),
             onPressed: _togglePanel,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kyros/archived_notes_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
@@ -323,8 +324,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.archive),
                 title: const Text('Archive'),
                 onTap: () {
-                  // TODO: Implement Archive functionality
-                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              ArchivedNotesScreen(userId: widget.userId)));
                 },
               ),
               ListTile(

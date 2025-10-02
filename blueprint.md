@@ -19,14 +19,28 @@ Kyros is a modern, feature-rich note-taking application designed for capturing a
 *   **Bible lookup:** The application includes a Bible lookup feature, which allows the user to search for and insert Bible passages into their notes.
 *   **User authentication:** The application uses Firebase Authentication to provide a secure and reliable user authentication system. Users can sign in with their Google or Apple accounts.
 *   **Highlights:** The application allows users to highlight and save Bible verses. These highlights are stored in Firestore and can be viewed and deleted from a dedicated "Highlights" screen.
+*   **Archive:** The application allows users to archive notes. Archived notes are hidden from the main note list and can be viewed on a separate "Archive" screen.
 
 ## Completed Tasks
 
 *   **Custom Branding:** Replaced the default "Kyros" branding with a custom logo and app icon. Updated the splash and authentication screens to use the new branding.
+*   **"Archive" Feature:** Implemented the "Archive" feature, allowing users to archive and unarchive notes.
 
-## Current Plan
+## Current Plan: Collections
 
-*   **Implement "Collections" feature:** The next step is to implement a "Collections" feature, which will allow users to group their notes into collections for better organization.
-*   **Implement "Archive" feature:** After "Collections," I will implement an "Archive" feature, which will allow users to archive notes they no longer need.
+### 1. Data Model Update
+
+*   **Collections:**
+    *   Introduce a new `collections` collection in Firestore.
+    *   Update `notes` documents with a `collectionId` field.
+
+### 2. Implement Collections Feature
+
+*   Create a dedicated screen to manage collections (create, rename, delete).
+*   Update the note editor to allow assigning a note to a collection.
+*   Modify the home screen to enable filtering notes by the selected collection.
+
+## Future Plans
+
 *   **Improve the user experience:** The application will be continuously improved to provide a more seamless and intuitive user experience. This includes adding new features, improving the design, and fixing any bugs or issues.
 *   **Expand to new platforms:** The application will be expanded to support new platforms, including web and desktop. This will allow users to access their notes from any device.
