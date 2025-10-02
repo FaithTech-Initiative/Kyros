@@ -5,6 +5,12 @@ class ThemeProvider with ChangeNotifier {
 
   ThemeMode get themeMode => _themeMode;
 
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    notifyListeners();
+  }
+
+  // Kept for any existing calls, but new implementation should use setThemeMode
   void toggleTheme() {
     _themeMode =
         _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
@@ -12,7 +18,6 @@ class ThemeProvider with ChangeNotifier {
   }
 
   void setSystemTheme() {
-    _themeMode = ThemeMode.system;
-    notifyListeners();
+    setThemeMode(ThemeMode.system);
   }
 }

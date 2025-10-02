@@ -1,9 +1,7 @@
 import 'dart:convert';
-// import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import 'package:firebase_ai/firebase_ai.dart';
 import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';

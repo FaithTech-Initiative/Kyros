@@ -13,18 +13,45 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: ListView(
-        children: [
-          ListTile(
-            title: const Text('Dark Mode'),
-            trailing: Switch(
-              value: themeProvider.themeMode == ThemeMode.dark,
-              onChanged: (value) {
-                themeProvider.toggleTheme();
-              },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Appearance',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            ListTile(
+              title: const Text('Theme Mode'),
+              trailing: DropdownButton<ThemeMode>(
+                value: themeProvider.themeMode,
+                items: const [
+                  DropdownMenuItem(
+                    value: ThemeMode.system,
+                    child: Text('System'),
+                  ),
+                  DropdownMenuItem(
+                    value: ThemeMode.light,
+                    child: Text('Light'),
+                  ),
+                  DropdownMenuItem(
+                    value: ThemeMode.dark,
+                    child: Text('Dark'),
+                  ),
+                ],
+                onChanged: (ThemeMode? newMode) {
+                  if (newMode != null) {
+                    themeProvider.setThemeMode(newMode);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
