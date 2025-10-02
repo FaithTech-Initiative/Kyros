@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kyros/about_screen.dart';
 import 'package:kyros/archived_notes_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
 import 'package:kyros/collections_screen.dart';
+import 'package:kyros/giving_screen.dart';
+import 'package:kyros/help_and_feedback_screen.dart';
 import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,6 +18,7 @@ import 'package:kyros/study_tools_screen.dart';
 import 'package:kyros/my_wiki_screen.dart';
 import 'package:kyros/expanding_fab.dart';
 import 'package:kyros/database.dart';
+import 'package:kyros/trash_screen.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class HomeScreen extends StatefulWidget {
@@ -151,10 +155,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       filled: true,
                       fillColor: theme.colorScheme.surface.withAlpha(245),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                        borderSide: BorderSide(
-                            color: theme.colorScheme.onSurface.withAlpha(80),
-                            width: 1.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 0, horizontal: 16),
@@ -260,7 +262,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       alignment: Alignment.bottomRight,
                       child: ElevatedButton(
                         onPressed: () {
-                          // TODO: Implement Giving functionality
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const GivingScreen()));
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: theme.colorScheme.onPrimary,
@@ -353,24 +358,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.delete),
                 title: const Text('Trash'),
                 onTap: () {
-                  // TODO: Implement Trash functionality
-                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const TrashScreen()));
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.info),
                 title: const Text('About'),
                 onTap: () {
-                  // TODO: Implement About functionality
-                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const AboutScreen()));
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.volunteer_activism),
                 title: const Text('Giving'),
                 onTap: () {
-                  // TODO: Implement Giving functionality
-                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const GivingScreen()));
                 },
               ),
               ListTile(
@@ -387,8 +392,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.help),
                 title: const Text('Help & Feedback'),
                 onTap: () {
-                  // TODO: Implement Help & Feedback functionality
-                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HelpAndFeedbackScreen()));
                 },
               ),
               const Divider(),
@@ -481,143 +488,148 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return StreamBuilder<List<Note>>(
-      stream: _notesStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.note_outlined, size: 80, color: Colors.grey),
-                const SizedBox(height: 20),
-                Text(
-                  'You have no notes yet.',
-                  style: GoogleFonts.lato(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Tap the "+" button to create your first note!',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
-                ),
-              ],
-            ),
-          );
-        } else {
-          final allNotes = snapshot.data!;
-          final filteredNotes = allNotes.where((note) {
-            final title = note.title.toLowerCase();
-            final content = _getPlainText(note.content).toLowerCase();
-            final query = widget.searchQuery.toLowerCase();
-            return title.contains(query) || content.contains(query);
-          }).toList();
-
-          if (filteredNotes.isEmpty) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withAlpha(235),
+      ),
+      child: StreamBuilder<List<Note>>(
+        stream: _notesStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.search_off, size: 80, color: Colors.grey),
+                  const Icon(Icons.note_add_outlined, size: 100, color: Colors.grey),
                   const SizedBox(height: 20),
                   Text(
-                    'No notes found.',
+                    'No Notes Yet',
                     style: GoogleFonts.lato(
-                        fontSize: 22, fontWeight: FontWeight.bold),
+                        fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Try a different search term or create a new note.',
+                    'Tap the + button to create a new note.',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
+                    style: GoogleFonts.lato(fontSize: 18, color: Colors.grey),
                   ),
                 ],
               ),
             );
-          }
+          } else {
+            final allNotes = snapshot.data!;
+            final filteredNotes = allNotes.where((note) {
+              final title = note.title.toLowerCase();
+              final content = _getPlainText(note.content).toLowerCase();
+              final query = widget.searchQuery.toLowerCase();
+              return title.contains(query) || content.contains(query);
+            }).toList();
 
-          return AnimationLimiter(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(12.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12.0,
-                mainAxisSpacing: 12.0,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: filteredNotes.length,
-              itemBuilder: (context, index) {
-                final note = filteredNotes[index];
-                final plainTextContent = _getPlainText(note.content);
+            if (filteredNotes.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.search_off, size: 80, color: Colors.grey),
+                    const SizedBox(height: 20),
+                    Text(
+                      'No notes found.',
+                      style: GoogleFonts.lato(
+                          fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Try a different search term or create a new note.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-                return AnimationConfiguration.staggeredGrid(
-                  position: index,
-                  duration: const Duration(milliseconds: 375),
-                  columnCount: 2,
-                  child: ScaleAnimation(
-                    child: FadeInAnimation(
-                      child: GestureDetector(
-                        onTap: () =>
-                            widget.navigateToNotePage(note: note),
-                        child: Card(
-                          elevation: 4.0,
-                          shadowColor: theme.colorScheme.primary.withAlpha(75),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  note.title,
-                                  style: GoogleFonts.lato(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 8),
-                                Expanded(
-                                  child: Text(
-                                    plainTextContent,
+            return AnimationLimiter(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16.0),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: filteredNotes.length,
+                itemBuilder: (context, index) {
+                  final note = filteredNotes[index];
+                  final plainTextContent = _getPlainText(note.content);
+
+                  return AnimationConfiguration.staggeredGrid(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    columnCount: 2,
+                    child: ScaleAnimation(
+                      child: FadeInAnimation(
+                        child: GestureDetector(
+                          onTap: () =>
+                              widget.navigateToNotePage(note: note),
+                          child: Card(
+                            elevation: 4.0,
+                            shadowColor: theme.colorScheme.primary.withAlpha(75),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    note.title,
                                     style: GoogleFonts.lato(
-                                      fontSize: 13,
-                                      color: theme.colorScheme.onSurface
-                                          .withAlpha(180),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
                                     ),
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    maxLines: 5,
                                   ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  timeago.format(note.updatedAt),
-                                  style: GoogleFonts.lato(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                  const SizedBox(height: 8),
+                                  Expanded(
+                                    child: Text(
+                                      plainTextContent,
+                                      style: GoogleFonts.lato(
+                                        fontSize: 14,
+                                        color: theme.colorScheme.onSurface
+                                            .withAlpha(180),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 5,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  const Spacer(),
+                                  Text(
+                                    timeago.format(note.updatedAt),
+                                    style: GoogleFonts.lato(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          );
-        }
-      },
+                  );
+                },
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter/material.dart' as material;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:kyros/bible_side_panel.dart';
 import 'package:kyros/database.dart';
+import 'package:path/path.dart' as path;
 
 class MainNotePage extends StatefulWidget {
   final String userId;
@@ -70,7 +75,7 @@ class _MainNotePageState extends State<MainNotePage> {
 
     if (title.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Please enter a title.')),
+        const SnackBar(content: material.Text('Please enter a title.')),
       );
       return;
     }
@@ -85,10 +90,12 @@ class _MainNotePageState extends State<MainNotePage> {
             collectionId: _selectedCollectionId,
             isArchived: widget.note!.isArchived);
       }
-      navigator.pop(true);
+      if (navigator.canPop()) {
+        navigator.pop(true);
+      }
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error saving note: $e')),
+        SnackBar(content: material.Text('Error saving note: $e')),
       );
     }
   }
@@ -112,12 +119,14 @@ class _MainNotePageState extends State<MainNotePage> {
         isArchived: true,
       );
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Note archived.')),
+        const SnackBar(content: material.Text('Note archived.')),
       );
-      navigator.pop(true);
+      if (navigator.canPop()) {
+        navigator.pop(true);
+      }
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error archiving note: $e')),
+        SnackBar(content: material.Text('Error archiving note: $e')),
       );
     }
   }
@@ -141,12 +150,14 @@ class _MainNotePageState extends State<MainNotePage> {
         isArchived: false,
       );
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Note unarchived.')),
+        const SnackBar(content: material.Text('Note unarchived.')),
       );
-      navigator.pop(true);
+      if (navigator.canPop()) {
+        navigator.pop(true);
+      }
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error unarchiving note: $e')),
+        SnackBar(content: material.Text('Error unarchiving note: $e')),
       );
     }
   }
@@ -165,8 +176,79 @@ class _MainNotePageState extends State<MainNotePage> {
     _controller.moveCursorToPosition(endOfQuote + 1);
   }
 
+  Future<void> _deleteNote() async {
+    if (widget.note == null) return;
+
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const material.Text('Delete Note'),
+        content:
+            const material.Text('Are you sure you want to delete this note?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const material.Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const material.Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _firestoreService.deleteNote(widget.userId, widget.note!.id);
+        if (navigator.canPop()) {
+          navigator.pop(true);
+        }
+      } catch (e) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(content: material.Text('Error deleting note: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+    final fileName = path.basename(file.path);
+    final destination = 'files/$fileName';
+
+    try {
+      final ref = FirebaseStorage.instance.ref(destination);
+      await ref.putFile(file);
+      final url = await ref.getDownloadURL();
+
+      _insertImageIntoEditor(url);
+    } catch (e) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: material.Text('Error uploading image: $e')),
+      );
+    }
+  }
+
+  void _insertImageIntoEditor(String url) {
+    final index = _controller.selection.baseOffset;
+    _controller.document.insert(index, BlockEmbed.image(url));
+    _controller.updateSelection(
+        TextSelection.collapsed(offset: index + 1), ChangeSource.local);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -177,16 +259,33 @@ class _MainNotePageState extends State<MainNotePage> {
           style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.image_outlined),
+            onPressed: _pickAndUploadImage,
+            tooltip: 'Insert Image',
+          ),
+          if (widget.note != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: _deleteNote,
+              tooltip: 'Delete Note',
+            ),
           if (widget.collections.isNotEmpty)
             DropdownButton<String>(
               value: _selectedCollectionId,
-              hint: const Text('Collection'),
-              items: widget.collections.map((collection) {
-                return DropdownMenuItem<String>(
-                  value: collection.id,
-                  child: Text(collection.name),
-                );
-              }).toList(),
+              hint: const material.Text('Collection'),
+              items: [
+                const DropdownMenuItem<String>(
+                  value: null,
+                  child: material.Text('No Collection'),
+                ),
+                ...widget.collections.map((collection) {
+                  return DropdownMenuItem<String>(
+                    value: collection.id,
+                    child: material.Text(collection.name),
+                  );
+                }),
+              ],
               onChanged: (value) {
                 setState(() {
                   _selectedCollectionId = value;
@@ -218,32 +317,36 @@ class _MainNotePageState extends State<MainNotePage> {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                QuillSimpleToolbar(
-                  controller: _controller,
-                ),
-                const Divider(),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: QuillEditor.basic(
-                      controller: _controller,
-                      //focusNode: _editorFocusNode,
-                    ),
+      body: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withAlpha(235),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  QuillSimpleToolbar(
+                    controller: _controller,
                   ),
-                )
-              ],
+                  const Divider(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: QuillEditor.basic(
+                        controller: _controller,
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-          if (_isPanelVisible)
-            BibleSidePanel(
-              onInsertPassage: _insertPassageIntoEditor,
-            ),
-        ],
+            if (_isPanelVisible)
+              BibleSidePanel(
+                onInsertPassage: _insertPassageIntoEditor,
+              ),
+          ],
+        ),
       ),
     );
   }

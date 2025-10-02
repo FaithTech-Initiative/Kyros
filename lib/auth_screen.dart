@@ -55,7 +55,7 @@ class AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
+ Future<void> _signInWithGoogle() async {
     try {
         // Correctly use the instance variable and the authenticate method
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
@@ -130,16 +130,9 @@ class AuthScreenState extends State<AuthScreen> {
               children: <Widget>[
                 SvgPicture.asset(
                   isDarkMode
-                      ? 'assets/images/icon_dark.svg'
-                      : 'assets/images/icon.svg',
-                  height: 100, // Increased logo size
-                ),
-                const SizedBox(height: 16),
-                SvgPicture.asset(
-                  isDarkMode
                       ? 'assets/images/logo_dark.svg'
                       : 'assets/images/logo.svg',
-                  height: 60, // Increased logo size
+                  height: 80, // Increased logo size
                 ),
                 const SizedBox(height: 20),
                 Text(
