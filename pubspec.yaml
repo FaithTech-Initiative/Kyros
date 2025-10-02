@@ -33,6 +33,7 @@ dependencies:
   flutter_quill_extensions: ^11.0.0
   flutter_inappwebview: ^6.0.0
   flutter_gen: ^5.12.0
+  flutter_svg: ^2.2.1
 
 dev_dependencies:
   flutter_test:
@@ -40,14 +41,15 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.13
   drift_dev: ^2.19.1
+  flutter_launcher_icons: ^0.14.4
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/icon.png"
 
 flutter:
   generate: true
   uses-material-design: true
   assets:
-    - assets/images/google_logo.png
-    - assets/images/apple_logo.png
-    - assets/images/carousel_1.png
-    - assets/images/carousel_2.png
-    - assets/images/carousel_3.png
+    - assets/images/

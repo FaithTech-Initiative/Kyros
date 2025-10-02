@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,6 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4F8),
       body: FadeTransition(
@@ -44,18 +46,14 @@ class _SplashScreenState extends State<SplashScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Spacer(flex: 2),
-              Image.asset(
-                'assets/Study notebook and pencil.png',
+              SvgPicture.asset(
+                isDarkMode ? 'assets/images/icon_dark.svg' : 'assets/images/icon.svg',
                 height: 150,
               ),
               const SizedBox(height: 20),
-              Text(
-                'Kyros',
-                style: GoogleFonts.lato(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2F4F4F),
-                ),
+              SvgPicture.asset(
+                isDarkMode ? 'assets/images/logo_dark.svg' : 'assets/images/logo.svg',
+                height: 48,
               ),
               const SizedBox(height: 10),
               Text(

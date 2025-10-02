@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kyros/home_screen.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -57,7 +58,7 @@ class AuthScreenState extends State<AuthScreen> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      // Correctly use the instance variable and the authenticate method
+        // Correctly use the instance variable and the authenticate method
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
@@ -69,15 +70,17 @@ class AuthScreenState extends State<AuthScreen> {
       );
 
       // Sign in to Firebase with the credentials
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       if (!mounted) return;
       _navigateToHome(userCredential.user);
-        } catch (e) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Google Sign in failed: $e')));
     }
   }
+
 
   Future<void> _signInWithApple() async {
     try {
@@ -115,6 +118,7 @@ class AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -124,14 +128,9 @@ class AuthScreenState extends State<AuthScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
-                  'Kyros',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                SvgPicture.asset(
+                  isDarkMode ? 'assets/images/logo_dark.svg' : 'assets/images/logo.svg',
+                  height: 48,
                 ),
                 const SizedBox(height: 20),
                 Text(

@@ -7,6 +7,7 @@ Kyros is a modern, feature-rich note-taking application designed for capturing a
 ## Style and Design
 
 *   **Theming:** The application uses a consistent and visually appealing theme based on Material Design 3. It features a teal primary color, a muted lilac secondary color, and a desaturated blue-white surface color. The typography is based on the Lato font from Google Fonts, providing a clean and readable text style.
+*   **Branding:** The application now features custom branding, with a user-provided logo and app icon. The "Kyros" text has been replaced with the new logo throughout the application.
 *   **Layout:** The application uses a responsive and mobile-friendly layout, with a clean and organized structure. The home screen features a grid view of notes, with a staggered animation for a more dynamic and engaging user experience.
 *   **Components:** The application uses a variety of modern UI components, including a custom-designed expanding floating action button, a search bar with a smooth animation, and a drawer for navigation and additional features.
 
@@ -18,6 +19,10 @@ Kyros is a modern, feature-rich note-taking application designed for capturing a
 *   **Bible lookup:** The application includes a Bible lookup feature, which allows the user to search for and insert Bible passages into their notes.
 *   **User authentication:** The application uses Firebase Authentication to provide a secure and reliable user authentication system. Users can sign in with their Google or Apple accounts.
 *   **Highlights:** The application allows users to highlight and save Bible verses. These highlights are stored in Firestore and can be viewed and deleted from a dedicated "Highlights" screen.
+
+## Completed Tasks
+
+*   **Custom Branding:** Replaced the default "Kyros" branding with a custom logo and app icon. Updated the splash and authentication screens to use the new branding.
 
 ## Current Plan
 
