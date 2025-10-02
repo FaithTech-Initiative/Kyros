@@ -1,49 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kyros/collection_notes_screen.dart';
-import 'package:kyros/database.dart';
 
 class CollectionsScreen extends StatefulWidget {
-  final String userId;
-
-  const CollectionsScreen({super.key, required this.userId});
+  const CollectionsScreen({super.key});
 
   @override
   State<CollectionsScreen> createState() => _CollectionsScreenState();
 }
 
 class _CollectionsScreenState extends State<CollectionsScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
-  final TextEditingController _collectionNameController =
-      TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late String _userId;
+
+  @override
+  void initState() {
+    super.initState();
+    _userId = _auth.currentUser!.uid;
+  }
 
   void _showAddCollectionDialog() {
+    final TextEditingController nameController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('New Collection'),
+          title: Text('New Collection', style: GoogleFonts.lato()),
           content: TextField(
-            controller: _collectionNameController,
-            decoration: const InputDecoration(hintText: 'Collection Name'),
+            controller: nameController,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Collection Name',
+            ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
-                if (_collectionNameController.text.isNotEmpty) {
-                  _firestoreService.addCollection(
-                      widget.userId, _collectionNameController.text);
-                  _collectionNameController.clear();
-                  Navigator.of(context).pop();
+                if (nameController.text.isNotEmpty) {
+                  _firestore.collection('collections').add({
+                    'name': nameController.text,
+                    'ownerId': _userId,
+                    'createdAt': Timestamp.now(),
+                  });
+                  Navigator.pop(context);
                 }
               },
-              child: const Text('Add'),
+              child: const Text('Create'),
             ),
           ],
         );
@@ -51,95 +59,60 @@ class _CollectionsScreenState extends State<CollectionsScreen> {
     );
   }
 
-  void _navigateToCollectionNotes(Collection collection) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CollectionNotesScreen(
-          userId: widget.userId,
-          collection: collection,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
-      body: StreamBuilder<List<Collection>>(
-        stream: _firestoreService.getCollections(widget.userId),
+      appBar: AppBar(
+        title: Text('Collections', style: GoogleFonts.lato()),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('collections')
+            .where('ownerId', isEqualTo: _userId)
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.collections_bookmark_outlined, size: 80, color: Colors.grey),
-                  const SizedBox(height: 20),
-                  Text(
-                    'You have no collections yet.',
-                    style: GoogleFonts.lato(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Tap the "+" button to create your first collection!',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.lato(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
+              child: Text(
+                'No collections yet.\nTap the "+" button to create one.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.lato(fontSize: 18, color: Colors.grey),
               ),
-            );
-          } else {
-            final collections = snapshot.data!;
-            return GridView.builder(
-              padding: const EdgeInsets.all(16.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 1.0,
-              ),
-              itemCount: collections.length,
-              itemBuilder: (context, index) {
-                final collection = collections[index];
-                return GestureDetector(
-                  onTap: () => _navigateToCollectionNotes(collection),
-                  child: Card(
-                    elevation: 4.0,
-                    shadowColor: theme.colorScheme.primary.withAlpha(75),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.folder, size: 50, color: Colors.amber),
-                          const SizedBox(height: 10),
-                          Text(
-                            collection.name,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.lato(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
             );
           }
+
+          var collections = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: collections.length,
+            itemBuilder: (context, index) {
+              var collection = collections[index];
+              return ListTile(
+                title: Text(collection['name'], style: GoogleFonts.lato()),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        // TODO: Implement rename functionality
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        // TODO: Implement delete functionality
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

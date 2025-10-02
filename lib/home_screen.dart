@@ -322,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          CollectionsScreen(userId: widget.userId),
+                          const CollectionsScreen(),
                     ),
                   );
                 },
@@ -346,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              ArchivedNotesScreen(userId: widget.userId)));
+                              const ArchivedNotesScreen()));
                 },
               ),
               ListTile(
