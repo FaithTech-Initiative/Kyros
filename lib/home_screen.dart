@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/archived_notes_screen.dart';
 import 'package:kyros/bible_lookup_screen.dart';
+import 'package:kyros/collections_screen.dart';
 import 'package:kyros/main_note_page.dart';
 import 'package:kyros/highlighted_verses_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,12 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _searchQuery = '';
+  late final FirestoreService _firestoreService;
+  late Future<List<Collection>> _collectionsFuture;
 
   late final List<Widget> _widgetOptions;
 
   @override
   void initState() {
     super.initState();
+    _firestoreService = FirestoreService();
+    _collectionsFuture = _firestoreService.getCollections(widget.userId).first;
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;
@@ -50,17 +55,24 @@ class _HomeScreenState extends State<HomeScreen> {
         searchQuery: _searchQuery,
       ),
       const BibleLookupScreen(),
+      CollectionsScreen(userId: widget.userId),
       const StudyToolsScreen(),
       const MyWikiScreen(),
     ];
   }
 
-  void _navigateToNotePage(BuildContext context, {Note? note}) async {
+  void _navigateToNotePage({Note? note}) async {
+    final collections = await _collectionsFuture;
+    if (!mounted) return;
     await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>
-              MainNotePage(userId: widget.userId, note: note)),
+        builder: (context) => MainNotePage(
+          userId: widget.userId,
+          note: note,
+          collections: collections,
+        ),
+      ),
     );
   }
 
@@ -221,6 +233,10 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Bible',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.collections_bookmark),
+            label: 'Collections',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.build),
             label: 'Study Tools',
           ),
@@ -306,7 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.collections_bookmark),
                 title: const Text('Collections'),
                 onTap: () {
-                  Navigator.pushNamed(context, '/collections');
+                  setState(() {
+                    _selectedIndex = 2;
+                    Navigator.pop(context);
+                  });
                 },
               ),
               ListTile(
@@ -387,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
         distance: 112.0,
         children: [
           ActionButton(
-            onPressed: () => _navigateToNotePage(context),
+            onPressed: () => _navigateToNotePage(),
             icon: const Icon(Icons.edit),
             label: 'New Note',
           ),
@@ -420,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class HomeScreenContent extends StatefulWidget {
   final String userId;
-  final Function(BuildContext, {Note? note}) navigateToNotePage;
+  final Function({Note? note}) navigateToNotePage;
   final String searchQuery;
   const HomeScreenContent({
     super.key,
@@ -545,7 +564,7 @@ class _HomeScreenContentState extends State<HomeScreenContent> {
                     child: FadeInAnimation(
                       child: GestureDetector(
                         onTap: () =>
-                            widget.navigateToNotePage(context, note: note),
+                            widget.navigateToNotePage(note: note),
                         child: Card(
                           elevation: 4.0,
                           shadowColor: theme.colorScheme.primary.withAlpha(75),

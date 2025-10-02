@@ -126,7 +126,7 @@ class KyrosApp extends StatelessWidget {
             '/home': (context) =>
                 HomeScreen(userId: FirebaseAuth.instance.currentUser!.uid),
             '/bible_lookup': (context) => const BibleLookupScreen(),
-            '/collections': (context) => const CollectionsScreen(),
+            '/collections': (context) => CollectionsScreen(userId: FirebaseAuth.instance.currentUser!.uid),
           },
           debugShowCheckedModeBanner: false,
         );

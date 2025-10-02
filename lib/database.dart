@@ -32,9 +32,25 @@ class Note {
   }
 }
 
+class Collection {
+  final String id;
+  final String name;
+
+  Collection({required this.id, required this.name});
+
+  factory Collection.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Collection(
+      id: doc.id,
+      name: data['name'] ?? '',
+    );
+  }
+}
+
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // Note methods
   Future<void> addNote(String userId, String title, String content,
       {String? collectionId, bool isArchived = false}) {
     return _db.collection('users').doc(userId).collection('notes').add({
@@ -94,6 +110,69 @@ class FirestoreService {
         .doc(userId)
         .collection('notes')
         .where('isArchived', isEqualTo: true)
+        .orderBy('updatedAt', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Note.fromFirestore(doc)).toList());
+  }
+
+  // Collection methods
+  Future<void> addCollection(String userId, String name) {
+    return _db.collection('users').doc(userId).collection('collections').add({
+      'name': name,
+    });
+  }
+
+  Future<void> renameCollection(
+      String collectionId, String userId, String newName) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('collections')
+        .doc(collectionId)
+        .update({'name': newName});
+  }
+
+  Future<void> deleteCollection(String collectionId, String userId) async {
+    // First, delete all notes in the collection
+    final notesSnapshot = await _db
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .where('collectionId', isEqualTo: collectionId)
+        .get();
+
+    for (final doc in notesSnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    // Then, delete the collection itself
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('collections')
+        .doc(collectionId)
+        .delete();
+  }
+
+  Stream<List<Collection>> getCollections(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('collections')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Collection.fromFirestore(doc))
+            .toList());
+  }
+
+  Stream<List<Note>> getNotesForCollection(String userId, String collectionId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('notes')
+        .where('collectionId', isEqualTo: collectionId)
+        .where('isArchived', isEqualTo: false)
         .orderBy('updatedAt', descending: true)
         .snapshots()
         .map((snapshot) =>

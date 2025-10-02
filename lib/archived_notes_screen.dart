@@ -10,6 +10,21 @@ class ArchivedNotesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final firestoreService = FirestoreService();
 
+    void navigateToNotePage(BuildContext context, {Note? note}) async {
+    final collections = await firestoreService.getCollections(userId).first;
+    if (!context.mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MainNotePage(
+          userId: userId,
+          note: note,
+          collections: collections,
+        ),
+      ),
+    );
+  }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Archived Notes'),
@@ -37,17 +52,7 @@ class ArchivedNotesScreen extends StatelessWidget {
                       ? '${note.content.substring(0, 100)}...'
                       : note.content,
                 ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MainNotePage(
-                        userId: userId,
-                        note: note,
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => navigateToNotePage(context, note: note),
               );
             },
           );

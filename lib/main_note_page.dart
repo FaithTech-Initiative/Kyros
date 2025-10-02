@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kyros/bible_side_panel.dart';
-import 'package:kyros/collection_service.dart';
 import 'package:kyros/database.dart';
 
 class MainNotePage extends StatefulWidget {
   final String userId;
   final Note? note;
-  final String? collectionId;
+  final List<Collection> collections;
   const MainNotePage(
-      {super.key, required this.userId, this.note, this.collectionId});
+      {super.key, required this.userId, this.note, required this.collections});
 
   @override
   State<MainNotePage> createState() => _MainNotePageState();
@@ -24,16 +23,14 @@ class _MainNotePageState extends State<MainNotePage> {
   final FocusNode _editorFocusNode = FocusNode();
   bool _isPanelVisible = true;
   late final FirestoreService _firestoreService;
-  late final CollectionService _collectionService;
   String? _selectedCollectionId;
 
   @override
   void initState() {
     super.initState();
     _firestoreService = FirestoreService();
-    _collectionService = CollectionService();
     _titleController = TextEditingController(text: widget.note?.title);
-    _selectedCollectionId = widget.note?.collectionId ?? widget.collectionId;
+    _selectedCollectionId = widget.note?.collectionId;
 
     if (widget.note != null && widget.note!.content.isNotEmpty) {
       try {
@@ -180,30 +177,22 @@ class _MainNotePageState extends State<MainNotePage> {
           style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         actions: [
-          StreamBuilder<List<Collection>>(
-            stream: _collectionService.getCollections(widget.userId),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              final collections = snapshot.data!;
-              return DropdownButton<String>(
-                value: _selectedCollectionId,
-                hint: const Text('Collection'),
-                items: collections.map((collection) {
-                  return DropdownMenuItem<String>(
-                    value: collection.id,
-                    child: Text(collection.name),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCollectionId = value;
-                  });
-                },
-              );
-            },
-          ),
+          if (widget.collections.isNotEmpty)
+            DropdownButton<String>(
+              value: _selectedCollectionId,
+              hint: const Text('Collection'),
+              items: widget.collections.map((collection) {
+                return DropdownMenuItem<String>(
+                  value: collection.id,
+                  child: Text(collection.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCollectionId = value;
+                });
+              },
+            ),
           if (widget.note != null && !widget.note!.isArchived)
             IconButton(
               icon: const Icon(Icons.archive_outlined),
