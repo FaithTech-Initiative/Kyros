@@ -9,6 +9,7 @@
     pkgs.flutter
     pkgs.dart
     pkgs.chromium
+    pkgs.jdk
   ];
 
   # Search for nix options here: https://search.nixos.org/options
