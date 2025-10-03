@@ -4,12 +4,13 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter/material.dart' as material;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kyros/bible_side_panel.dart';
 import 'package:kyros/database.dart';
+import 'package:kyros/note_editor.dart';
+import 'package:kyros/note_screen_app_bar.dart';
 import 'package:path/path.dart' as path;
+import 'package:share_plus/share_plus.dart';
 
 class MainNotePage extends StatefulWidget {
   final String userId;
@@ -66,6 +67,13 @@ class _MainNotePageState extends State<MainNotePage> {
     });
   }
 
+  Future<void> _shareNote() async {
+    final title = _titleController.text.trim();
+    final content = _controller.document.toPlainText();
+    final noteText = '$title\n\n$content';
+    await SharePlus.instance.share(ShareParams(text: noteText));
+  }
+
   Future<void> _saveNote() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -75,7 +83,7 @@ class _MainNotePageState extends State<MainNotePage> {
 
     if (title.isEmpty) {
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: material.Text('Please enter a title.')),
+        const SnackBar(content: Text('Please enter a title.')),
       );
       return;
     }
@@ -95,7 +103,7 @@ class _MainNotePageState extends State<MainNotePage> {
       }
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: material.Text('Error saving note: $e')),
+        SnackBar(content: Text('Error saving note: $e')),
       );
     }
   }
@@ -119,14 +127,14 @@ class _MainNotePageState extends State<MainNotePage> {
         isArchived: true,
       );
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: material.Text('Note archived.')),
+        const SnackBar(content: Text('Note archived.')),
       );
       if (navigator.canPop()) {
         navigator.pop(true);
       }
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: material.Text('Error archiving note: $e')),
+        SnackBar(content: Text('Error archiving note: $e')),
       );
     }
   }
@@ -150,14 +158,14 @@ class _MainNotePageState extends State<MainNotePage> {
         isArchived: false,
       );
       scaffoldMessenger.showSnackBar(
-        const SnackBar(content: material.Text('Note unarchived.')),
+        const SnackBar(content: Text('Note unarchived.')),
       );
       if (navigator.canPop()) {
         navigator.pop(true);
       }
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: material.Text('Error unarchiving note: $e')),
+        SnackBar(content: Text('Error unarchiving note: $e')),
       );
     }
   }
@@ -185,17 +193,16 @@ class _MainNotePageState extends State<MainNotePage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const material.Text('Delete Note'),
-        content:
-            const material.Text('Are you sure you want to delete this note?'),
+        title: const Text('Delete Note'),
+        content: const Text('Are you sure you want to delete this note?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const material.Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const material.Text('Delete'),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -209,7 +216,7 @@ class _MainNotePageState extends State<MainNotePage> {
         }
       } catch (e) {
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: material.Text('Error deleting note: $e')),
+          SnackBar(content: Text('Error deleting note: $e')),
         );
       }
     }
@@ -234,7 +241,7 @@ class _MainNotePageState extends State<MainNotePage> {
       _insertImageIntoEditor(url);
     } catch (e) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: material.Text('Error uploading image: $e')),
+        SnackBar(content: Text('Error uploading image: $e')),
       );
     }
   }
@@ -250,72 +257,24 @@ class _MainNotePageState extends State<MainNotePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: _titleController,
-          decoration: const InputDecoration.collapsed(
-            hintText: 'Note Title',
-          ),
-          style: GoogleFonts.lato(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.image_outlined),
-            onPressed: _pickAndUploadImage,
-            tooltip: 'Insert Image',
-          ),
-          if (widget.note != null)
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: _deleteNote,
-              tooltip: 'Delete Note',
-            ),
-          if (widget.collections.isNotEmpty)
-            DropdownButton<String>(
-              value: _selectedCollectionId,
-              hint: const material.Text('Collection'),
-              items: [
-                const DropdownMenuItem<String>(
-                  value: null,
-                  child: material.Text('No Collection'),
-                ),
-                ...widget.collections.map((collection) {
-                  return DropdownMenuItem<String>(
-                    value: collection.id,
-                    child: material.Text(collection.name),
-                  );
-                }),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedCollectionId = value;
-                });
-              },
-            ),
-          if (widget.note != null && !widget.note!.isArchived)
-            IconButton(
-              icon: const Icon(Icons.archive_outlined),
-              onPressed: _archiveNote,
-              tooltip: 'Archive Note',
-            ),
-          if (widget.note != null && widget.note!.isArchived)
-            IconButton(
-              icon: const Icon(Icons.unarchive_outlined),
-              onPressed: _unarchiveNote,
-              tooltip: 'Unarchive Note',
-            ),
-          IconButton(
-            icon: Icon(_isPanelVisible ? Icons.menu_book : Icons.menu_open),
-            onPressed: _togglePanel,
-            tooltip: 'Toggle Bible Panel',
-          ),
-          IconButton(
-            icon:
-                Icon(Icons.save, color: Theme.of(context).colorScheme.primary),
-            onPressed: _saveNote,
-            tooltip: 'Save Note',
-          ),
-        ],
+      appBar: NotePageAppBar(
+        titleController: _titleController,
+        onSave: _saveNote,
+        onShare: _shareNote,
+        onDelete: _deleteNote,
+        onArchive: _archiveNote,
+        onUnarchive: _unarchiveNote,
+        onTogglePanel: _togglePanel,
+        onPickImage: _pickAndUploadImage,
+        isPanelVisible: _isPanelVisible,
+        isArchived: widget.note?.isArchived ?? false,
+        collections: widget.collections,
+        selectedCollectionId: _selectedCollectionId,
+        onCollectionChanged: (value) {
+          setState(() {
+            _selectedCollectionId = value;
+          });
+        },
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -324,21 +283,9 @@ class _MainNotePageState extends State<MainNotePage> {
         child: Row(
           children: [
             Expanded(
-              child: Column(
-                children: [
-                  QuillSimpleToolbar(
-                    controller: _controller,
-                  ),
-                  const Divider(),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: QuillEditor.basic(
-                        controller: _controller,
-                      ),
-                    ),
-                  )
-                ],
+              child: NoteEditor(
+                controller: _controller,
+                editorFocusNode: _editorFocusNode,
               ),
             ),
             if (_isPanelVisible)
